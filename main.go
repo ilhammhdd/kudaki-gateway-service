@@ -8,6 +8,7 @@ import (
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 	"github.com/ilhammhdd/go-toolkit/safekit"
+	"github.com/ilhammhdd/kudaki-gateway-service/externals/rest"
 )
 
 func init() {
