@@ -1,6 +1,6 @@
 #!/bin/bash
 
-docker build -t $IMAGE_NAME \
+docker build -t $IMAGE_NAME . \
     # --build-arg ADDRESS=$ADDRESS \
     --build-arg GRPC_PORT=$GRPC_PORT \
     --build-arg KAFKA_BROKERS=$KAFKA_BROKERS \
@@ -8,4 +8,3 @@ docker build -t $IMAGE_NAME \
     --build-arg USER_SERVICE_GRPC_ADDRESS=$USER_SERVICE_GRPC_ADDRESS \
     --build-arg REST_FRONTEND_RULE=$REST_FRONTEND_RULE \
     # --build-arg GRPC_FRONTEND_RULE=$GRPC_FRONTEND_RULE \
-    .
