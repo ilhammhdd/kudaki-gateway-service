@@ -1,0 +1,35 @@
+settings:
+  recovery:
+    index: true
+    events: false
+    tools: false
+  legacy:
+    force: false
+    interval: 0s
+schema:
+- name: kudaki-gateway-service
+  path: .
+  commands:
+    clean:
+      status: true
+    run:
+      status: true
+  args:
+  - 0.0.0.0
+  - 9000
+  - 9001
+  - 178.62.107.160:29092
+  - localhost:9099
+  watcher:
+    extensions:
+    - go
+    paths:
+    - /
+    ignored_paths:
+    - .git
+    - .realize
+    - vendor
+    - deployment
+    scripts:
+    - type: before
+      command: taskkill /IM "kudaki-gateway-service.exe" /F
