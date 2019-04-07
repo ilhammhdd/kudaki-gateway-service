@@ -65,14 +65,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e5bfeb2dc5f8475b2bf577f088a602a347888bd7cc75aebd68e8adcee342db12"
+  digest = "1:48d2cf7fa408ea1e8f0517a75be51d01d67a2d13d6cdec9a4fa6a790a2a9d075"
   name = "github.com/ilhammhdd/go-toolkit"
   packages = [
     "errorkit",
     "safekit",
   ]
   pruneopts = "UT"
-  revision = "2e4afd0d87980dd5ed64fb8ca800614bd8f5c78e"
+  revision = "7e0d09bebc33c74222a3b7acbb5d854eb24cd0c5"
 
 [[projects]]
   branch = "master"
