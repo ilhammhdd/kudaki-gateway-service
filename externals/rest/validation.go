@@ -49,7 +49,10 @@ func (rv RestValidation) Validate() (*[]string, bool) {
 	var errs []string
 
 	for param, rule := range rv.Rules {
-		if val, ok := rv.request.MultipartForm.Value[param]; !ok {
+		if rv.request.MultipartForm == nil {
+			valid = false
+			errs = append(errs, "multipart form required")
+		} else if val, ok := rv.request.MultipartForm.Value[param]; !ok {
 			log.Println("validating, ", param, "missing")
 			valid = false
 			errs = append(errs, fmt.Sprintf("%s not exists", param))
@@ -135,7 +138,8 @@ func URLParamValidator(rules map[string]string, val url.Values) (*[]string, bool
 	var errs []string
 
 	for param, rule := range rules {
-		if vals, ok := val[param]; !ok {
+		vals, ok := val[param]
+		if !ok && len(val) > 0 {
 			log.Println("URLEncodingating, ", param, "missing")
 			valid = false
 			errs = append(errs, fmt.Sprintf("%s not exists", param))
