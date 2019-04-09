@@ -217,7 +217,7 @@ func Authenticate(h http.Handler) http.Handler {
 	})
 }
 
-func TestAuthenticate(w http.ResponseWriter, r *http.Request) {
+func TestAuthenticateJWT(w http.ResponseWriter, r *http.Request) {
 
 	resBody := adapters.ResponseBody{Success: true}
 	adapters.NewResponse(http.StatusOK, &resBody).WriteResponse(&w)
