@@ -38,6 +38,7 @@ func restListener() {
 	http.Handle("/user/verify", rest.MethodValidator(http.MethodGet, http.HandlerFunc(rest.VerifyUser)))
 	http.Handle("/login", rest.MethodValidator(http.MethodPost, http.HandlerFunc(rest.Login)))
 	http.Handle("/test/authenticate/jwt", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.TestAuthenticateJWT))))
+	http.Handle("/user/reset/password", rest.MethodValidator(http.MethodPost, rest.Authenticate(http.HandlerFunc(rest.ResetPassword))))
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%s", os.Getenv("REST_PORT")),

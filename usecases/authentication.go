@@ -131,3 +131,8 @@ ConsLoop:
 
 	return &loggedin, eventErr
 }
+
+func (u User) ResetPassword(context.Context, *events.ResetPasswordRequested) (*events.PasswordReseted, error) {
+
+	return nil, nil
+}

@@ -76,7 +76,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4784d485fe2e8946401678de9cd4e221af5f0fd673570dbc29de4a20af52001c"
+  digest = "1:5179cc1ee6549beb1b786243ccb96697e118fcc20f395405ea6adaed16af9737"
   name = "github.com/ilhammhdd/kudaki-entities"
   packages = [
     ".",
@@ -85,7 +85,7 @@
     "user",
   ]
   pruneopts = "UT"
-  revision = "a158e055c7b03015e175b04071c5a72e92b049bc"
+  revision = "996cb07a4a5d499d5b1d1ebe3ee9f88dd318b9d0"
 
 [[projects]]
   digest = "1:d886a3c32c8c1a770d07e36340f061d3afc948d065ffc3c9a19b01b34d4f0b65"
@@ -161,7 +161,7 @@
   revision = "64821d5d210748c883cd2b809589555ae4654203"
 
 [[projects]]
-  digest = "1:c00eb80d7b152379c3e94c38d82b29deca98b1d0f53e4e20362589b7fcbffa07"
+  digest = "1:31d87f39886fb38a2b6c097ff3b9f985d6960772170d64a68246f7790e955746"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -178,6 +178,7 @@
     "grpclog",
     "internal",
     "internal/backoff",
+    "internal/balancerload",
     "internal/binarylog",
     "internal/channelz",
     "internal/envconfig",
@@ -197,8 +198,8 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "3507fb8e1a5ad030303c106fef3a47c9fdad16ad"
-  version = "v1.19.1"
+  revision = "236199dd5f8031d698fb64091194aecd1c3895b2"
+  version = "v1.20.0"
 
 [[projects]]
   digest = "1:6981402aef27693f4b2ec619117abd263fde29f8c1dfac46eef0f35038d37513"

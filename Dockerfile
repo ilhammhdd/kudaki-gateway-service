@@ -30,7 +30,7 @@ ENV GRPC_FRONTEND_RULE=$GRPC_FRONTEND_RULE
 
 COPY --from=build-env /go/src/github.com/ilhammhdd/kudaki-gateway-service/kudaki_gateway_service_app .
 
-LABEL traefik.frontend.rule=Host:$REST_FRONTEND_RULE
+LABEL traefik.rest.frontend.rule=Host:$REST_FRONTEND_RULE
 LABEL traefik.rest.port=$REST_PORT
 LABEL traefik.grpc.frontend.rule=Host:$GRPC_FRONTEND_RULE
 LABEL traefik.grpc.port=$GRPC_PORT

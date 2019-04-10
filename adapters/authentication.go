@@ -99,3 +99,8 @@ func Login(r *http.Request, esp usecases.EventSourceProducer, esc usecases.Event
 
 	return NewResponse(int(loggedin.EventStatus.HttpCode), &resBody)
 }
+
+func ResetPassword(r *http.Request, esp usecases.EventSourceProducer, esc usecases.EventSourceConsumer) *Response {
+
+	return nil
+}
