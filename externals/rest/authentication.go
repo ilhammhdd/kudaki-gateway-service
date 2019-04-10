@@ -83,5 +83,5 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	adapters.ResetPassword()
+	adapters.ResetPassword(r, kafka.NewProduction(), kafka.NewConsumption())
 }
