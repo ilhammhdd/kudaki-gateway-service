@@ -22,6 +22,7 @@ func init() {
 }
 
 func main() {
+	// testing
 	wp := safekit.NewWorkerPool()
 
 	wp.Work <- restListener
