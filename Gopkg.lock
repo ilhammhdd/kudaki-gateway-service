@@ -65,18 +65,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:48d2cf7fa408ea1e8f0517a75be51d01d67a2d13d6cdec9a4fa6a790a2a9d075"
+  digest = "1:95790033c3f485063ff4e608661272d454c19f733b39ffca682826e96c822395"
   name = "github.com/ilhammhdd/go-toolkit"
   packages = [
     "errorkit",
+    "jwtkit",
     "safekit",
   ]
   pruneopts = "UT"
-  revision = "7e0d09bebc33c74222a3b7acbb5d854eb24cd0c5"
+  revision = "e8e0b4523d2600181fc0d74d30375bde65ac88ab"
 
 [[projects]]
   branch = "master"
-  digest = "1:5179cc1ee6549beb1b786243ccb96697e118fcc20f395405ea6adaed16af9737"
+  digest = "1:b9d47cafd57e81fb81f399f50f6ab0ca8507ce88a4133e7dabd85e26e8228144"
   name = "github.com/ilhammhdd/kudaki-entities"
   packages = [
     ".",
@@ -85,7 +86,7 @@
     "user",
   ]
   pruneopts = "UT"
-  revision = "996cb07a4a5d499d5b1d1ebe3ee9f88dd318b9d0"
+  revision = "c77ff1c57901e39293fb7f6504fb377e6feb4713"
 
 [[projects]]
   digest = "1:d886a3c32c8c1a770d07e36340f061d3afc948d065ffc3c9a19b01b34d4f0b65"
@@ -123,11 +124,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:cf353a5a9ffb2d6f850e9c773e25388a425a70c270546480427ed069e87b136a"
+  digest = "1:e2e51bf73862610e548f3acd292f447b500e53d792aa55260a8cb605dfd8ba09"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "4b34438f7a67ee5f45cc6132e2bad873a20324e9"
+  revision = "0ad05ae3009d6413d3363aa09b350b2ec37daf09"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -216,6 +217,7 @@
     "github.com/golang/protobuf/proto",
     "github.com/google/uuid",
     "github.com/ilhammhdd/go-toolkit/errorkit",
+    "github.com/ilhammhdd/go-toolkit/jwtkit",
     "github.com/ilhammhdd/go-toolkit/safekit",
     "github.com/ilhammhdd/kudaki-entities",
     "github.com/ilhammhdd/kudaki-entities/events",

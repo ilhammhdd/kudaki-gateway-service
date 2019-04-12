@@ -132,7 +132,39 @@ ConsLoop:
 	return &loggedin, eventErr
 }
 
-func (u User) ResetPassword(context.Context, *events.ResetPasswordRequested) (*events.PasswordReseted, error) {
+func (u User) ResetPassword(ctx context.Context, in *events.ResetPasswordRequested) (*events.PasswordReseted, error) {
 
-	return nil, nil
+	u.Esp.Set(events.User_name[int32(events.User_RESET_PASSWORD_REQUESTED)], 0, sarama.OffsetNewest)
+	_, _, err := u.Esp.SyncProduce(in.Uid, in)
+	errorkit.ErrorHandled(err)
+
+	u.Esc.Set(events.User_name[int32(events.User_PASSWORD_RESETED)], 0, sarama.OffsetNewest)
+	partCons, sig, closeChan := u.Esc.Consume()
+
+	var pr events.PasswordReseted
+	var returnErr error
+
+ConsLoop:
+	for {
+		select {
+		case msg := <-partCons.Messages():
+			log.Println("consumed message :", string(msg.Value))
+			if !errorkit.ErrorHandled(proto.Unmarshal(msg.Value, &pr)) {
+				log.Println("It's a PasswordReseted event")
+				if pr.Uid == in.Uid {
+					log.Println("ResetPasswordRequested and PasswordReseted uid matched!")
+					break ConsLoop
+				}
+			}
+		case consErr := <-partCons.Errors():
+			returnErr = consErr.Err
+			break ConsLoop
+		case <-sig:
+			break ConsLoop
+		}
+	}
+
+	close(closeChan)
+
+	return &pr, returnErr
 }

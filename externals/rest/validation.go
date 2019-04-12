@@ -1,14 +1,12 @@
 package rest
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"regexp"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/ilhammhdd/kudaki-entities/events"
@@ -192,13 +190,13 @@ func Authenticate(h http.Handler) http.Handler {
 
 		defer conn.Close()
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-		defer cancel()
+		// ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		// defer cancel()
 
 		client := rpc.NewUserClient(conn)
 
 		log.Println("calling UserAuthentication grpc, token : ", uar.Jwt)
-		ua, err := client.UserAuthentication(ctx, &uar)
+		ua, err := client.UserAuthentication(r.Context(), &uar)
 		if err != nil {
 			resBody := adapters.ResponseBody{Success: false, Errs: &[]string{err.Error()}}
 			adapters.NewResponse(http.StatusUnauthorized, &resBody).WriteResponse(&w)

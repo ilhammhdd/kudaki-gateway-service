@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/ilhammhdd/go-toolkit/jwtkit"
+
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 	"github.com/ilhammhdd/kudaki-entities/events"
 
@@ -102,5 +104,33 @@ func Login(r *http.Request, esp usecases.EventSourceProducer, esc usecases.Event
 
 func ResetPassword(r *http.Request, esp usecases.EventSourceProducer, esc usecases.EventSourceConsumer) *Response {
 
-	return nil
+	jwt, err := jwtkit.GetJWT(jwtkit.JWTString(r.Header.Get("Kudaki-Token")))
+	errorkit.ErrorHandled(err)
+
+	rpr := events.ResetPasswordRequested{
+		NewPassword: r.MultipartForm.Value["new_password"][0],
+		OldPassword: r.MultipartForm.Value["old_password"][0],
+		Uid:         uuid.New().String(),
+		Profile: &user.Profile{
+			User: &user.User{
+				Uuid:  jwt.Payload.Claims["user_uuid"].(string),
+				Token: r.Header.Get("Kudaki-Token")}}}
+
+	usr := usecases.User{
+		Esc: esc,
+		Esp: esp}
+
+	pr, err := usr.ResetPassword(r.Context(), &rpr)
+	errorkit.ErrorHandled(err)
+
+	var resBody ResponseBody
+
+	if pr.EventStatus.HttpCode != http.StatusOK {
+		resBody.Success = false
+		resBody.Errs = &pr.EventStatus.Errors
+	} else {
+		resBody.Success = true
+	}
+
+	return NewResponse(int(pr.EventStatus.HttpCode), &resBody)
 }

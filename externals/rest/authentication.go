@@ -71,6 +71,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	restValidation := RestValidation{
 		Rules: map[string]string{
+			"old_password": RegexPassword,
 			"new_password": RegexPassword},
 		request: r}
 
@@ -83,5 +84,5 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	adapters.ResetPassword(r, kafka.NewProduction(), kafka.NewConsumption())
+	adapters.ResetPassword(r, kafka.NewProduction(), kafka.NewConsumption()).WriteResponse(&w)
 }
