@@ -8,6 +8,8 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/ilhammhdd/kudaki-entities/user"
+
 	"github.com/google/uuid"
 	"github.com/ilhammhdd/kudaki-entities/events"
 
@@ -190,9 +192,6 @@ func Authenticate(h http.Handler) http.Handler {
 
 		defer conn.Close()
 
-		// ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-		// defer cancel()
-
 		client := rpc.NewUserClient(conn)
 
 		log.Println("calling UserAuthentication grpc, token : ", uar.Jwt)
@@ -215,8 +214,52 @@ func Authenticate(h http.Handler) http.Handler {
 	})
 }
 
-func TestAuthenticateJWT(w http.ResponseWriter, r *http.Request) {
+func Authorize(role user.Role, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
+		headerErr, ok := HeaderParamValidator(
+			map[string]string{"Kudaki-Token": RegexJWT},
+			r.Header)
+
+		if !ok {
+			resBody := adapters.ResponseBody{
+				Success: ok,
+				Errs:    headerErr}
+			adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+
+			return
+		}
+
+		conn, err := grpc.Dial(os.Getenv("USER_SERVICE_GRPC_ADDRESS"), grpc.WithInsecure())
+		errorkit.ErrorHandled(err)
+
+		uc := rpc.NewUserClient(conn)
+
+		uar := &events.UserAuthorizationRequested{
+			Jwt:  r.Header.Get("Kudaki-Token"),
+			Role: role,
+			Uid:  uuid.New().String()}
+
+		uad, err := uc.UserAuthorization(r.Context(), uar)
+		errorkit.ErrorHandled(err)
+
+		if uad.EventStatus.HttpCode != http.StatusOK {
+			resBody := adapters.ResponseBody{Errs: &uad.EventStatus.Errors, Success: false}
+			adapters.NewResponse(http.StatusUnauthorized, &resBody).WriteResponse(&w)
+
+			return
+		}
+
+		h.ServeHTTP(w, r)
+	})
+}
+
+func TestAuthenticateJWT(w http.ResponseWriter, r *http.Request) {
+	resBody := adapters.ResponseBody{Success: true}
+	adapters.NewResponse(http.StatusOK, &resBody).WriteResponse(&w)
+}
+
+func TestAuthorizeUser(w http.ResponseWriter, r *http.Request) {
 	resBody := adapters.ResponseBody{Success: true}
 	adapters.NewResponse(http.StatusOK, &resBody).WriteResponse(&w)
 }

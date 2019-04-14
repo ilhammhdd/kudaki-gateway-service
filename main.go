@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/ilhammhdd/kudaki-entities/user"
+
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 	"github.com/ilhammhdd/go-toolkit/safekit"
 	"github.com/ilhammhdd/kudaki-gateway-service/externals/rest"
@@ -40,6 +42,7 @@ func restListener() {
 	http.Handle("/login", rest.MethodValidator(http.MethodPost, http.HandlerFunc(rest.Login)))
 	http.Handle("/test/authenticate/jwt", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.TestAuthenticateJWT))))
 	http.Handle("/user/reset/password", rest.MethodValidator(http.MethodPost, rest.Authenticate(http.HandlerFunc(rest.ResetPassword))))
+	http.Handle("/test/authorize/user", rest.Authorize(user.Role_USER, http.HandlerFunc(rest.TestAuthorizeUser)))
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%s", os.Getenv("REST_PORT")),
