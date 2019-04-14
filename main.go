@@ -24,7 +24,8 @@ func init() {
 }
 
 func main() {
-	// testing again, how to trigger it? publish or push with tag? COME ON
+	// testing again, how to trigger it? publish or push with tag? COME ON!
+	// still unsure
 	wp := safekit.NewWorkerPool()
 
 	wp.Work <- restListener
