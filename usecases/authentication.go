@@ -1,7 +1,6 @@
 package usecases
 
 import (
-	"context"
 	"log"
 	"time"
 
@@ -17,31 +16,29 @@ type User struct {
 	Esc EventSourceConsumer
 }
 
-func (u User) Signup(ctx context.Context, in *events.SignupRequested) (*events.UserVerificationEmailSent, error) {
-	// u.Esp.Set(entities.Topics_name[int32(entities.Topics_USER_command)], int32(commands.Partition_SIGN_UP), sarama.OffsetNewest)
-	u.Esp.Set(entities.Topics_name[int32(entities.Topics_SIGN_UP_REQUESTED)], 0, sarama.OffsetNewest)
+func (u User) Signup(key string, msg []byte) (*events.Signedup, error) {
+	u.Esp.Set(entities.Topics_name[int32(entities.Topics_SIGN_UP_REQUESTED)])
 	start := time.Now()
-	partition, offset, err := u.Esp.SyncProduce(in.Uid, in)
+	partition, offset, err := u.Esp.SyncProduce(key, msg)
 	errorkit.ErrorHandled(err)
-
 	duration := time.Since(start)
-	log.Println(duration.Seconds(), " seconds passed after producing")
 
-	log.Println("Signup command produced at :", partition, offset)
+	log.Printf("produced SignupRequested : partition = %d, offset = %d, duration = %f seconds, key = %s", partition, offset, duration.Seconds(), key)
 
-	u.Esc.Set(entities.Topics_name[int32(entities.Topics_USER_VERIFICATION_EMAIL_SENT)], 0, sarama.OffsetNewest)
+	u.Esc.Set(entities.Topics_name[int32(entities.Topics_SIGNED_UP)], 0, sarama.OffsetNewest)
 	partCons, sig, closeChan := u.Esc.Consume()
 
-	var resultedEvent events.UserVerificationEmailSent
+	var sdu events.Signedup
 	var eventErr error
 
 ConsLoop:
 	for {
 		select {
 		case msg := <-partCons.Messages():
-			err = proto.Unmarshal(msg.Value, &resultedEvent)
+			err = proto.Unmarshal(msg.Value, &sdu)
 			if !errorkit.ErrorHandled(err) {
-				if resultedEvent.User.Uuid == in.Profile.User.Uuid {
+				if sdu.Uid == key {
+					log.Printf("consumed Signedup : partition = %d, offset = %d, key = %s, event UID matched.", msg.Partition, msg.Offset, msg.Key)
 					break ConsLoop
 				}
 			}
@@ -55,17 +52,17 @@ ConsLoop:
 
 	close(closeChan)
 
-	return &resultedEvent, eventErr
+	return &sdu, eventErr
 }
 
-func (u User) VerifyUser(ctx context.Context, in *events.VerifyUserRequested) (*events.Signedup, error) {
+func (u User) VerifyUser(key string, msg []byte) (*events.Signedup, error) {
 
-	u.Esp.Set(entities.Topics_name[int32(entities.Topics_VERIFY_USER_REQUESTED)], 0, sarama.OffsetNewest)
+	u.Esp.Set(entities.Topics_name[int32(entities.Topics_VERIFY_USER_REQUESTED)])
 	start := time.Now()
-	_, _, err := u.Esp.SyncProduce(in.Uid, in)
+	partition, offset, err := u.Esp.SyncProduce(key, msg)
 	errorkit.ErrorHandled(err)
 	duration := time.Since(start)
-	log.Println(duration.Seconds(), " seconds passed after producing")
+	log.Printf("produced VerifyUserRequested : partition = %d, offset = %d, duration = %f seconds, key = %s", partition, offset, duration.Seconds(), key)
 
 	u.Esc.Set(entities.Topics_name[int32(entities.Topics_SIGNED_UP)], 0, sarama.OffsetNewest)
 	partCons, sig, closeChan := u.Esc.Consume()
@@ -79,7 +76,8 @@ ConsLoop:
 		case msg := <-partCons.Messages():
 			err = proto.Unmarshal(msg.Value, &resultedEvent)
 			if !errorkit.ErrorHandled(err) {
-				if resultedEvent.Uid == in.Uid {
+				if resultedEvent.Uid == key {
+					log.Printf("consumed Signedup : partition = %d, offset = %d, key = %s, event UID matched.", msg.Partition, msg.Offset, msg.Key)
 					break ConsLoop
 				}
 			}
@@ -96,11 +94,14 @@ ConsLoop:
 	return &resultedEvent, eventErr
 }
 
-func (u User) Login(ctx context.Context, in *events.LoginRequested) (*events.Loggedin, error) {
+func (u User) Login(key string, msg []byte) (*events.Loggedin, error) {
 
-	u.Esp.Set(events.User_name[int32(events.User_LOGIN_REQUESTED)], 0, sarama.OffsetNewest)
-	_, _, err := u.Esp.SyncProduce(in.Uid, in)
+	u.Esp.Set(events.User_name[int32(events.User_LOGIN_REQUESTED)])
+	start := time.Now()
+	partition, offset, err := u.Esp.SyncProduce(key, msg)
+	duration := time.Since(start)
 	errorkit.ErrorHandled(err)
+	log.Printf("produced LoginRequested : partition = %d, offset = %d, duration = %f seconds, key = %s", partition, offset, duration.Seconds(), key)
 
 	u.Esc.Set(events.User_name[int32(events.User_LOGGED_IN)], 0, sarama.OffsetNewest)
 	partCons, sig, closeChan := u.Esc.Consume()
@@ -113,8 +114,8 @@ ConsLoop:
 		select {
 		case msg := <-partCons.Messages():
 			if !errorkit.ErrorHandled(proto.Unmarshal(msg.Value, &loggedin)) {
-				if loggedin.Uid == in.Uid {
-					log.Println("Logged in event : ", loggedin)
+				if loggedin.Uid == key {
+					log.Printf("consumed Loggedin : partition = %d, offset = %d, key = %s, event UID matched.", msg.Partition, msg.Offset, msg.Key)
 					break ConsLoop
 				}
 			}
@@ -132,11 +133,14 @@ ConsLoop:
 	return &loggedin, eventErr
 }
 
-func (u User) ResetPassword(ctx context.Context, in *events.ResetPasswordRequested) (*events.PasswordReseted, error) {
+func (u User) ResetPassword(key string, msg []byte) (*events.PasswordReseted, error) {
 
-	u.Esp.Set(events.User_name[int32(events.User_RESET_PASSWORD_REQUESTED)], 0, sarama.OffsetNewest)
-	_, _, err := u.Esp.SyncProduce(in.Uid, in)
+	u.Esp.Set(events.User_name[int32(events.User_RESET_PASSWORD_REQUESTED)])
+	start := time.Now()
+	partition, offset, err := u.Esp.SyncProduce(key, msg)
+	duration := time.Since(start)
 	errorkit.ErrorHandled(err)
+	log.Printf("produced ResetPasswordRequested : partition = %d, offset = %d, duration = %f seconds, key = %s", partition, offset, duration.Seconds(), key)
 
 	u.Esc.Set(events.User_name[int32(events.User_PASSWORD_RESETED)], 0, sarama.OffsetNewest)
 	partCons, sig, closeChan := u.Esc.Consume()
@@ -148,11 +152,9 @@ ConsLoop:
 	for {
 		select {
 		case msg := <-partCons.Messages():
-			log.Println("consumed message :", string(msg.Value))
 			if !errorkit.ErrorHandled(proto.Unmarshal(msg.Value, &pr)) {
-				log.Println("It's a PasswordReseted event")
-				if pr.Uid == in.Uid {
-					log.Println("ResetPasswordRequested and PasswordReseted uid matched!")
+				if pr.Uid == key {
+					log.Printf("consumed PasswordReseted : partition = %d, offset = %d, key = %s", msg.Partition, msg.Offset, msg.Key)
 					break ConsLoop
 				}
 			}

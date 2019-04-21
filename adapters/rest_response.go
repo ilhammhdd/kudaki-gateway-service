@@ -19,9 +19,9 @@ func (res *Response) WriteResponse(w *http.ResponseWriter) {
 }
 
 type ResponseBody struct {
-	Success bool                    `json:"success"`
-	Errs    *[]string               `json:"errors,omitempty"`
-	Data    *map[string]interface{} `json:"data,omitempty"`
+	Success bool        `json:"success"`
+	Errs    *[]string   `json:"errors,omitempty"`
+	Data    interface{} `json:"data,omitempty"`
 }
 
 func (r *ResponseBody) Parse() []byte {
@@ -39,3 +39,5 @@ func NewResponse(httpCode int, resBody *ResponseBody) *Response {
 		HttpCode: httpCode,
 		JSONBody: resBodyJSON}
 }
+
+type DataMap map[string]interface{}

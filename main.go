@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/ilhammhdd/kudaki-entities/user"
 
@@ -14,13 +14,16 @@ import (
 )
 
 func init() {
-	if len(os.Args) == 6 {
+	if len(os.Args) == 7 {
 		os.Setenv("ADDRESS", os.Args[1])
 		os.Setenv("GRPC_PORT", os.Args[2])
 		os.Setenv("REST_PORT", os.Args[3])
 		os.Setenv("KAFKA_BROKERS", os.Args[4])
 		os.Setenv("USER_SERVICE_GRPC_ADDRESS", os.Args[5])
+		os.Setenv("KAFKA_VERSION", os.Args[6])
 	}
+
+	log.Println(os.Getenv("KAFKA_VERSION"))
 }
 
 func main() {
@@ -44,11 +47,14 @@ func restListener() {
 	http.Handle("/test/authenticate/jwt", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.TestAuthenticateJWT))))
 	http.Handle("/user/reset/password", rest.MethodValidator(http.MethodPost, rest.Authenticate(http.HandlerFunc(rest.ResetPassword))))
 	http.Handle("/test/authorize/user", rest.Authorize(user.Role_USER, http.HandlerFunc(rest.TestAuthorizeUser)))
+	http.Handle("/mountain/create", rest.MethodValidator(http.MethodPost, rest.Authorize(user.Role_KUDAKI_TEAM, http.HandlerFunc(rest.CreateMountain))))
+	http.Handle("/team/add", rest.MethodValidator(http.MethodPost, rest.Authorize(user.Role_ADMIN, http.HandlerFunc(rest.AddTeam))))
+	http.Handle("/mountain/retrieve", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.RetrieveMountains))))
 
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%s", os.Getenv("REST_PORT")),
-		ReadTimeout:  time.Second * 3,
-		WriteTimeout: time.Second * 7}
+		Addr: fmt.Sprintf(":%s", os.Getenv("REST_PORT")),
+		/* ReadTimeout:  time.Second * 3,
+		WriteTimeout: time.Second * 7 */}
 
 	defer server.Close()
 

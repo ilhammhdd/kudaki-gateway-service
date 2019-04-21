@@ -22,16 +22,24 @@ import (
 )
 
 const (
-	RegexEmail              = `^[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})$`
-	RegexEmailErrMessage    = "not a valid email address"
-	RegexPassword           = `^[\w_!@#$%*]{6,30}$`
-	RegexPasswordErrMessage = "not a valid password, allowed alphanumeric with _!@#$%* symbols, minimal 6 and maximal 30 in length"
-	RegexNotEmpty           = `.*`
-	RegexNotEmptyErrMessage = "can't be empty"
-	RegexURL                = `^((((h)(t)|(f))(t)(p)((s)?))\://)?(www.|[a-zA-Z0-9].)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,6}(\:[0-9]{1,5})*(/($|[a-zA-Z0-9\.\,\;\?\'\\\+&amp;%\$#\=~_\-]+))*$`
-	RegexURLErrMessage      = "not a valid url"
-	RegexJWT                = `^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$`
-	RegexJWTErrMessage      = "not a valid jwt"
+	RegexEmail               = `^[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})$`
+	RegexEmailErrMessage     = "not a valid email address"
+	RegexPassword            = `^[\w_!@#$%*]{6,30}$`
+	RegexPasswordErrMessage  = "not a valid, allowed alphanumeric with _!@#$%* symbols, minimal 6 and maximal 30 in length"
+	RegexNotEmpty            = `.*`
+	RegexNotEmptyErrMessage  = "can't be empty"
+	RegexURL                 = `^((((h)(t)|(f))(t)(p)((s)?))\://)?(www.|[a-zA-Z0-9].)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,6}(\:[0-9]{1,5})*(/($|[a-zA-Z0-9\.\,\;\?\'\\\+&amp;%\$#\=~_\-]+))*$`
+	RegexURLErrMessage       = "not a valid url"
+	RegexJWT                 = `^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$`
+	RegexJWTErrMessage       = "not a valid jwt"
+	RegexNumber              = `^[0-9]+`
+	RegexNumberErrMessage    = "not a number"
+	RegexLatitude            = `^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$`
+	RegexLatitudeErrMessage  = "not a latitude value"
+	RegexLongitude           = `^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$`
+	RegexLongitudeErrMessage = "not a longitude value"
+	RegexRole                = `^(USER|ORGANIZER)$`
+	RegexRoleErrMessage      = "not a valid one"
 )
 
 type RestValidator interface {
@@ -73,6 +81,14 @@ func (rv RestValidation) Validate() (*[]string, bool) {
 					errs = append(errs, fmt.Sprintf("%s %s", param, RegexURLErrMessage))
 				case RegexJWT:
 					errs = append(errs, fmt.Sprintf("%s %s", param, RegexJWTErrMessage))
+				case RegexNumber:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexNumberErrMessage))
+				case RegexLatitude:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexLatitudeErrMessage))
+				case RegexLongitude:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexLongitudeErrMessage))
+				case RegexRole:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexRoleErrMessage))
 				}
 			}
 		}
@@ -123,6 +139,14 @@ func HeaderParamValidator(rules map[string]string, h http.Header) (*[]string, bo
 						errs = append(errs, fmt.Sprintf("%s %s", param, RegexURLErrMessage))
 					case RegexJWT:
 						errs = append(errs, fmt.Sprintf("%s %s", param, RegexJWTErrMessage))
+					case RegexNumber:
+						errs = append(errs, fmt.Sprintf("%s %s", param, RegexNumberErrMessage))
+					case RegexLatitude:
+						errs = append(errs, fmt.Sprintf("%s %s", param, RegexLatitudeErrMessage))
+					case RegexLongitude:
+						errs = append(errs, fmt.Sprintf("%s %s", param, RegexLongitudeErrMessage))
+					case RegexRole:
+						errs = append(errs, fmt.Sprintf("%s %s", param, RegexRoleErrMessage))
 					}
 				}
 			}
@@ -161,6 +185,14 @@ func URLParamValidator(rules map[string]string, val url.Values) (*[]string, bool
 						errs = append(errs, fmt.Sprintf("%s %s", param, RegexURLErrMessage))
 					case RegexJWT:
 						errs = append(errs, fmt.Sprintf("%s %s", param, RegexJWTErrMessage))
+					case RegexNumber:
+						errs = append(errs, fmt.Sprintf("%s %s", param, RegexNumberErrMessage))
+					case RegexLatitude:
+						errs = append(errs, fmt.Sprintf("%s %s", param, RegexLatitudeErrMessage))
+					case RegexLongitude:
+						errs = append(errs, fmt.Sprintf("%s %s", param, RegexLongitudeErrMessage))
+					case RegexRole:
+						errs = append(errs, fmt.Sprintf("%s %s", param, RegexRoleErrMessage))
 					}
 				}
 			}
@@ -194,7 +226,6 @@ func Authenticate(h http.Handler) http.Handler {
 
 		client := rpc.NewUserClient(conn)
 
-		log.Println("calling UserAuthentication grpc, token : ", uar.Jwt)
 		ua, err := client.UserAuthentication(r.Context(), &uar)
 		if err != nil {
 			resBody := adapters.ResponseBody{Success: false, Errs: &[]string{err.Error()}}

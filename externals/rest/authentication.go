@@ -9,7 +9,7 @@ import (
 	"github.com/ilhammhdd/kudaki-gateway-service/adapters"
 )
 
-func Signup(w http.ResponseWriter, r *http.Request) {
+func AddTeam(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20)
 
 	fmt.Println("multipart form : ", r.MultipartForm)
@@ -19,6 +19,31 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 			"email":     RegexEmail,
 			"password":  RegexPassword,
 			"role":      RegexNotEmpty,
+			"full_name": RegexNotEmpty,
+			"photo":     RegexURL},
+		request: r,
+	}
+
+	if errs, ok := v.Validate(); !ok {
+		resBody := adapters.ResponseBody{Success: ok, Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+
+		return
+	}
+
+	adapters.Signup(r, kafka.NewProduction(), kafka.NewConsumption()).WriteResponse(&w)
+}
+
+func Signup(w http.ResponseWriter, r *http.Request) {
+	r.ParseMultipartForm(32 << 20)
+
+	fmt.Println("multipart form : ", r.MultipartForm)
+
+	v := RestValidation{
+		Rules: map[string]string{
+			"email":     RegexEmail,
+			"password":  RegexPassword,
+			"role":      RegexRole,
 			"full_name": RegexNotEmpty,
 			"photo":     RegexURL},
 		request: r,
@@ -46,7 +71,7 @@ func VerifyUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	adapters.VerifyUser(urlVals[param][0], r.Context(), kafka.NewProduction(), kafka.NewConsumption())
+	adapters.VerifyUser(urlVals[param][0], kafka.NewProduction(), kafka.NewConsumption())
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {

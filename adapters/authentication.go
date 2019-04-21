@@ -1,8 +1,9 @@
 package adapters
 
 import (
-	"context"
 	"net/http"
+
+	"github.com/golang/protobuf/proto"
 
 	"github.com/ilhammhdd/go-toolkit/jwtkit"
 
@@ -35,32 +36,36 @@ func Signup(r *http.Request, esp usecases.EventSourceProducer, esc usecases.Even
 		Uid:     uuid.New().String(),
 		Profile: &profile,
 	}
+	suBytes, err := proto.Marshal(&su)
+	errorkit.ErrorHandled(err)
 
 	user := usecases.User{Esp: esp, Esc: esc}
-	uves, err := user.Signup(r.Context(), &su)
+	sdu, err := user.Signup(su.Uid, suBytes)
 	errorkit.ErrorHandled(err)
 
 	var resBody ResponseBody
 
-	if uves.EventStatus.HttpCode != http.StatusOK {
+	if sdu.EventStatus.HttpCode != http.StatusOK {
 		resBody.Success = false
-		resBody.Errs = &uves.EventStatus.Errors
+		resBody.Errs = &sdu.EventStatus.Errors
 	} else {
 		resBody.Success = true
 	}
 
-	return NewResponse(int(uves.EventStatus.HttpCode), &resBody)
+	return NewResponse(int(sdu.EventStatus.HttpCode), &resBody)
 }
 
-func VerifyUser(jwt string, ctx context.Context, esp usecases.EventSourceProducer, esc usecases.EventSourceConsumer) *Response {
+func VerifyUser(jwt string, esp usecases.EventSourceProducer, esc usecases.EventSourceConsumer) *Response {
 
 	vu := events.VerifyUserRequested{
 		Uid:           uuid.New().String(),
 		VerifyUserJwt: jwt}
+	vuBytes, err := proto.Marshal(&vu)
+	errorkit.ErrorHandled(err)
 
 	userUsecase := usecases.User{Esc: esc, Esp: esp}
 
-	sdu, err := userUsecase.VerifyUser(ctx, &vu)
+	sdu, err := userUsecase.VerifyUser(vu.Uid, vuBytes)
 	errorkit.ErrorHandled(err)
 
 	var resBody ResponseBody
@@ -82,10 +87,12 @@ func Login(r *http.Request, esp usecases.EventSourceProducer, esc usecases.Event
 		User: &user.User{
 			Email:    r.MultipartForm.Value["email"][0],
 			Password: r.MultipartForm.Value["password"][0]}}
+	lrBytes, err := proto.Marshal(&lr)
+	errorkit.ErrorHandled(err)
 
 	userUsecase := usecases.User{Esp: esp, Esc: esc}
 
-	loggedin, err := userUsecase.Login(r.Context(), &lr)
+	loggedin, err := userUsecase.Login(lr.Uid, lrBytes)
 	errorkit.ErrorHandled(err)
 
 	var resBody ResponseBody
@@ -95,8 +102,7 @@ func Login(r *http.Request, esp usecases.EventSourceProducer, esc usecases.Event
 		resBody.Errs = &loggedin.EventStatus.Errors
 	} else {
 		resBody.Success = true
-		resBody.Data = &map[string]interface{}{
-			"token": loggedin.User.Token}
+		resBody.Data = DataMap{"token": string(loggedin.User.Token)}
 	}
 
 	return NewResponse(int(loggedin.EventStatus.HttpCode), &resBody)
@@ -115,12 +121,14 @@ func ResetPassword(r *http.Request, esp usecases.EventSourceProducer, esc usecas
 			User: &user.User{
 				Uuid:  jwt.Payload.Claims["user_uuid"].(string),
 				Token: r.Header.Get("Kudaki-Token")}}}
+	rprBytes, err := proto.Marshal(&rpr)
+	errorkit.ErrorHandled(err)
 
 	usr := usecases.User{
 		Esc: esc,
 		Esp: esp}
 
-	pr, err := usr.ResetPassword(r.Context(), &rpr)
+	pr, err := usr.ResetPassword(rpr.Uid, rprBytes)
 	errorkit.ErrorHandled(err)
 
 	var resBody ResponseBody
