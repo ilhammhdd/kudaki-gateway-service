@@ -16,11 +16,11 @@ type Mountain struct {
 }
 
 func (m Mountain) CreateMountain(key string, msg []byte) *events.MountainCreated {
-	m.Esp.Set(events.Mountain_name[int32(events.Mountain_CREATE_MOUNTAIN_REQUESTED)])
+	m.Esp.Set(events.MountainTopic_name[int32(events.MountainTopic_CREATE_MOUNTAIN_REQUESTED)])
 	_, _, err := m.Esp.SyncProduce(key, msg)
 	errorkit.ErrorHandled(err)
 
-	m.Esc.Set(events.Mountain_name[int32(events.Mountain_MOUNTAIN_CREATED)], 0, sarama.OffsetNewest)
+	m.Esc.Set(events.MountainTopic_name[int32(events.MountainTopic_MOUNTAIN_CREATED)], 0, sarama.OffsetNewest)
 	partCons, sig, closeChan := m.Esc.Consume()
 	defer close(closeChan)
 
@@ -47,13 +47,13 @@ func (m Mountain) CreateMountain(key string, msg []byte) *events.MountainCreated
 
 func (m Mountain) RetrieveMountains(key string, msg []byte) *events.MountainsRetrieved {
 
-	m.Esp.Set(events.Mountain_name[int32(events.Mountain_RETRIEVE_MOUNTAINS_REQUESTED)])
+	m.Esp.Set(events.MountainTopic_name[int32(events.MountainTopic_RETRIEVE_MOUNTAINS_REQUESTED)])
 	partition, offset, err := m.Esp.SyncProduce(key, msg)
 	errorkit.ErrorHandled(err)
 
 	log.Printf("produced : partition = %d, offset = %d, key = %s, message = %s", partition, offset, key, msg)
 
-	m.Esc.Set(events.Mountain_name[int32(events.Mountain_MOUNTAINS_RETRIEVED)], 0, sarama.OffsetNewest)
+	m.Esc.Set(events.MountainTopic_name[int32(events.MountainTopic_MOUNTAINS_RETRIEVED)], 0, sarama.OffsetNewest)
 	partCons, sig, closeChan := m.Esc.Consume()
 
 	var mr events.MountainsRetrieved

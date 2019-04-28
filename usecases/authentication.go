@@ -6,7 +6,6 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/ilhammhdd/go-toolkit/errorkit"
-	entities "github.com/ilhammhdd/kudaki-entities"
 	"github.com/ilhammhdd/kudaki-entities/events"
 	sarama "gopkg.in/Shopify/sarama.v1"
 )
@@ -17,7 +16,7 @@ type User struct {
 }
 
 func (u User) Signup(key string, msg []byte) (*events.Signedup, error) {
-	u.Esp.Set(entities.Topics_name[int32(entities.Topics_SIGN_UP_REQUESTED)])
+	u.Esp.Set(events.UserTopic_name[int32(events.UserTopic_SIGN_UP_REQUESTED)])
 	start := time.Now()
 	partition, offset, err := u.Esp.SyncProduce(key, msg)
 	errorkit.ErrorHandled(err)
@@ -25,7 +24,7 @@ func (u User) Signup(key string, msg []byte) (*events.Signedup, error) {
 
 	log.Printf("produced SignupRequested : partition = %d, offset = %d, duration = %f seconds, key = %s", partition, offset, duration.Seconds(), key)
 
-	u.Esc.Set(entities.Topics_name[int32(entities.Topics_SIGNED_UP)], 0, sarama.OffsetNewest)
+	u.Esc.Set(events.UserTopic_name[int32(events.UserTopic_SIGNED_UP)], 0, sarama.OffsetNewest)
 	partCons, sig, closeChan := u.Esc.Consume()
 
 	var sdu events.Signedup
@@ -57,14 +56,14 @@ ConsLoop:
 
 func (u User) VerifyUser(key string, msg []byte) (*events.Signedup, error) {
 
-	u.Esp.Set(entities.Topics_name[int32(entities.Topics_VERIFY_USER_REQUESTED)])
+	u.Esp.Set(events.UserTopic_name[int32(events.UserTopic_VERIFY_USER_REQUESTED)])
 	start := time.Now()
 	partition, offset, err := u.Esp.SyncProduce(key, msg)
 	errorkit.ErrorHandled(err)
 	duration := time.Since(start)
 	log.Printf("produced VerifyUserRequested : partition = %d, offset = %d, duration = %f seconds, key = %s", partition, offset, duration.Seconds(), key)
 
-	u.Esc.Set(entities.Topics_name[int32(entities.Topics_SIGNED_UP)], 0, sarama.OffsetNewest)
+	u.Esc.Set(events.UserTopic_name[int32(events.UserTopic_SIGNED_UP)], 0, sarama.OffsetNewest)
 	partCons, sig, closeChan := u.Esc.Consume()
 
 	var resultedEvent events.Signedup
@@ -96,14 +95,14 @@ ConsLoop:
 
 func (u User) Login(key string, msg []byte) (*events.Loggedin, error) {
 
-	u.Esp.Set(events.User_name[int32(events.User_LOGIN_REQUESTED)])
+	u.Esp.Set(events.UserTopic_name[int32(events.UserTopic_LOGIN_REQUESTED)])
 	start := time.Now()
 	partition, offset, err := u.Esp.SyncProduce(key, msg)
 	duration := time.Since(start)
 	errorkit.ErrorHandled(err)
 	log.Printf("produced LoginRequested : partition = %d, offset = %d, duration = %f seconds, key = %s", partition, offset, duration.Seconds(), key)
 
-	u.Esc.Set(events.User_name[int32(events.User_LOGGED_IN)], 0, sarama.OffsetNewest)
+	u.Esc.Set(events.UserTopic_name[int32(events.UserTopic_LOGGED_IN)], 0, sarama.OffsetNewest)
 	partCons, sig, closeChan := u.Esc.Consume()
 
 	var loggedin events.Loggedin
@@ -135,14 +134,14 @@ ConsLoop:
 
 func (u User) ResetPassword(key string, msg []byte) (*events.PasswordReseted, error) {
 
-	u.Esp.Set(events.User_name[int32(events.User_RESET_PASSWORD_REQUESTED)])
+	u.Esp.Set(events.UserTopic_name[int32(events.UserTopic_RESET_PASSWORD_REQUESTED)])
 	start := time.Now()
 	partition, offset, err := u.Esp.SyncProduce(key, msg)
 	duration := time.Since(start)
 	errorkit.ErrorHandled(err)
 	log.Printf("produced ResetPasswordRequested : partition = %d, offset = %d, duration = %f seconds, key = %s", partition, offset, duration.Seconds(), key)
 
-	u.Esc.Set(events.User_name[int32(events.User_PASSWORD_RESETED)], 0, sarama.OffsetNewest)
+	u.Esc.Set(events.UserTopic_name[int32(events.UserTopic_PASSWORD_RESETED)], 0, sarama.OffsetNewest)
 	partCons, sig, closeChan := u.Esc.Consume()
 
 	var pr events.PasswordReseted

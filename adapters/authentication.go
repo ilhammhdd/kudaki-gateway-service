@@ -1,13 +1,13 @@
 package adapters
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/golang/protobuf/proto"
 
-	"github.com/ilhammhdd/go-toolkit/jwtkit"
-
 	"github.com/ilhammhdd/go-toolkit/errorkit"
+	"github.com/ilhammhdd/go-toolkit/jwtkit"
 	"github.com/ilhammhdd/kudaki-entities/events"
 
 	"github.com/ilhammhdd/kudaki-gateway-service/usecases"
@@ -113,13 +113,16 @@ func ResetPassword(r *http.Request, esp usecases.EventSourceProducer, esc usecas
 	jwt, err := jwtkit.GetJWT(jwtkit.JWTString(r.Header.Get("Kudaki-Token")))
 	errorkit.ErrorHandled(err)
 
+	jwtMap := jwt.Payload.Claims["user"].(map[string]interface{})
+	log.Printf("jwt map : type = %T, value = %v", jwtMap, jwtMap)
+
 	rpr := events.ResetPasswordRequested{
 		NewPassword: r.MultipartForm.Value["new_password"][0],
 		OldPassword: r.MultipartForm.Value["old_password"][0],
 		Uid:         uuid.New().String(),
 		Profile: &user.Profile{
 			User: &user.User{
-				Uuid:  jwt.Payload.Claims["user_uuid"].(string),
+				Uuid:  "",
 				Token: r.Header.Get("Kudaki-Token")}}}
 	rprBytes, err := proto.Marshal(&rpr)
 	errorkit.ErrorHandled(err)

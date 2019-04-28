@@ -41,15 +41,22 @@ func restListener() {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("tested"))
 	}))
+
+	// user
 	http.Handle("/signup", rest.MethodValidator(http.MethodPost, http.HandlerFunc(rest.Signup)))
 	http.Handle("/user/verify", rest.MethodValidator(http.MethodGet, http.HandlerFunc(rest.VerifyUser)))
 	http.Handle("/login", rest.MethodValidator(http.MethodPost, http.HandlerFunc(rest.Login)))
 	http.Handle("/test/authenticate/jwt", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.TestAuthenticateJWT))))
-	http.Handle("/user/reset/password", rest.MethodValidator(http.MethodPost, rest.Authenticate(http.HandlerFunc(rest.ResetPassword))))
-	http.Handle("/test/authorize/user", rest.Authorize(user.Role_USER, http.HandlerFunc(rest.TestAuthorizeUser)))
-	http.Handle("/mountain/create", rest.MethodValidator(http.MethodPost, rest.Authorize(user.Role_KUDAKI_TEAM, http.HandlerFunc(rest.CreateMountain))))
+	http.Handle("/user/reset/password", rest.MethodValidator(http.MethodPut, rest.Authenticate(http.HandlerFunc(rest.ResetPassword))))
 	http.Handle("/team/add", rest.MethodValidator(http.MethodPost, rest.Authorize(user.Role_ADMIN, http.HandlerFunc(rest.AddTeam))))
+	http.Handle("/test/authorize/user", rest.Authorize(user.Role_USER, http.HandlerFunc(rest.TestAuthorizeUser)))
+
+	// mountain
+	http.Handle("/mountain/create", rest.MethodValidator(http.MethodPost, rest.Authorize(user.Role_KUDAKI_TEAM, http.HandlerFunc(rest.CreateMountain))))
 	http.Handle("/mountain/retrieve", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.RetrieveMountains))))
+
+	// rental
+	http.Handle("/storefront/item/add", rest.MethodValidator(http.MethodPost, rest.Authenticate(http.HandlerFunc(rest.AddFrontstoreItem))))
 
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%s", os.Getenv("REST_PORT")),
