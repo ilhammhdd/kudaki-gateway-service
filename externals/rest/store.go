@@ -36,3 +36,37 @@ func AddFrontstoreItem(w http.ResponseWriter, r *http.Request) {
 
 	adapters.AddStorefrontItem(r, kafka.NewProduction(), kafka.NewConsumption()).WriteResponse(&w)
 }
+
+func DeleteStorefrontItem(w http.ResponseWriter, r *http.Request) {
+	upv := URLParamValidation{
+		Rules:  map[string]string{"item_uuid": RegexUUIDV4},
+		Values: r.URL.Query(),
+	}
+
+	if errs, valid := upv.Validate(); !valid {
+		resBody := adapters.ResponseBody{
+			Errs:    errs,
+			Success: valid,
+		}
+
+		adapters.NewResponse(http.StatusBadGateway, &resBody).WriteResponse(&w)
+		return
+	}
+
+	storefrontItemDeletionAdapter := adapters.StorefrontItemDeletion{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction(),
+		Request:  r,
+	}
+
+	storefrontItemDeletionAdapter.DeleteStorefrontItem().WriteResponse(&w)
+}
+
+func RetrieveStorefrontItems(w http.ResponseWriter, r *http.Request) {
+	sir := adapters.StorefrontItemsRetrieval{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction(),
+		Request:  r,
+	}
+	sir.Retrieve().WriteResponse(&w)
+}

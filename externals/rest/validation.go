@@ -40,6 +40,8 @@ const (
 	RegexLongitudeErrMessage = "not a longitude value"
 	RegexRole                = `^(USER|ORGANIZER)$`
 	RegexRoleErrMessage      = "not a valid one"
+	RegexUUIDV4              = `^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$`
+	RegexUUIDV4ErrMessage    = "not a valid UUID v4 form"
 )
 
 type RestValidator interface {
@@ -89,6 +91,8 @@ func (rv RestValidation) Validate() (*[]string, bool) {
 					errs = append(errs, fmt.Sprintf("%s %s", param, RegexLongitudeErrMessage))
 				case RegexRole:
 					errs = append(errs, fmt.Sprintf("%s %s", param, RegexRoleErrMessage))
+				case RegexUUIDV4:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexUUIDV4ErrMessage))
 				}
 			}
 		}
@@ -147,6 +151,8 @@ func HeaderParamValidator(rules map[string]string, h http.Header) (*[]string, bo
 						errs = append(errs, fmt.Sprintf("%s %s", param, RegexLongitudeErrMessage))
 					case RegexRole:
 						errs = append(errs, fmt.Sprintf("%s %s", param, RegexRoleErrMessage))
+					case RegexUUIDV4:
+						errs = append(errs, fmt.Sprintf("%s %s", param, RegexUUIDV4ErrMessage))
 					}
 				}
 			}
@@ -156,15 +162,27 @@ func HeaderParamValidator(rules map[string]string, h http.Header) (*[]string, bo
 	return &errs, valid
 }
 
-func URLParamValidator(rules map[string]string, val url.Values) (*[]string, bool) {
+type URLParamValidation struct {
+	Rules  map[string]string
+	Values url.Values
+}
+
+func (upv *URLParamValidation) Validate( /* rules map[string]string, val url.Values */ ) (*[]string, bool) {
 
 	valid := true
 	var errs []string
 
-	for param, rule := range rules {
-		vals, ok := val[param]
-		if !ok && len(val) > 0 {
-			log.Println("URLEncodingating, ", param, "missing")
+	if len(upv.Values) == 0 {
+		valid = false
+		errs = append(errs, "url parameters needed")
+
+		return &errs, valid
+	}
+
+	for param, rule := range upv.Rules {
+		vals, ok := upv.Values[param]
+		if !ok && len(upv.Values) > 0 {
+			log.Println("URLEncoding validating, ", param, "missing")
 			valid = false
 			errs = append(errs, fmt.Sprintf("%s not exists", param))
 		} else {
@@ -193,6 +211,8 @@ func URLParamValidator(rules map[string]string, val url.Values) (*[]string, bool
 						errs = append(errs, fmt.Sprintf("%s %s", param, RegexLongitudeErrMessage))
 					case RegexRole:
 						errs = append(errs, fmt.Sprintf("%s %s", param, RegexRoleErrMessage))
+					case RegexUUIDV4:
+						errs = append(errs, fmt.Sprintf("%s %s", param, RegexUUIDV4ErrMessage))
 					}
 				}
 			}

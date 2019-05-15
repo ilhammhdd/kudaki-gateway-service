@@ -1,16 +1,15 @@
 package usecases
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/golang/protobuf/proto"
-
-	"gopkg.in/Shopify/sarama.v1"
-
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 	"github.com/ilhammhdd/kudaki-entities/events"
+	sarama "gopkg.in/Shopify/sarama.v1"
 )
 
 type Store struct {
@@ -38,7 +37,7 @@ ConsLoop:
 		select {
 		case msg := <-partCons.Messages():
 			if !errorkit.ErrorHandled(proto.Unmarshal(msg.Value, &sia)) {
-				if sia.Uuid == key {
+				if sia.Uid == key {
 					log.Printf("consumed StorefrontItemAdded : partition = %d, offset = %d, key = %s", msg.Partition, msg.Offset, msg.Key)
 					break ConsLoop
 				}
@@ -57,4 +56,71 @@ ConsLoop:
 	close(closeChan)
 
 	return &sia
+}
+
+type StorefrontItemDeletion struct {
+	Esc EventSourceConsumer
+	Esp EventSourceProducer
+}
+
+func (s StorefrontItemDeletion) DeleteStorefrontItem(key string, msg []byte) *events.StorefrontItemDeleted {
+
+	err := s.produce(key, msg)
+	errorkit.ErrorHandled(err)
+
+	storefrontItemDeleted, err := s.consume(key)
+	errorkit.ErrorHandled(err)
+
+	return storefrontItemDeleted
+}
+
+func (s StorefrontItemDeletion) produce(key string, msg []byte) error {
+	s.Esp.Set(events.StoreTopic_name[int32(events.StoreTopic_DELETE_STOREFRONT_ITEM_REQUESTED)])
+	start := time.Now()
+	prodPart, prodOffset, err := s.Esp.SyncProduce(key, msg)
+	duration := time.Since(start)
+
+	log.Printf("produced DeleteStorefrontItemRequested : partition = %d, offset = %d, key = %s, duration = %f seconds", prodPart, prodOffset, key, duration.Seconds())
+	return err
+}
+
+func (s StorefrontItemDeletion) consume(key string) (*events.StorefrontItemDeleted, error) {
+	var storefrontItemDeleted events.StorefrontItemDeleted
+	s.Esc.Set(events.StoreTopic_name[int32(events.StoreTopic_STOREFRONT_ITEM_DELETED)], 0, sarama.OffsetNewest)
+	cons, sig, closeCons := s.Esc.Consume()
+	defer close(closeCons)
+	for {
+		select {
+		case msg := <-cons.Messages():
+			if !errorkit.ErrorHandled(proto.Unmarshal(msg.Value, &storefrontItemDeleted)) {
+				if key == string(msg.Key) {
+					log.Printf("consumed StorefrontItemDeleted : partition = %d, offset = %d, key = %s", msg.Partition, msg.Offset, msg.Key)
+					return &storefrontItemDeleted, nil
+				}
+			}
+		case errs := <-cons.Errors():
+			return nil, errs.Err
+		case <-sig:
+			return nil, errors.New("service terminated")
+		}
+	}
+}
+
+type StorefrontItemsRetrieval struct {
+	Consumer EventSourceConsumer
+	Producer EventSourceProducer
+}
+
+func (s StorefrontItemsRetrieval) Retrieve(key string, value []byte) {
+	s.produce(key, value)
+}
+
+func (s StorefrontItemsRetrieval) produce(key string, value []byte) {
+	s.Producer.Set(events.StoreTopic_name[int32(events.StoreTopic_RETRIEVE_STOREFRONT_ITEMS_REQUESTED)])
+	start := time.Now()
+	prodPart, prodOffset, err := s.Producer.SyncProduce(key, value)
+	duration := time.Since(start)
+	errorkit.ErrorHandled(err)
+
+	log.Printf("produced RetrieveStorefrontItemRequested : partition = %d, offset = %d, key = %s, duration = %f seconds", prodPart, prodOffset, key, duration.Seconds())
 }

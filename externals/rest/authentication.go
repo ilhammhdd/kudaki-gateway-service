@@ -61,17 +61,20 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 func VerifyUser(w http.ResponseWriter, r *http.Request) {
 	param := "verify_token"
-	rules := map[string]string{param: RegexJWT}
-	urlVals := r.URL.Query()
 
-	if errs, ok := URLParamValidator(rules, urlVals); !ok {
+	upv := URLParamValidation{
+		Rules:  map[string]string{param: RegexJWT},
+		Values: r.URL.Query(),
+	}
+
+	if errs, ok := upv.Validate(); !ok {
 		resBody := adapters.ResponseBody{Success: ok, Errs: errs}
 		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 
 		return
 	}
 
-	adapters.VerifyUser(urlVals[param][0], kafka.NewProduction(), kafka.NewConsumption())
+	adapters.VerifyUser(r.URL.Query()[param][0], kafka.NewProduction(), kafka.NewConsumption())
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
