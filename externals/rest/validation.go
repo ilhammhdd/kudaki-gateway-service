@@ -65,7 +65,7 @@ func (rv RestValidation) Validate() (*[]string, bool) {
 		} else if val, ok := rv.request.MultipartForm.Value[param]; !ok {
 			log.Println("validating, ", param, "missing")
 			valid = false
-			errs = append(errs, fmt.Sprintf("%s not exists", param))
+			errs = append(errs, fmt.Sprintf("%s multipart/form-data parameter not exists", param))
 		} else {
 			regexOk, regexErr := regexp.MatchString(rule, val[0])
 			errorkit.ErrorHandled(regexErr)
@@ -124,7 +124,7 @@ func HeaderParamValidator(rules map[string]string, h http.Header) (*[]string, bo
 		if vals, ok := h[param]; !ok {
 			log.Println("Http Header, ", param, "missing")
 			valid = false
-			errs = append(errs, fmt.Sprintf("%s not exists", param))
+			errs = append(errs, fmt.Sprintf("%s header parameter not exists", param))
 		} else {
 			for _, val := range vals {
 				regexOk, regexErr := regexp.MatchString(rule, val)
@@ -184,7 +184,7 @@ func (upv *URLParamValidation) Validate( /* rules map[string]string, val url.Val
 		if !ok && len(upv.Values) > 0 {
 			log.Println("URLEncoding validating, ", param, "missing")
 			valid = false
-			errs = append(errs, fmt.Sprintf("%s not exists", param))
+			errs = append(errs, fmt.Sprintf("%s url parameter not exists", param))
 		} else {
 			for _, val := range vals {
 				regexOk, regexErr := regexp.MatchString(rule, val)

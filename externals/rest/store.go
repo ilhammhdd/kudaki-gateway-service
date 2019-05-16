@@ -63,6 +63,25 @@ func DeleteStorefrontItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func RetrieveStorefrontItems(w http.ResponseWriter, r *http.Request) {
+
+	urlParamValid := URLParamValidation{
+		Rules: map[string]string{
+			"from":  RegexNumber,
+			"limit": RegexNumber,
+		},
+		Values: r.URL.Query(),
+	}
+
+	if errs, valid := urlParamValid.Validate(); !valid {
+		resBody := adapters.ResponseBody{
+			Errs:    errs,
+			Success: false,
+		}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+
+		return
+	}
+
 	sir := adapters.StorefrontItemsRetrieval{
 		Consumer: kafka.NewConsumption(),
 		Producer: kafka.NewProduction(),

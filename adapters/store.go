@@ -152,9 +152,38 @@ func (s StorefrontItemsRetrieval) Retrieve() *Response {
 		Producer: s.Producer,
 	}
 
-	sir.Retrieve(retrieveStorefrontItemRequested.Uid, rsirMarshalled)
+	sird := sir.Retrieve(retrieveStorefrontItemRequested.Uid, rsirMarshalled)
+	return s.parseEventToResponse(sird)
+}
 
-	resBody := ResponseBody{Success: true}
+func (s StorefrontItemsRetrieval) parseEventToResponse(in *events.StorefrontItemsRetrieved) *Response {
+	type responseData struct {
+		First int32         `json:"first"`
+		Last  int32         `json:"last,omitempty"`
+		Limit int32         `json:"limit,omitempty"`
+		Items []*store.Item `json:"items,omitempty"`
+	}
+
+	var resBody ResponseBody
+
+	if int32(in.EventStatus.HttpCode) != http.StatusOK {
+		resBody.Errs = &in.EventStatus.Errors
+		resBody.Success = false
+
+		return NewResponse(int(in.EventStatus.HttpCode), &resBody)
+	}
+
+	log.Printf("first value from event : %v", in.First)
+
+	resData := responseData{
+		First: in.First,
+		Items: in.Items.Items,
+		Limit: in.Limit,
+		Last:  in.Last,
+	}
+
+	resBody.Data = resData
+	resBody.Success = true
 
 	return NewResponse(http.StatusOK, &resBody)
 }
@@ -165,9 +194,16 @@ func (s StorefrontItemsRetrieval) parseRequestToEvent() *events.RetrieveStorefro
 
 	usr := ParseUserFromJWT(jwt)
 
+	from, err := strconv.ParseInt(s.Request.URL.Query().Get("from"), 10, 32)
+	errorkit.ErrorHandled(err)
+	limit, err := strconv.ParseInt(s.Request.URL.Query().Get("limit"), 10, 32)
+	errorkit.ErrorHandled(err)
+
 	rsir := events.RetrieveStorefrontItemsRequested{
-		Uid:  uuid.New().String(),
-		User: &user.User{Uuid: usr.Uuid},
+		Uid:   uuid.New().String(),
+		User:  &user.User{Uuid: usr.Uuid},
+		From:  int32(from),
+		Limit: int32(limit),
 	}
 
 	return &rsir

@@ -111,8 +111,9 @@ type StorefrontItemsRetrieval struct {
 	Producer EventSourceProducer
 }
 
-func (s StorefrontItemsRetrieval) Retrieve(key string, value []byte) {
+func (s StorefrontItemsRetrieval) Retrieve(key string, value []byte) *events.StorefrontItemsRetrieved {
 	s.produce(key, value)
+	return s.consume(key)
 }
 
 func (s StorefrontItemsRetrieval) produce(key string, value []byte) {
@@ -123,4 +124,29 @@ func (s StorefrontItemsRetrieval) produce(key string, value []byte) {
 	errorkit.ErrorHandled(err)
 
 	log.Printf("produced RetrieveStorefrontItemRequested : partition = %d, offset = %d, key = %s, duration = %f seconds", prodPart, prodOffset, key, duration.Seconds())
+}
+
+func (s StorefrontItemsRetrieval) consume(key string) *events.StorefrontItemsRetrieved {
+
+	s.Consumer.Set(events.StoreTopic_name[int32(events.StoreTopic_STOREFRONT_ITEMS_RETRIEVED)], 0, sarama.OffsetNewest)
+	partCons, sig, closeChan := s.Consumer.Consume()
+	defer close(closeChan)
+
+	var sir events.StorefrontItemsRetrieved
+
+	for {
+		select {
+		case msg := <-partCons.Messages():
+			if unmarshallErr := proto.Unmarshal(msg.Value, &sir); unmarshallErr == nil {
+				if string(msg.Key) == key {
+					log.Printf("consumed StorefrontItemsRetrieved : partition = %d, offset = %d, key = %s", msg.Partition, msg.Offset, msg.Key)
+					return &sir
+				}
+			}
+		case errs := <-partCons.Errors():
+			errorkit.ErrorHandled(errs.Err)
+		case <-sig:
+			return nil
+		}
+	}
 }
