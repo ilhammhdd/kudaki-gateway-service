@@ -69,9 +69,6 @@ func AddStorefrontItem(r *http.Request, esp usecases.EventSourceProducer, esc us
 	var resBody ResponseBody
 	if sia.EventStatus.HttpCode != int32(http.StatusOK) {
 		resBody.Errs = &sia.EventStatus.Errors
-		resBody.Success = false
-	} else {
-		resBody.Success = true
 	}
 
 	return NewResponse(int(sia.EventStatus.HttpCode), &resBody)
@@ -123,13 +120,8 @@ func (s StorefrontItemDeletion) parseEventToResponse(event *events.StorefrontIte
 	var resBody ResponseBody
 
 	if event.EventStatus.HttpCode != int32(http.StatusOK) {
-		resBody.Success = false
 		resBody.Errs = &event.EventStatus.Errors
-
-		return NewResponse(int(event.EventStatus.HttpCode), &resBody)
 	}
-
-	resBody.Success = true
 
 	return NewResponse(http.StatusOK, &resBody)
 }
@@ -168,7 +160,6 @@ func (s StorefrontItemsRetrieval) parseEventToResponse(in *events.StorefrontItem
 
 	if int32(in.EventStatus.HttpCode) != http.StatusOK {
 		resBody.Errs = &in.EventStatus.Errors
-		resBody.Success = false
 
 		return NewResponse(int(in.EventStatus.HttpCode), &resBody)
 	}
@@ -183,7 +174,6 @@ func (s StorefrontItemsRetrieval) parseEventToResponse(in *events.StorefrontItem
 	}
 
 	resBody.Data = resData
-	resBody.Success = true
 
 	return NewResponse(http.StatusOK, &resBody)
 }

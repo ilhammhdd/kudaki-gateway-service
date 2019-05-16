@@ -105,7 +105,7 @@ func MethodValidator(m string, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method != m {
-			resBody := adapters.ResponseBody{Success: false}
+			resBody := adapters.ResponseBody{Errs: &[]string{fmt.Sprintf("method not allowed, need %s method", m)}}
 			adapters.NewResponse(http.StatusMethodNotAllowed, &resBody).WriteResponse(&w)
 
 			return
@@ -229,7 +229,7 @@ func Authenticate(h http.Handler) http.Handler {
 
 		errs, valid := HeaderParamValidator(rules, r.Header)
 		if !valid {
-			resBody := adapters.ResponseBody{Success: false, Errs: errs}
+			resBody := adapters.ResponseBody{Errs: errs}
 			adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 
 			return
@@ -248,14 +248,14 @@ func Authenticate(h http.Handler) http.Handler {
 
 		ua, err := client.UserAuthentication(r.Context(), &uar)
 		if err != nil {
-			resBody := adapters.ResponseBody{Success: false, Errs: &[]string{err.Error()}}
+			resBody := adapters.ResponseBody{Errs: &[]string{err.Error()}}
 			adapters.NewResponse(http.StatusUnauthorized, &resBody).WriteResponse(&w)
 
 			return
 		}
 
 		if ua.EventStatus.HttpCode != http.StatusOK {
-			resBody := adapters.ResponseBody{Success: false, Errs: &ua.EventStatus.Errors}
+			resBody := adapters.ResponseBody{Errs: &ua.EventStatus.Errors}
 			adapters.NewResponse(int(ua.EventStatus.HttpCode), &resBody).WriteResponse(&w)
 
 			return
@@ -273,9 +273,7 @@ func Authorize(role user.Role, h http.Handler) http.Handler {
 			r.Header)
 
 		if !ok {
-			resBody := adapters.ResponseBody{
-				Success: ok,
-				Errs:    headerErr}
+			resBody := adapters.ResponseBody{Errs: headerErr}
 			adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 
 			return
@@ -295,7 +293,7 @@ func Authorize(role user.Role, h http.Handler) http.Handler {
 		errorkit.ErrorHandled(err)
 
 		if uad.EventStatus.HttpCode != http.StatusOK {
-			resBody := adapters.ResponseBody{Errs: &uad.EventStatus.Errors, Success: false}
+			resBody := adapters.ResponseBody{Errs: &uad.EventStatus.Errors}
 			adapters.NewResponse(http.StatusUnauthorized, &resBody).WriteResponse(&w)
 
 			return
@@ -306,11 +304,11 @@ func Authorize(role user.Role, h http.Handler) http.Handler {
 }
 
 func TestAuthenticateJWT(w http.ResponseWriter, r *http.Request) {
-	resBody := adapters.ResponseBody{Success: true}
+	resBody := adapters.ResponseBody{}
 	adapters.NewResponse(http.StatusOK, &resBody).WriteResponse(&w)
 }
 
 func TestAuthorizeUser(w http.ResponseWriter, r *http.Request) {
-	resBody := adapters.ResponseBody{Success: true}
+	resBody := adapters.ResponseBody{}
 	adapters.NewResponse(http.StatusOK, &resBody).WriteResponse(&w)
 }

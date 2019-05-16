@@ -23,10 +23,7 @@ func AddFrontstoreItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if errs, valid := restValidation.Validate(); !valid {
-		resBody := adapters.ResponseBody{
-			Errs:    errs,
-			Success: valid,
-		}
+		resBody := adapters.ResponseBody{Errs: errs}
 		adapters.NewResponse(http.StatusAccepted, &resBody).WriteResponse(&w)
 
 		return
@@ -44,10 +41,7 @@ func DeleteStorefrontItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if errs, valid := upv.Validate(); !valid {
-		resBody := adapters.ResponseBody{
-			Errs:    errs,
-			Success: valid,
-		}
+		resBody := adapters.ResponseBody{Errs: errs}
 
 		adapters.NewResponse(http.StatusBadGateway, &resBody).WriteResponse(&w)
 		return
@@ -73,10 +67,7 @@ func RetrieveStorefrontItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if errs, valid := urlParamValid.Validate(); !valid {
-		resBody := adapters.ResponseBody{
-			Errs:    errs,
-			Success: false,
-		}
+		resBody := adapters.ResponseBody{Errs: errs}
 		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 
 		return
@@ -88,4 +79,8 @@ func RetrieveStorefrontItems(w http.ResponseWriter, r *http.Request) {
 		Request:  r,
 	}
 	sir.Retrieve().WriteResponse(&w)
+}
+
+func UpdateStorefrontItem(w http.ResponseWriter, r *http.Request) {
+
 }

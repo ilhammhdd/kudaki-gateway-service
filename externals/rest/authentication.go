@@ -25,7 +25,7 @@ func AddTeam(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if errs, ok := v.Validate(); !ok {
-		resBody := adapters.ResponseBody{Success: ok, Errs: errs}
+		resBody := adapters.ResponseBody{Errs: errs}
 		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 
 		return
@@ -50,7 +50,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if errs, ok := v.Validate(); !ok {
-		resBody := adapters.ResponseBody{Success: ok, Errs: errs}
+		resBody := adapters.ResponseBody{Errs: errs}
 		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 
 		return
@@ -68,7 +68,7 @@ func VerifyUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if errs, ok := upv.Validate(); !ok {
-		resBody := adapters.ResponseBody{Success: ok, Errs: errs}
+		resBody := adapters.ResponseBody{Errs: errs}
 		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 
 		return
@@ -85,9 +85,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		request: r}
 
 	if errs, valid := restValidation.Validate(); !valid {
-		resBody := adapters.ResponseBody{
-			Errs:    errs,
-			Success: valid}
+		resBody := adapters.ResponseBody{Errs: errs}
 		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 
 		return
@@ -104,9 +102,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		request: r}
 
 	if errs, ok := restValidation.Validate(); !ok {
-		resBody := adapters.ResponseBody{
-			Errs:    errs,
-			Success: ok}
+		resBody := adapters.ResponseBody{Errs: errs}
 		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 
 		return

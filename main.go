@@ -59,6 +59,7 @@ func restListener() {
 	http.Handle("/storefront/item/add", rest.MethodValidator(http.MethodPost, rest.Authenticate(http.HandlerFunc(rest.AddFrontstoreItem))))
 	http.Handle("/storefront/item/delete", rest.MethodValidator(http.MethodDelete, rest.Authenticate(http.HandlerFunc(rest.DeleteStorefrontItem))))
 	http.Handle("/storefront/items", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.RetrieveStorefrontItems))))
+	http.Handle("/storefront/item/update", rest.MethodValidator(http.MethodPut, rest.Authenticate(http.HandlerFunc(rest.UpdateStorefrontItem))))
 
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%s", os.Getenv("REST_PORT")),

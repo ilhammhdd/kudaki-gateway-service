@@ -46,10 +46,7 @@ func Signup(r *http.Request, esp usecases.EventSourceProducer, esc usecases.Even
 	var resBody ResponseBody
 
 	if sdu.EventStatus.HttpCode != http.StatusOK {
-		resBody.Success = false
 		resBody.Errs = &sdu.EventStatus.Errors
-	} else {
-		resBody.Success = true
 	}
 
 	return NewResponse(int(sdu.EventStatus.HttpCode), &resBody)
@@ -71,10 +68,7 @@ func VerifyUser(jwt string, esp usecases.EventSourceProducer, esc usecases.Event
 	var resBody ResponseBody
 
 	if sdu.EventStatus.HttpCode != http.StatusOK {
-		resBody.Success = false
 		resBody.Errs = &sdu.EventStatus.Errors
-	} else {
-		resBody.Success = true
 	}
 
 	return NewResponse(int(sdu.EventStatus.HttpCode), &resBody)
@@ -98,10 +92,8 @@ func Login(r *http.Request, esp usecases.EventSourceProducer, esc usecases.Event
 	var resBody ResponseBody
 
 	if loggedin.EventStatus.HttpCode != http.StatusOK {
-		resBody.Success = false
 		resBody.Errs = &loggedin.EventStatus.Errors
 	} else {
-		resBody.Success = true
 		resBody.Data = DataMap{"token": string(loggedin.User.Token)}
 	}
 
@@ -137,10 +129,7 @@ func ResetPassword(r *http.Request, esp usecases.EventSourceProducer, esc usecas
 	var resBody ResponseBody
 
 	if pr.EventStatus.HttpCode != http.StatusOK {
-		resBody.Success = false
 		resBody.Errs = &pr.EventStatus.Errors
-	} else {
-		resBody.Success = true
 	}
 
 	return NewResponse(int(pr.EventStatus.HttpCode), &resBody)

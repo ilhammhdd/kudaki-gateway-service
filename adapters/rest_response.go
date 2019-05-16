@@ -19,9 +19,8 @@ func (res *Response) WriteResponse(w *http.ResponseWriter) {
 }
 
 type ResponseBody struct {
-	Success bool        `json:"success"`
-	Errs    *[]string   `json:"errors,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
+	Errs *[]string   `json:"errors,omitempty"`
+	Data interface{} `json:"data,omitempty"`
 }
 
 func (r *ResponseBody) Parse() []byte {

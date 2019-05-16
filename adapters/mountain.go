@@ -42,9 +42,7 @@ func CreateMountain(r *http.Request, esp usecases.EventSourceProducer, esc useca
 	mountain := usecases.Mountain{Esp: esp, Esc: esc}
 	mc := mountain.CreateMountain(cmr.Uid, cmrBytes)
 
-	resBody := ResponseBody{
-		Success: mc.EventStatus.HttpCode == http.StatusOK,
-	}
+	resBody := ResponseBody{}
 
 	if mc.EventStatus.HttpCode != int32(http.StatusOK) {
 		resBody.Errs = &mc.EventStatus.Errors
@@ -72,8 +70,7 @@ func RetrieveMountains(esp usecases.EventSourceProducer, esc usecases.EventSourc
 	errorkit.ErrorHandled(err)
 
 	resBody := ResponseBody{
-		Data:    mrJSON,
-		Success: true,
+		Data: mrJSON,
 	}
 	return NewResponse(http.StatusOK, &resBody)
 }

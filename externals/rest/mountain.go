@@ -19,9 +19,7 @@ func CreateMountain(w http.ResponseWriter, r *http.Request) {
 		request: r}
 
 	if errs, ok := restValidation.Validate(); !ok {
-		resBody := adapters.ResponseBody{
-			Errs:    errs,
-			Success: ok}
+		resBody := adapters.ResponseBody{Errs: errs}
 
 		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 	} else {
