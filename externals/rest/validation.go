@@ -26,7 +26,7 @@ const (
 	RegexEmailErrMessage     = "not a valid email address"
 	RegexPassword            = `^[\w_!@#$%*]{6,30}$`
 	RegexPasswordErrMessage  = "not a valid, allowed alphanumeric with _!@#$%* symbols, minimal 6 and maximal 30 in length"
-	RegexNotEmpty            = `.*`
+	RegexNotEmpty            = `.*\S.*`
 	RegexNotEmptyErrMessage  = "can't be empty"
 	RegexURL                 = `^((((h)(t)|(f))(t)(p)((s)?))\://)?(www.|[a-zA-Z0-9].)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,6}(\:[0-9]{1,5})*(/($|[a-zA-Z0-9\.\,\;\?\'\\\+&amp;%\$#\=~_\-]+))*$`
 	RegexURLErrMessage       = "not a valid url"
@@ -51,6 +51,53 @@ type RestValidator interface {
 type RestValidation struct {
 	Rules   map[string]string
 	request *http.Request
+}
+
+func (rv RestValidation) ValidateIfExists() (*[]string, *[]string, bool) {
+
+	var existedParam []string
+	rv.request.ParseMultipartForm(50000000)
+	valid := true
+	var errs []string
+
+	for param, rule := range rv.Rules {
+		if rv.request.MultipartForm == nil {
+			valid = false
+			errs = append(errs, "multipart form required")
+		} else if val, ok := rv.request.MultipartForm.Value[param]; ok {
+			existedParam = append(existedParam, param)
+			regexOk, regexErr := regexp.MatchString(rule, val[0])
+			errorkit.ErrorHandled(regexErr)
+			if !regexOk {
+				log.Println("regex not ok, rule : ", rule, "value : ", val[0])
+				valid = false
+				switch rule {
+				case RegexEmail:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexEmailErrMessage))
+				case RegexPassword:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexPassword))
+				case RegexNotEmpty:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexNotEmptyErrMessage))
+				case RegexURL:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexURLErrMessage))
+				case RegexJWT:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexJWTErrMessage))
+				case RegexNumber:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexNumberErrMessage))
+				case RegexLatitude:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexLatitudeErrMessage))
+				case RegexLongitude:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexLongitudeErrMessage))
+				case RegexRole:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexRoleErrMessage))
+				case RegexUUIDV4:
+					errs = append(errs, fmt.Sprintf("%s %s", param, RegexUUIDV4ErrMessage))
+				}
+			}
+		}
+	}
+
+	return &existedParam, &errs, valid
 }
 
 func (rv RestValidation) Validate() (*[]string, bool) {

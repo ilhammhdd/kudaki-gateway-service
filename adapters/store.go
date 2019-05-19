@@ -164,13 +164,12 @@ func (s StorefrontItemsRetrieval) parseEventToResponse(in *events.StorefrontItem
 		return NewResponse(int(in.EventStatus.HttpCode), &resBody)
 	}
 
-	log.Printf("first value from event : %v", in.First)
+	resData := responseData{Limit: in.Limit}
 
-	resData := responseData{
-		First: in.First,
-		Items: in.Items.Items,
-		Limit: in.Limit,
-		Last:  in.Last,
+	if in.Items != nil {
+		resData.First = in.First
+		resData.Items = in.Items.Items
+		resData.Last = in.Last
 	}
 
 	resBody.Data = resData
@@ -197,4 +196,74 @@ func (s StorefrontItemsRetrieval) parseRequestToEvent() *events.RetrieveStorefro
 	}
 
 	return &rsir
+}
+
+type StorefrontItemUpdate struct {
+	Request  *http.Request
+	Consumer usecases.EventSourceConsumer
+	Producer usecases.EventSourceProducer
+}
+
+func (s StorefrontItemUpdate) Update() *Response {
+
+	usir := s.parseRequestToEvent()
+	usirBytes, err := proto.Marshal(usir)
+	errorkit.ErrorHandled(err)
+
+	siu := usecases.StorefrontItemUpdate{
+		Consumer: s.Consumer,
+		Key:      &usir.Uid,
+		Message:  &usirBytes,
+		Producer: s.Producer,
+	}
+	siud := siu.Update()
+	return s.parseEventToResponse(siud)
+}
+
+func (s StorefrontItemUpdate) parseRequestToEvent() *events.UpdateStorefrontItemRequested {
+
+	var usir events.UpdateStorefrontItemRequested
+
+	usir.Item = s.parseItem()
+	usir.Uid = uuid.New().String()
+
+	jwt, err := jwtkit.GetJWT(jwtkit.JWTString(s.Request.Header.Get("Kudaki-Token")))
+	errorkit.ErrorHandled(err)
+	usir.User = ParseUserFromJWT(jwt)
+
+	log.Printf("UpdateStorefrontItemRequested event : type = %T, value = %v", usir, usir)
+
+	return &usir
+}
+
+func (s StorefrontItemUpdate) parseEventToResponse(in *events.StorefrontItemUpdated) *Response {
+
+	var resBody ResponseBody
+
+	if in.EventStatus.HttpCode != http.StatusOK {
+		resBody.Errs = &in.EventStatus.Errors
+
+		return NewResponse(int(in.EventStatus.HttpCode), &resBody)
+	}
+
+	return NewResponse(int(in.EventStatus.HttpCode), &resBody)
+}
+
+func (s StorefrontItemUpdate) parseItem() *store.Item {
+
+	var item store.Item
+
+	amount, err := strconv.ParseInt(s.Request.MultipartForm.Value["amount"][0], 10, 32)
+	errorkit.ErrorHandled(err)
+	item.Amount = int32(amount)
+	item.Description = s.Request.MultipartForm.Value["description"][0]
+	item.Name = s.Request.MultipartForm.Value["name"][0]
+	item.Photo = s.Request.MultipartForm.Value["photo"][0]
+	price, err := strconv.ParseInt(s.Request.MultipartForm.Value["price"][0], 10, 32)
+	errorkit.ErrorHandled(err)
+	item.Price = int32(price)
+	item.Unit = s.Request.MultipartForm.Value["unit"][0]
+	item.Uuid = s.Request.MultipartForm.Value["uuid"][0]
+
+	return &item
 }

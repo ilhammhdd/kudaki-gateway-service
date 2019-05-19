@@ -82,5 +82,32 @@ func RetrieveStorefrontItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateStorefrontItem(w http.ResponseWriter, r *http.Request) {
+	restValidation := RestValidation{
+		Rules: map[string]string{
+			"uuid":        RegexUUIDV4,
+			"name":        RegexNotEmpty,
+			"amount":      RegexNumber,
+			"unit":        RegexNotEmpty,
+			"price":       RegexNumber,
+			"description": RegexNotEmpty,
+			"photo":       RegexNotEmpty,
+		},
+		request: r,
+	}
 
+	var resBody adapters.ResponseBody
+
+	if errs, valid := restValidation.Validate(); !valid {
+		resBody.Errs = errs
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+
+		return
+	}
+
+	siu := adapters.StorefrontItemUpdate{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction(),
+		Request:  r,
+	}
+	siu.Update().WriteResponse(&w)
 }

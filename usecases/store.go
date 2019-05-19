@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ilhammhdd/kudaki-gateway-service/externals/kafka"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 	"github.com/ilhammhdd/kudaki-entities/events"
@@ -149,4 +151,49 @@ func (s StorefrontItemsRetrieval) consume(key string) *events.StorefrontItemsRet
 			return nil
 		}
 	}
+}
+
+type StorefrontItemUpdate struct {
+	Consumer EventSourceConsumer
+	Producer EventSourceProducer
+	Key      *string
+	Message  *[]byte
+}
+
+func (s StorefrontItemUpdate) Update() *events.StorefrontItemUpdated {
+
+	s.produce()
+	return s.consume()
+}
+
+func (s StorefrontItemUpdate) consume() *events.StorefrontItemUpdated {
+	cons := kafka.NewConsumption()
+	cons.Set(events.StoreTopic_name[int32(events.StoreTopic_STOREFRONT_ITEM_UPDATED)], 0, sarama.OffsetNewest)
+	partCons, sig, closeChan := cons.Consume()
+	defer close(closeChan)
+
+	var siu events.StorefrontItemUpdated
+	for {
+		select {
+		case msg := <-partCons.Messages():
+			if unmarshallErr := proto.Unmarshal(msg.Value, &siu); unmarshallErr == nil {
+				if string(msg.Key) == (*s.Key) {
+					return &siu
+				}
+			}
+		case errs := <-partCons.Errors():
+			errorkit.ErrorHandled(errs.Err)
+		case <-sig:
+			return nil
+		}
+	}
+}
+
+func (s StorefrontItemUpdate) produce() {
+	s.Producer.Set(events.StoreTopic_name[int32(events.StoreTopic_UPDATE_STOREFRONT_ITEM_REQUESTED)])
+	start := time.Now()
+	part, offset, err := s.Producer.SyncProduce(*s.Key, *s.Message)
+	duration := time.Since(start)
+	errorkit.ErrorHandled(err)
+	log.Printf("produced UpdateStorefrontItemRequested : partition = %d, offset = %d, key = %s, duration = %f seconds", part, offset, *s.Key, duration.Seconds())
 }

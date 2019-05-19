@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/ilhammhdd/kudaki-entities/user"
 
@@ -14,13 +15,11 @@ import (
 )
 
 func init() {
-	if len(os.Args) == 7 {
-		os.Setenv("ADDRESS", os.Args[1])
-		os.Setenv("GRPC_PORT", os.Args[2])
-		os.Setenv("REST_PORT", os.Args[3])
-		os.Setenv("KAFKA_BROKERS", os.Args[4])
-		os.Setenv("USER_SERVICE_GRPC_ADDRESS", os.Args[5])
-		os.Setenv("KAFKA_VERSION", os.Args[6])
+	if len(os.Args) > 1 {
+		for _, val := range os.Args[1:] {
+			flag := strings.Split(val, " ")
+			os.Setenv(flag[1], flag[2])
+		}
 	}
 
 	log.Println(os.Getenv("KAFKA_VERSION"))

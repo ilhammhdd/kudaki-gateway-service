@@ -15,12 +15,12 @@ schema:
     run:
       status: true
   args:
-  - 0.0.0.0
-  - 9000
-  - 9001
-  - 178.62.107.160:29092
-  - localhost:9099
-  - 2.1.1
+  - -- ADDRESS 0.0.0.0
+  - -- GRPC_PORT 9000
+  - -- REST_PORT 9001
+  - -- KAFKA_BROKERS 178.62.107.160:29092
+  - -- USER_SERVICE_GRPC_ADDRESS localhost:9099
+  - -- KAFKA_VERSION 2.1.1
   watcher:
     extensions:
     - go
