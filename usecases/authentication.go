@@ -132,19 +132,24 @@ ConsLoop:
 	return &loggedin, eventErr
 }
 
-func (u User) ResetPassword(key string, msg []byte) (*events.PasswordReseted, error) {
+type ChangeUserPassword struct {
+	Consumer EventSourceConsumer
+	Producer EventSourceProducer
+}
 
-	u.Esp.Set(events.UserTopic_name[int32(events.UserTopic_RESET_PASSWORD_REQUESTED)])
+func (rup ChangeUserPassword) ChangePassword(key string, msg []byte) (*events.PasswordChanged, error) {
+
+	rup.Producer.Set(events.UserTopic_name[int32(events.UserTopic_CHANGE_PASSWORD_REQUESTED)])
 	start := time.Now()
-	partition, offset, err := u.Esp.SyncProduce(key, msg)
+	partition, offset, err := rup.Producer.SyncProduce(key, msg)
 	duration := time.Since(start)
 	errorkit.ErrorHandled(err)
-	log.Printf("produced ResetPasswordRequested : partition = %d, offset = %d, duration = %f seconds, key = %s", partition, offset, duration.Seconds(), key)
+	log.Printf("produced ChangePasswordRequested : partition = %d, offset = %d, duration = %f seconds, key = %s", partition, offset, duration.Seconds(), key)
 
-	u.Esc.Set(events.UserTopic_name[int32(events.UserTopic_PASSWORD_RESETED)], 0, sarama.OffsetNewest)
-	partCons, sig, closeChan := u.Esc.Consume()
+	rup.Consumer.Set(events.UserTopic_name[int32(events.UserTopic_PASSWORD_CHANGED)], 0, sarama.OffsetNewest)
+	partCons, sig, closeChan := rup.Consumer.Consume()
 
-	var pr events.PasswordReseted
+	var pr events.PasswordChanged
 	var returnErr error
 
 ConsLoop:
@@ -153,7 +158,7 @@ ConsLoop:
 		case msg := <-partCons.Messages():
 			if !errorkit.ErrorHandled(proto.Unmarshal(msg.Value, &pr)) {
 				if pr.Uid == key {
-					log.Printf("consumed PasswordReseted : partition = %d, offset = %d, key = %s", msg.Partition, msg.Offset, msg.Key)
+					log.Printf("consumed PasswordChanged : partition = %d, offset = %d, key = %s", msg.Partition, msg.Offset, msg.Key)
 					break ConsLoop
 				}
 			}
@@ -168,4 +173,92 @@ ConsLoop:
 	close(closeChan)
 
 	return &pr, returnErr
+}
+
+type ResetPasswordEmailDelivery struct {
+	Consumer EventSourceConsumer
+	Producer EventSourceProducer
+}
+
+func (rped ResetPasswordEmailDelivery) SendEmail(key string, msg *[]byte) *events.ResetPasswordEmailSent {
+
+	rped.produce(key, msg)
+	return rped.consume(key)
+}
+
+func (rped ResetPasswordEmailDelivery) produce(key string, msg *[]byte) {
+	rped.Producer.Set(events.UserTopic_name[int32(events.UserTopic_SEND_RESET_PASSWORD_EMAIL_REQUESTED)])
+	start := time.Now()
+	partition, offset, err := rped.Producer.SyncProduce(key, *msg)
+	duration := time.Since(start)
+	errorkit.ErrorHandled(err)
+
+	log.Printf("produced SendResetPasswordEmailRequested : partition = %d, offset = %d, duration = %f seconds, key = %s", partition, offset, duration.Seconds(), key)
+}
+
+func (rped ResetPasswordEmailDelivery) consume(key string) *events.ResetPasswordEmailSent {
+	rped.Consumer.Set(events.UserTopic_name[int32(events.UserTopic_RESET_PASSWORD_EMAIL_SENT)], 0, sarama.OffsetNewest)
+	partCons, sig, closeChan := rped.Consumer.Consume()
+	defer close(closeChan)
+
+	var rpes events.ResetPasswordEmailSent
+
+	for {
+		select {
+		case msg := <-partCons.Messages():
+			if unmarshallErr := proto.Unmarshal(msg.Value, &rpes); unmarshallErr == nil {
+				if string(msg.Key) == key {
+					return &rpes
+				}
+			}
+		case errs := <-partCons.Errors():
+			errorkit.ErrorHandled(errs.Err)
+		case <-sig:
+			return nil
+		}
+	}
+}
+
+type ResetPassword struct {
+	Consumer EventSourceConsumer
+	Producer EventSourceProducer
+}
+
+func (rp ResetPassword) Reset(key string, msg *[]byte) *events.PasswordReseted {
+	rp.produce(key, msg)
+
+	return rp.consume(key)
+}
+
+func (rp ResetPassword) produce(key string, msg *[]byte) {
+	rp.Producer.Set(events.UserTopic_name[int32(events.UserTopic_RESET_PASSWORD_REQUESTED)])
+	start := time.Now()
+	partition, offset, err := rp.Producer.SyncProduce(key, *msg)
+	duration := time.Since(start)
+	errorkit.ErrorHandled(err)
+
+	log.Printf("produced ResetPasswordRequested : partition = %d, offset = %d, duration = %f seconds, key = %s", partition, offset, duration.Seconds(), key)
+}
+
+func (rp ResetPassword) consume(key string) *events.PasswordReseted {
+	rp.Consumer.Set(events.UserTopic_name[int32(events.UserTopic_PASSWORD_RESETED)], 0, sarama.OffsetNewest)
+	partCons, sig, closeChan := rp.Consumer.Consume()
+	defer close(closeChan)
+
+	var rpes events.PasswordReseted
+
+	for {
+		select {
+		case msg := <-partCons.Messages():
+			if unmarshallErr := proto.Unmarshal(msg.Value, &rpes); unmarshallErr == nil {
+				if string(msg.Key) == key {
+					return &rpes
+				}
+			}
+		case errs := <-partCons.Errors():
+			errorkit.ErrorHandled(errs.Err)
+		case <-sig:
+			return nil
+		}
+	}
 }

@@ -94,7 +94,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	adapters.Login(r, kafka.NewProduction(), kafka.NewConsumption()).WriteResponse(&w)
 }
 
-func ResetPassword(w http.ResponseWriter, r *http.Request) {
+func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	restValidation := RestValidation{
 		Rules: map[string]string{
 			"old_password": RegexPassword,
@@ -108,5 +108,64 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	adapters.ResetPassword(r, kafka.NewProduction(), kafka.NewConsumption()).WriteResponse(&w)
+	adapters.ChangePassword(r, kafka.NewProduction(), kafka.NewConsumption()).WriteResponse(&w)
+}
+
+func SendResetPasswordEmail(w http.ResponseWriter, r *http.Request) {
+	restValidation := RestValidation{
+		Rules:   map[string]string{"email": RegexEmail},
+		request: r,
+	}
+
+	if errs, ok := restValidation.Validate(); !ok {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+
+		return
+	}
+
+	rped := adapters.ResetPasswordEmailDelivery{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction(),
+		Request:  r,
+	}
+
+	rped.SendEmail().WriteResponse(&w)
+}
+
+func ResetPasswordPage(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func ResetPassword(w http.ResponseWriter, r *http.Request) {
+	urlValidation := URLParamValidation{
+		Rules:  map[string]string{"reset_token": RegexJWT},
+		Values: r.URL.Query(),
+	}
+
+	if errs, valid := urlValidation.Validate(); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+
+		return
+	}
+
+	restValidation := RestValidation{
+		Rules:   map[string]string{"new_password": RegexPassword},
+		request: r,
+	}
+
+	if aerrs, valid := restValidation.Validate(); !valid {
+		resBody := adapters.ResponseBody{Errs: aerrs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+
+		return
+	}
+
+	rp := adapters.ResetPassword{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction(),
+		Request:  r,
+	}
+	rp.ResetPassword().WriteResponse(&w)
 }

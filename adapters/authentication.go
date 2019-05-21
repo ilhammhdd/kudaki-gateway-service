@@ -100,7 +100,7 @@ func Login(r *http.Request, esp usecases.EventSourceProducer, esc usecases.Event
 	return NewResponse(int(loggedin.EventStatus.HttpCode), &resBody)
 }
 
-func ResetPassword(r *http.Request, esp usecases.EventSourceProducer, esc usecases.EventSourceConsumer) *Response {
+func ChangePassword(r *http.Request, esp usecases.EventSourceProducer, esc usecases.EventSourceConsumer) *Response {
 
 	jwt, err := jwtkit.GetJWT(jwtkit.JWTString(r.Header.Get("Kudaki-Token")))
 	errorkit.ErrorHandled(err)
@@ -108,7 +108,7 @@ func ResetPassword(r *http.Request, esp usecases.EventSourceProducer, esc usecas
 	jwtMap := jwt.Payload.Claims["user"].(map[string]interface{})
 	log.Printf("jwt map : type = %T, value = %v", jwtMap, jwtMap)
 
-	rpr := events.ResetPasswordRequested{
+	rpr := events.ChangePasswordRequested{
 		NewPassword: r.MultipartForm.Value["new_password"][0],
 		OldPassword: r.MultipartForm.Value["old_password"][0],
 		Uid:         uuid.New().String(),
@@ -119,11 +119,12 @@ func ResetPassword(r *http.Request, esp usecases.EventSourceProducer, esc usecas
 	rprBytes, err := proto.Marshal(&rpr)
 	errorkit.ErrorHandled(err)
 
-	usr := usecases.User{
-		Esc: esc,
-		Esp: esp}
+	rup := usecases.ChangeUserPassword{
+		Consumer: esc,
+		Producer: esp,
+	}
 
-	pr, err := usr.ResetPassword(rpr.Uid, rprBytes)
+	pr, err := rup.ChangePassword(rpr.Uid, rprBytes)
 	errorkit.ErrorHandled(err)
 
 	var resBody ResponseBody
@@ -133,4 +134,96 @@ func ResetPassword(r *http.Request, esp usecases.EventSourceProducer, esc usecas
 	}
 
 	return NewResponse(int(pr.EventStatus.HttpCode), &resBody)
+}
+
+type ResetPasswordEmailDelivery struct {
+	Request  *http.Request
+	Consumer usecases.EventSourceConsumer
+	Producer usecases.EventSourceProducer
+}
+
+func (rped ResetPasswordEmailDelivery) SendEmail() *Response {
+
+	key, msg := rped.parseRequestToKafkaMessage()
+	rpedUsecase := usecases.ResetPasswordEmailDelivery{
+		Consumer: rped.Consumer,
+		Producer: rped.Producer,
+	}
+
+	rpes := rpedUsecase.SendEmail(key, &msg)
+
+	return rped.parseEventToResponse(rpes)
+}
+
+func (rped ResetPasswordEmailDelivery) parseRequestToKafkaMessage() (key string, msg []byte) {
+
+	rpr := events.SendResetPasswordEmailRequested{
+		Email: rped.Request.MultipartForm.Value["email"][0],
+		Uid:   uuid.New().String(),
+	}
+
+	rprByte, marshalErr := proto.Marshal(&rpr)
+	errorkit.ErrorHandled(marshalErr)
+
+	return rpr.Uid, rprByte
+}
+
+func (rped ResetPasswordEmailDelivery) parseEventToResponse(in *events.ResetPasswordEmailSent) *Response {
+
+	var resBody ResponseBody
+
+	if in.EventStatus.HttpCode != http.StatusOK {
+		resBody.Errs = &in.EventStatus.Errors
+
+		return NewResponse(int(in.EventStatus.HttpCode), &resBody)
+	}
+
+	return NewResponse(http.StatusOK, &resBody)
+}
+
+type ResetPassword struct {
+	Request  *http.Request
+	Consumer usecases.EventSourceConsumer
+	Producer usecases.EventSourceProducer
+}
+
+func (rp ResetPassword) ResetPassword() *Response {
+
+	key, msg := rp.parseToKafkaMessage()
+	rpUsecase := usecases.ResetPassword{
+		Consumer: rp.Consumer,
+		Producer: rp.Producer,
+	}
+
+	pr := rpUsecase.Reset(key, &msg)
+	return rp.parseToResponse(pr)
+}
+
+func (rp ResetPassword) parseToKafkaMessage() (string, []byte) {
+
+	rpr := events.ResetPasswordRequested{
+		NewPassword: rp.Request.MultipartForm.Value["new_password"][0],
+		Token:       rp.Request.URL.Query().Get("reset_token"),
+		Uid:         uuid.New().String(),
+	}
+
+	rprByte, err := proto.Marshal(&rpr)
+	errorkit.ErrorHandled(err)
+
+	return rpr.Uid, rprByte
+}
+
+func (rp ResetPassword) parseToResponse(in *events.PasswordReseted) *Response {
+
+	var resBody ResponseBody
+
+	if in.EventStatus.HttpCode != http.StatusOK {
+		resBody.Errs = &in.EventStatus.Errors
+
+		return NewResponse(int(in.EventStatus.HttpCode), &resBody)
+	}
+
+	return NewResponse(http.StatusOK, &resBody)
+
+	return nil
 }

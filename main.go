@@ -46,19 +46,30 @@ func restListener() {
 	http.Handle("/user/verify", rest.MethodValidator(http.MethodGet, http.HandlerFunc(rest.VerifyUser)))
 	http.Handle("/login", rest.MethodValidator(http.MethodPost, http.HandlerFunc(rest.Login)))
 	http.Handle("/test/authenticate/jwt", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.TestAuthenticateJWT))))
-	http.Handle("/user/reset/password", rest.MethodValidator(http.MethodPut, rest.Authenticate(http.HandlerFunc(rest.ResetPassword))))
+	http.Handle("/user/change-password", rest.MethodValidator(http.MethodPut, rest.Authenticate(http.HandlerFunc(rest.ChangePassword))))
 	http.Handle("/team/add", rest.MethodValidator(http.MethodPost, rest.Authorize(user.Role_ADMIN, http.HandlerFunc(rest.AddTeam))))
 	http.Handle("/test/authorize/user", rest.Authorize(user.Role_USER, http.HandlerFunc(rest.TestAuthorizeUser)))
+	http.Handle("/user/reset-password/send-email", rest.MethodValidator(http.MethodPut, http.HandlerFunc(rest.SendResetPasswordEmail)))
+	http.Handle("/user/reset-password", rest.MethodRouting{
+		GetHandler: http.HandlerFunc(rest.ResetPasswordPage),
+		PutHandler: http.HandlerFunc(rest.ResetPassword),
+	})
 
 	// mountain
 	http.Handle("/mountain/create", rest.MethodValidator(http.MethodPost, rest.Authorize(user.Role_KUDAKI_TEAM, http.HandlerFunc(rest.CreateMountain))))
 	http.Handle("/mountain/retrieve", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.RetrieveMountains))))
 
 	// rental
-	http.Handle("/storefront/item/add", rest.MethodValidator(http.MethodPost, rest.Authenticate(http.HandlerFunc(rest.AddFrontstoreItem))))
-	http.Handle("/storefront/item/delete", rest.MethodValidator(http.MethodDelete, rest.Authenticate(http.HandlerFunc(rest.DeleteStorefrontItem))))
 	http.Handle("/storefront/items", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.RetrieveStorefrontItems))))
-	http.Handle("/storefront/item/update", rest.MethodValidator(http.MethodPut, rest.Authenticate(http.HandlerFunc(rest.UpdateStorefrontItem))))
+	http.Handle("/storefront/item", rest.MethodRouting{
+		PostHandler:   rest.Authenticate(http.HandlerFunc(rest.AddFrontstoreItem)),
+		DeleteHandler: rest.Authenticate(http.HandlerFunc(rest.DeleteStorefrontItem)),
+		PutHandler:    rest.Authenticate(http.HandlerFunc(rest.UpdateStorefrontItem)),
+	})
+	// http.Handle("/storefront/item/add", rest.MethodValidator(http.MethodPost, rest.Authenticate(http.HandlerFunc(rest.AddFrontstoreItem))))
+	// http.Handle("/storefront/item/delete", rest.MethodValidator(http.MethodDelete, rest.Authenticate(http.HandlerFunc(rest.DeleteStorefrontItem))))
+	// http.Handle("/storefront/items", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.RetrieveStorefrontItems))))
+	// http.Handle("/storefront/item/update", rest.MethodValidator(http.MethodPut, rest.Authenticate(http.HandlerFunc(rest.UpdateStorefrontItem))))
 
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%s", os.Getenv("REST_PORT")),
