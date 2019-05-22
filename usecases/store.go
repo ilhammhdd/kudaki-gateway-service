@@ -197,3 +197,49 @@ func (s StorefrontItemUpdate) produce() {
 	errorkit.ErrorHandled(err)
 	log.Printf("produced UpdateStorefrontItemRequested : partition = %d, offset = %d, key = %s, duration = %f seconds", part, offset, *s.Key, duration.Seconds())
 }
+
+type ItemsRetrieval struct {
+	Consumer EventSourceConsumer
+	Producer EventSourceProducer
+	Key      string
+	Message  *[]byte
+}
+
+func (ir ItemsRetrieval) Retrieve() *events.ItemsRetrieved {
+
+	ir.produce()
+	return ir.consume()
+}
+
+func (ir ItemsRetrieval) produce() {
+	ir.Producer.Set(events.StoreTopic_name[int32(events.StoreTopic_RETRIEVE_ITEMS_REQUESTED)])
+	start := time.Now()
+	part, offset, err := ir.Producer.SyncProduce(ir.Key, *ir.Message)
+	duration := time.Since(start)
+	errorkit.ErrorHandled(err)
+	log.Printf("produced RetrieveItemsRequested : partition = %d, offset = %d, key = %s, duration = %f seconds", part, offset, ir.Key, duration.Seconds())
+}
+
+func (ir ItemsRetrieval) consume() *events.ItemsRetrieved {
+	cons := kafka.NewConsumption()
+	cons.Set(events.StoreTopic_name[int32(events.StoreTopic_ITEMS_RETRIEVED)], 0, sarama.OffsetNewest)
+	partCons, sig, closeChan := cons.Consume()
+	defer close(closeChan)
+
+	var ird events.ItemsRetrieved
+	for {
+		select {
+		case msg := <-partCons.Messages():
+			if unmarshallErr := proto.Unmarshal(msg.Value, &ird); unmarshallErr == nil {
+				if string(msg.Key) == (ir.Key) {
+					log.Printf("consumed ItemsRetrieved : partition = %d, offset = %d, key = %s", msg.Partition, msg.Offset, msg.Key)
+					return &ird
+				}
+			}
+		case errs := <-partCons.Errors():
+			errorkit.ErrorHandled(errs.Err)
+		case <-sig:
+			return nil
+		}
+	}
+}

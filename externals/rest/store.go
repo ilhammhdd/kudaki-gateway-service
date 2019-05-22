@@ -111,3 +111,34 @@ func UpdateStorefrontItem(w http.ResponseWriter, r *http.Request) {
 	}
 	siu.Update().WriteResponse(&w)
 }
+
+func RetrieveItems(w http.ResponseWriter, r *http.Request) {
+	urlParamValid := URLParamValidation{
+		Rules: map[string]string{
+			"from":  RegexNumber,
+			"limit": RegexNumber,
+		}}
+
+	if errs, valid := urlParamValid.Validate(); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+
+		return
+	}
+
+	ir := adapters.ItemsRetrieval{
+		Consumer:  kafka.NewConsumption(),
+		Producer:  kafka.NewProduction(),
+		URLParams: r.URL.Query(),
+	}
+
+	ir.Retrieve().WriteResponse(&w)
+}
+
+func RetrieveItem(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func SearchItems(w http.ResponseWriter, r *http.Request) {
+
+}

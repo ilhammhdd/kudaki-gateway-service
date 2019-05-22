@@ -3,6 +3,7 @@ package adapters
 import (
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/ilhammhdd/kudaki-entities/events"
@@ -266,4 +267,71 @@ func (s StorefrontItemUpdate) parseItem() *store.Item {
 	item.Uuid = s.Request.MultipartForm.Value["uuid"][0]
 
 	return &item
+}
+
+type ItemsRetrieval struct {
+	Consumer  usecases.EventSourceConsumer
+	Producer  usecases.EventSourceProducer
+	URLParams url.Values
+}
+
+func (ir ItemsRetrieval) Retrieve() *Response {
+
+	key, msg := ir.parseToKafkaMessage()
+	irUsecase := usecases.ItemsRetrieval{
+		Consumer: ir.Consumer,
+		Producer: ir.Producer,
+		Key:      key,
+		Message:  &msg,
+	}
+	return ir.parseToResponse(irUsecase.Retrieve())
+}
+
+func (ir ItemsRetrieval) parseToKafkaMessage() (string, []byte) {
+
+	var in events.RetrieveItemsRequested
+
+	from, err := strconv.ParseInt(ir.URLParams.Get("from"), 10, 32)
+	errorkit.ErrorHandled(err)
+	limit, err := strconv.ParseInt(ir.URLParams.Get("limit"), 10, 32)
+	errorkit.ErrorHandled(err)
+
+	in.From = int32(from)
+	in.Limit = int32(limit)
+	in.Uid = uuid.New().String()
+
+	inByte, err := proto.Marshal(&in)
+	errorkit.ErrorHandled(err)
+
+	return in.Uid, inByte
+}
+
+func (ir ItemsRetrieval) parseToResponse(in *events.ItemsRetrieved) *Response {
+
+	type responseData struct {
+		First int32         `json:"first"`
+		Last  int32         `json:"last,omitempty"`
+		Limit int32         `json:"limit,omitempty"`
+		Items []*store.Item `json:"items,omitempty"`
+	}
+
+	var resBody ResponseBody
+
+	if int32(in.EventStatus.HttpCode) != http.StatusOK {
+		resBody.Errs = &in.EventStatus.Errors
+
+		return NewResponse(int(in.EventStatus.HttpCode), &resBody)
+	}
+
+	resData := responseData{Limit: in.Limit}
+
+	if in.Items != nil {
+		resData.First = in.First
+		resData.Items = in.Items.Items
+		resData.Last = in.Last
+	}
+
+	resBody.Data = resData
+
+	return NewResponse(http.StatusOK, &resBody)
 }

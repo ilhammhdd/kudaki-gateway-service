@@ -59,17 +59,16 @@ func restListener() {
 	http.Handle("/mountain/create", rest.MethodValidator(http.MethodPost, rest.Authorize(user.Role_KUDAKI_TEAM, http.HandlerFunc(rest.CreateMountain))))
 	http.Handle("/mountain/retrieve", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.RetrieveMountains))))
 
-	// rental
+	// store
 	http.Handle("/storefront/items", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.RetrieveStorefrontItems))))
 	http.Handle("/storefront/item", rest.MethodRouting{
 		PostHandler:   rest.Authenticate(http.HandlerFunc(rest.AddFrontstoreItem)),
 		DeleteHandler: rest.Authenticate(http.HandlerFunc(rest.DeleteStorefrontItem)),
 		PutHandler:    rest.Authenticate(http.HandlerFunc(rest.UpdateStorefrontItem)),
 	})
-	// http.Handle("/storefront/item/add", rest.MethodValidator(http.MethodPost, rest.Authenticate(http.HandlerFunc(rest.AddFrontstoreItem))))
-	// http.Handle("/storefront/item/delete", rest.MethodValidator(http.MethodDelete, rest.Authenticate(http.HandlerFunc(rest.DeleteStorefrontItem))))
-	// http.Handle("/storefront/items", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.RetrieveStorefrontItems))))
-	// http.Handle("/storefront/item/update", rest.MethodValidator(http.MethodPut, rest.Authenticate(http.HandlerFunc(rest.UpdateStorefrontItem))))
+	http.Handle("/store/items", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.RetrieveItems))))
+	http.Handle("/store/item", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.RetrieveItem))))
+	http.Handle("/store/search-items", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.SearchItems))))
 
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%s", os.Getenv("REST_PORT")),
