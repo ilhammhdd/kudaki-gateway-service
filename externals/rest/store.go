@@ -137,7 +137,24 @@ func RetrieveItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func RetrieveItem(w http.ResponseWriter, r *http.Request) {
+	urlValidation := URLParamValidation{
+		Rules:  map[string]string{"item_uuid": RegexUUIDV4},
+		Values: r.URL.Query(),
+	}
 
+	if errs, valid := urlValidation.Validate(); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+
+		return
+	}
+
+	irAdapter := adapters.ItemRetrieval{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction(),
+		Request:  r,
+	}
+	irAdapter.Retrieve().WriteResponse(&w)
 }
 
 func SearchItems(w http.ResponseWriter, r *http.Request) {

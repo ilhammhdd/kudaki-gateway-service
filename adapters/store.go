@@ -335,3 +335,52 @@ func (ir ItemsRetrieval) parseToResponse(in *events.ItemsRetrieved) *Response {
 
 	return NewResponse(http.StatusOK, &resBody)
 }
+
+type ItemRetrieval struct {
+	Consumer usecases.EventSourceConsumer
+	Producer usecases.EventSourceProducer
+	Request  *http.Request
+}
+
+func (ir ItemRetrieval) Retrieve() *Response {
+
+	key, msg := ir.parseToKafkaMessage()
+
+	irUsecase := usecases.ItemRetrieval{
+		Consumer: ir.Consumer,
+		Producer: ir.Producer,
+		OutKey:   key,
+		OutMsg:   msg,
+	}
+	return ir.parseToResponse(irUsecase.Retrieve())
+}
+
+func (ir ItemRetrieval) parseToKafkaMessage() (string, *[]byte) {
+
+	var in events.RetrieveItemRequested
+	in.ItemUuid = ir.Request.URL.Query().Get("item_uuid")
+	in.Uid = uuid.New().String()
+
+	userJWT, err := jwtkit.GetJWT(jwtkit.JWTString(ir.Request.Header.Get("Kudaki-Token")))
+	errorkit.ErrorHandled(err)
+	in.User = ParseUserFromJWT(userJWT)
+
+	inByte, err := proto.Marshal(&in)
+	errorkit.ErrorHandled(err)
+
+	return in.Uid, &inByte
+}
+
+func (ir ItemRetrieval) parseToResponse(in *events.ItemRetrieved) *Response {
+
+	var resBody ResponseBody
+
+	if int32(in.EventStatus.HttpCode) != http.StatusOK {
+		resBody.Errs = &in.EventStatus.Errors
+
+		return NewResponse(int(in.EventStatus.HttpCode), &resBody)
+	}
+
+	resBody.Data = in.Item
+	return NewResponse(int(in.EventStatus.HttpCode), &resBody)
+}
