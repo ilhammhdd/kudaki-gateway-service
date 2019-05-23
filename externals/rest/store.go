@@ -117,7 +117,8 @@ func RetrieveItems(w http.ResponseWriter, r *http.Request) {
 		Rules: map[string]string{
 			"from":  RegexNumber,
 			"limit": RegexNumber,
-		}}
+		},
+		Values: r.URL.Query()}
 
 	if errs, valid := urlParamValid.Validate(); !valid {
 		resBody := adapters.ResponseBody{Errs: errs}

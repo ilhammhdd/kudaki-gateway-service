@@ -18,16 +18,18 @@ type MethodRouting struct {
 
 func (mr MethodRouting) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	switch r.Method {
-	case http.MethodPost:
+	switch {
+	case r.Method == http.MethodPost && mr.PostHandler != nil:
 		mr.PostHandler.ServeHTTP(w, r)
-	case http.MethodPut:
+	case r.Method == http.MethodPut && mr.PutHandler != nil:
 		mr.PutHandler.ServeHTTP(w, r)
-	case http.MethodDelete:
+	case r.Method == http.MethodDelete && mr.DeleteHandler != nil:
 		mr.DeleteHandler.ServeHTTP(w, r)
-	case http.MethodGet:
+	case r.Method == http.MethodGet && mr.GetHandler != nil:
 		mr.GetHandler.ServeHTTP(w, r)
-	case http.MethodPatch:
+	case r.Method == http.MethodPatch && mr.PatchHandler != nil:
 		mr.PatchHandler.ServeHTTP(w, r)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 }
