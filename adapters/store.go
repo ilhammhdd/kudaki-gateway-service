@@ -309,7 +309,7 @@ func (ir ItemsRetrieval) parseToKafkaMessage() (string, []byte) {
 func (ir ItemsRetrieval) parseToResponse(in *events.ItemsRetrieved) *Response {
 
 	type responseData struct {
-		First int32         `json:"first"`
+		First int32         `json:"first,omitempty"`
 		Last  int32         `json:"last,omitempty"`
 		Limit int32         `json:"limit,omitempty"`
 		Items []*store.Item `json:"items,omitempty"`
