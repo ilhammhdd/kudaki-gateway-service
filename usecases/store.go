@@ -289,3 +289,49 @@ func (ir ItemRetrieval) consume() *events.ItemRetrieved {
 		}
 	}
 }
+
+type ItemSearch struct {
+	Consumer EventSourceConsumer
+	Producer EventSourceProducer
+	OutKey   string
+	OutMsg   *[]byte
+}
+
+func (is ItemSearch) Search() *events.ItemsSearched {
+
+	is.produce()
+	return is.consume()
+}
+
+func (is ItemSearch) produce() {
+	is.Producer.Set(events.StoreTopic_name[int32(events.StoreTopic_SEARCH_ITEMS_REQUESTED)])
+	start := time.Now()
+	part, offset, err := is.Producer.SyncProduce(is.OutKey, *is.OutMsg)
+	duration := time.Since(start)
+	errorkit.ErrorHandled(err)
+	log.Printf("produced SearchItemsRequested : partition = %d, offset = %d, key = %s, duration = %f seconds", part, offset, is.OutKey, duration.Seconds())
+}
+
+func (is ItemSearch) consume() *events.ItemsSearched {
+	cons := kafka.NewConsumption()
+	cons.Set(events.StoreTopic_name[int32(events.StoreTopic_ITEMS_SEARCHED)], 0, sarama.OffsetNewest)
+	partCons, sig, closeChan := cons.Consume()
+	defer close(closeChan)
+
+	var isd events.ItemsSearched
+	for {
+		select {
+		case msg := <-partCons.Messages():
+			if unmarshallErr := proto.Unmarshal(msg.Value, &isd); unmarshallErr == nil {
+				if string(msg.Key) == (is.OutKey) {
+					log.Printf("consumed ItemsSearched : partition = %d, offset = %d, key = %s", msg.Partition, msg.Offset, msg.Key)
+					return &isd
+				}
+			}
+		case errs := <-partCons.Errors():
+			errorkit.ErrorHandled(errs.Err)
+		case <-sig:
+			return nil
+		}
+	}
+}

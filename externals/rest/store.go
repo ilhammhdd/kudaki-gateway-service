@@ -158,5 +158,27 @@ func RetrieveItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func SearchItems(w http.ResponseWriter, r *http.Request) {
+	urlValidation := URLParamValidation{
+		Rules: map[string]string{
+			"keyword": RegexNotEmpty,
+			"from":    RegexNumber,
+			"limit":   RegexNumber,
+		},
+		Values: r.URL.Query(),
+	}
 
+	if errs, valid := urlValidation.Validate(); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+
+		return
+	}
+
+	isAdapter := adapters.ItemSearch{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction(),
+		Request:  r,
+	}
+
+	isAdapter.Search().WriteResponse(&w)
 }

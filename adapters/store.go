@@ -384,3 +384,75 @@ func (ir ItemRetrieval) parseToResponse(in *events.ItemRetrieved) *Response {
 	resBody.Data = in.Item
 	return NewResponse(int(in.EventStatus.HttpCode), &resBody)
 }
+
+type ItemSearch struct {
+	Consumer usecases.EventSourceConsumer
+	Producer usecases.EventSourceProducer
+	Request  *http.Request
+}
+
+func (is ItemSearch) Search() *Response {
+
+	key, msg := is.parseToKafkaMessage()
+
+	isUsecase := usecases.ItemSearch{
+		Consumer: is.Consumer,
+		OutKey:   key,
+		OutMsg:   msg,
+		Producer: is.Producer,
+	}
+
+	return is.parseToResponse(isUsecase.Search())
+}
+
+func (is ItemSearch) parseToKafkaMessage() (string, *[]byte) {
+
+	var sir events.SearchItemsRequested
+	sir.Keyword = is.Request.URL.Query().Get("keyword")
+	sir.Uid = uuid.New().String()
+	from, err := strconv.ParseUint(is.Request.URL.Query().Get("from"), 10, 64)
+	errorkit.ErrorHandled(err)
+	limit, err := strconv.ParseInt(is.Request.URL.Query().Get("limit"), 10, 32)
+	errorkit.ErrorHandled(err)
+	sir.From = from
+	sir.Limit = int32(limit)
+
+	userJWT, err := jwtkit.GetJWT(jwtkit.JWTString(is.Request.Header.Get("Kudaki-Token")))
+	errorkit.ErrorHandled(err)
+	sir.User = ParseUserFromJWT(userJWT)
+	sirByte, err := proto.Marshal(&sir)
+	errorkit.ErrorHandled(err)
+
+	return sir.Uid, &sirByte
+}
+
+func (is ItemSearch) parseToResponse(in *events.ItemsSearched) *Response {
+
+	type ResponseData struct {
+		First uint64        `json:"first,omitempty"`
+		Last  uint64        `json:"last,omitempty"`
+		Limit int32         `json:"limit,omitempty"`
+		Items []*store.Item `json:"items,omitempty"`
+	}
+
+	var resBody ResponseBody
+
+	if in.EventStatus.HttpCode != http.StatusOK {
+		resBody.Errs = &in.EventStatus.Errors
+
+		return NewResponse(int(in.EventStatus.HttpCode), &resBody)
+	}
+
+	var resData ResponseData
+
+	if in.Items != nil {
+		resData.First = in.First
+		resData.Items = in.Items.Items
+		resData.Limit = in.Limit
+		resData.Last = in.Last
+	}
+
+	resBody.Data = resData
+
+	return NewResponse(int(in.EventStatus.HttpCode), &resBody)
+}
