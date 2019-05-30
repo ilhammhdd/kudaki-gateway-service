@@ -7,10 +7,19 @@ import (
 	"os"
 	"strings"
 
+	"github.com/google/uuid"
+	"github.com/ilhammhdd/kudaki-gateway-service/adapters"
+
+	"github.com/ilhammhdd/kudaki-gateway-service/externals/kudakiredisearch"
+
+	"github.com/RediSearch/redisearch-go/redisearch"
+	kudaki_entities "github.com/ilhammhdd/kudaki-entities"
+
 	"github.com/ilhammhdd/kudaki-entities/user"
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 	"github.com/ilhammhdd/go-toolkit/safekit"
+	_ "github.com/ilhammhdd/kudaki-entities/rental"
 	"github.com/ilhammhdd/kudaki-gateway-service/externals/rest"
 )
 
@@ -69,6 +78,35 @@ func restListener() {
 	http.Handle("/store/items", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.RetrieveItems))))
 	http.Handle("/store/item", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.RetrieveItem))))
 	http.Handle("/store/search-items", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.SearchItems))))
+
+	// rental
+	http.Handle("/rental/checkout", rest.MethodValidator(http.MethodPost, rest.Authenticate(http.HandlerFunc(rest.Checkout))))
+	http.Handle("/rental/mock-index-cart", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rsClient := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudaki_entities.ClientName_CARTS.String())
+		rsClient.Drop()
+		err := rsClient.CreateIndex(kudakiredisearch.CartsSchema.Schema())
+		if errorkit.ErrorHandled(err) {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		unsanitaryDocUUID := adapters.RedisearchUnsanitary(uuid.New().String())
+		unsanitaryUserUUID := adapters.RedisearchUnsanitary(uuid.New().String())
+		doc := redisearch.NewDocument(unsanitaryDocUUID.Sanitize(), 1.0)
+		doc.Set("id", 1)
+		doc.Set("uuid", unsanitaryDocUUID.Sanitize())
+		doc.Set("user_uuid", unsanitaryUserUUID.Sanitize())
+		doc.Set("total_price", 100000)
+		doc.Set("open", 1)
+
+		errIndex := rsClient.IndexOptions(redisearch.DefaultIndexingOptions, doc)
+		if errorkit.ErrorHandled(errIndex) {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}))
 
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%s", os.Getenv("REST_PORT")),

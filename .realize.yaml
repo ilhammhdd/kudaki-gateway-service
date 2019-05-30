@@ -21,6 +21,7 @@ schema:
   - -- KAFKA_BROKERS 178.62.107.160:29092
   - -- USER_SERVICE_GRPC_ADDRESS localhost:9099
   - -- KAFKA_VERSION 2.1.1
+  - -- REDISEARCH_SERVER 178.62.107.160:6379
   watcher:
     extensions:
     - go

@@ -3,6 +3,8 @@ package usecases
 import (
 	"os"
 
+	"github.com/golang/protobuf/proto"
+	"github.com/ilhammhdd/go-toolkit/errorkit"
 	sarama "gopkg.in/Shopify/sarama.v1"
 )
 
@@ -28,4 +30,25 @@ type EventDrivenConsumerGroup interface {
 	Messages() chan *sarama.ConsumerMessage
 	Errors() chan error
 	Close()
+}
+
+func Consume(unmarshalProto proto.Message, topic string, key string, consumer EventSourceConsumer) proto.Message {
+	consumer.Set(topic, 0, sarama.OffsetNewest)
+	partCons, sig, closeChan := consumer.Consume()
+	defer close(closeChan)
+
+	for {
+		select {
+		case msg := <-partCons.Messages():
+			if unmarshallErr := proto.Unmarshal(msg.Value, unmarshalProto); unmarshallErr == nil {
+				if string(msg.Key) == (key) {
+					return unmarshalProto
+				}
+			}
+		case errs := <-partCons.Errors():
+			errorkit.ErrorHandled(errs.Err)
+		case <-sig:
+			return nil
+		}
+	}
 }

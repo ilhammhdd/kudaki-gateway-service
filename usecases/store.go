@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ilhammhdd/kudaki-gateway-service/externals/kafka"
-
 	"github.com/golang/protobuf/proto"
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 	"github.com/ilhammhdd/kudaki-entities/events"
@@ -167,9 +165,8 @@ func (s StorefrontItemUpdate) Update() *events.StorefrontItemUpdated {
 }
 
 func (s StorefrontItemUpdate) consume() *events.StorefrontItemUpdated {
-	cons := kafka.NewConsumption()
-	cons.Set(events.StoreTopic_name[int32(events.StoreTopic_STOREFRONT_ITEM_UPDATED)], 0, sarama.OffsetNewest)
-	partCons, sig, closeChan := cons.Consume()
+	s.Consumer.Set(events.StoreTopic_name[int32(events.StoreTopic_STOREFRONT_ITEM_UPDATED)], 0, sarama.OffsetNewest)
+	partCons, sig, closeChan := s.Consumer.Consume()
 	defer close(closeChan)
 
 	var siu events.StorefrontItemUpdated
@@ -221,9 +218,8 @@ func (ir ItemsRetrieval) produce() {
 }
 
 func (ir ItemsRetrieval) consume() *events.ItemsRetrieved {
-	cons := kafka.NewConsumption()
-	cons.Set(events.StoreTopic_name[int32(events.StoreTopic_ITEMS_RETRIEVED)], 0, sarama.OffsetNewest)
-	partCons, sig, closeChan := cons.Consume()
+	ir.Consumer.Set(events.StoreTopic_name[int32(events.StoreTopic_ITEMS_RETRIEVED)], 0, sarama.OffsetNewest)
+	partCons, sig, closeChan := ir.Consumer.Consume()
 	defer close(closeChan)
 
 	var ird events.ItemsRetrieved
@@ -267,9 +263,8 @@ func (ir ItemRetrieval) produce() {
 }
 
 func (ir ItemRetrieval) consume() *events.ItemRetrieved {
-	cons := kafka.NewConsumption()
-	cons.Set(events.StoreTopic_name[int32(events.StoreTopic_ITEM_RETRIEVED)], 0, sarama.OffsetNewest)
-	partCons, sig, closeChan := cons.Consume()
+	ir.Consumer.Set(events.StoreTopic_name[int32(events.StoreTopic_ITEM_RETRIEVED)], 0, sarama.OffsetNewest)
+	partCons, sig, closeChan := ir.Consumer.Consume()
 	defer close(closeChan)
 
 	var ird events.ItemRetrieved
@@ -313,9 +308,8 @@ func (is ItemSearch) produce() {
 }
 
 func (is ItemSearch) consume() *events.ItemsSearched {
-	cons := kafka.NewConsumption()
-	cons.Set(events.StoreTopic_name[int32(events.StoreTopic_ITEMS_SEARCHED)], 0, sarama.OffsetNewest)
-	partCons, sig, closeChan := cons.Consume()
+	is.Consumer.Set(events.StoreTopic_name[int32(events.StoreTopic_ITEMS_SEARCHED)], 0, sarama.OffsetNewest)
+	partCons, sig, closeChan := is.Consumer.Consume()
 	defer close(closeChan)
 
 	var isd events.ItemsSearched

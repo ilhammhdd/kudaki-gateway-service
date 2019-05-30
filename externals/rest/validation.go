@@ -148,6 +148,38 @@ func (rv RestValidation) Validate() (*[]string, bool) {
 	return &errs, valid
 }
 
+func (rv RestValidation) ValidateJSON() (*[]string, bool) {
+
+	return nil, false
+}
+
+func GetRegexErrorMessage(rule string) string {
+	switch rule {
+	case RegexEmail:
+		return RegexEmailErrMessage
+	case RegexPassword:
+		return RegexPasswordErrMessage
+	case RegexNotEmpty:
+		return RegexNotEmptyErrMessage
+	case RegexURL:
+		return RegexURLErrMessage
+	case RegexJWT:
+		return RegexJWTErrMessage
+	case RegexNumber:
+		return RegexNumberErrMessage
+	case RegexLatitude:
+		return RegexLatitudeErrMessage
+	case RegexLongitude:
+		return RegexLongitudeErrMessage
+	case RegexRole:
+		return RegexRoleErrMessage
+	case RegexUUIDV4:
+		return RegexUUIDV4ErrMessage
+	default:
+		return "regex error message not defined"
+	}
+}
+
 func MethodValidator(m string, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
