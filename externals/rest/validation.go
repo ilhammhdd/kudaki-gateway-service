@@ -53,51 +53,29 @@ type RestValidation struct {
 	request *http.Request
 }
 
-func (rv RestValidation) ValidateIfExists() (*[]string, *[]string, bool) {
+func (rv RestValidation) ValidateIfExists() (existedParam *[]string, errs *[]string, valid bool) {
 
-	var existedParam []string
+	var tempExistedParam []string
+	var tempErrs []string
 	rv.request.ParseMultipartForm(50000000)
-	valid := true
-	var errs []string
+	valid = true
 
 	for param, rule := range rv.Rules {
 		if rv.request.MultipartForm == nil {
 			valid = false
-			errs = append(errs, "multipart form required")
+			tempErrs = append(tempErrs, "multipart form required")
 		} else if val, ok := rv.request.MultipartForm.Value[param]; ok {
-			existedParam = append(existedParam, param)
+			tempExistedParam = append(tempExistedParam, param)
 			regexOk, regexErr := regexp.MatchString(rule, val[0])
 			errorkit.ErrorHandled(regexErr)
 			if !regexOk {
-				log.Println("regex not ok, rule : ", rule, "value : ", val[0])
+				tempErrs = append(tempErrs, fmt.Sprintf("%v %s", param, GetRegexErrorMessage(rule)))
 				valid = false
-				switch rule {
-				case RegexEmail:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexEmailErrMessage))
-				case RegexPassword:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexPassword))
-				case RegexNotEmpty:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexNotEmptyErrMessage))
-				case RegexURL:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexURLErrMessage))
-				case RegexJWT:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexJWTErrMessage))
-				case RegexNumber:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexNumberErrMessage))
-				case RegexLatitude:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexLatitudeErrMessage))
-				case RegexLongitude:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexLongitudeErrMessage))
-				case RegexRole:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexRoleErrMessage))
-				case RegexUUIDV4:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexUUIDV4ErrMessage))
-				}
 			}
 		}
 	}
 
-	return &existedParam, &errs, valid
+	return &tempExistedParam, &tempErrs, valid
 }
 
 func (rv RestValidation) Validate() (*[]string, bool) {
@@ -117,30 +95,8 @@ func (rv RestValidation) Validate() (*[]string, bool) {
 			regexOk, regexErr := regexp.MatchString(rule, val[0])
 			errorkit.ErrorHandled(regexErr)
 			if !regexOk {
-				log.Println("regex not ok, rule : ", rule, "value : ", val[0])
 				valid = false
-				switch rule {
-				case RegexEmail:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexEmailErrMessage))
-				case RegexPassword:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexPassword))
-				case RegexNotEmpty:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexNotEmptyErrMessage))
-				case RegexURL:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexURLErrMessage))
-				case RegexJWT:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexJWTErrMessage))
-				case RegexNumber:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexNumberErrMessage))
-				case RegexLatitude:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexLatitudeErrMessage))
-				case RegexLongitude:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexLongitudeErrMessage))
-				case RegexRole:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexRoleErrMessage))
-				case RegexUUIDV4:
-					errs = append(errs, fmt.Sprintf("%s %s", param, RegexUUIDV4ErrMessage))
-				}
+				errs = append(errs, fmt.Sprintf("%s %s", param, GetRegexErrorMessage(rule)))
 			}
 		}
 	}
@@ -211,28 +167,7 @@ func HeaderParamValidator(rules map[string]string, h http.Header) (*[]string, bo
 				if !regexOk {
 					log.Println("regex not ok, rule : ", rule, "value : ", val[0])
 					valid = false
-					switch rule {
-					case RegexEmail:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexEmailErrMessage))
-					case RegexPassword:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexPassword))
-					case RegexNotEmpty:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexNotEmptyErrMessage))
-					case RegexURL:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexURLErrMessage))
-					case RegexJWT:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexJWTErrMessage))
-					case RegexNumber:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexNumberErrMessage))
-					case RegexLatitude:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexLatitudeErrMessage))
-					case RegexLongitude:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexLongitudeErrMessage))
-					case RegexRole:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexRoleErrMessage))
-					case RegexUUIDV4:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexUUIDV4ErrMessage))
-					}
+					errs = append(errs, fmt.Sprintf("%s %s", param, GetRegexErrorMessage(rule)))
 				}
 			}
 		}
@@ -271,28 +206,7 @@ func (upv *URLParamValidation) Validate( /* rules map[string]string, val url.Val
 				if !regexOk {
 					log.Println("regex not ok, rule : ", rule, "value : ", val[0])
 					valid = false
-					switch rule {
-					case RegexEmail:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexEmailErrMessage))
-					case RegexPassword:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexPassword))
-					case RegexNotEmpty:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexNotEmptyErrMessage))
-					case RegexURL:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexURLErrMessage))
-					case RegexJWT:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexJWTErrMessage))
-					case RegexNumber:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexNumberErrMessage))
-					case RegexLatitude:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexLatitudeErrMessage))
-					case RegexLongitude:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexLongitudeErrMessage))
-					case RegexRole:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexRoleErrMessage))
-					case RegexUUIDV4:
-						errs = append(errs, fmt.Sprintf("%s %s", param, RegexUUIDV4ErrMessage))
-					}
+					errs = append(errs, fmt.Sprintf("%s %s", param, GetRegexErrorMessage(rule)))
 				}
 			}
 		}

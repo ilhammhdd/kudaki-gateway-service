@@ -7,11 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/google/uuid"
-	"github.com/ilhammhdd/kudaki-gateway-service/adapters"
-
-	"github.com/ilhammhdd/kudaki-gateway-service/externals/kudakiredisearch"
-
 	"github.com/RediSearch/redisearch-go/redisearch"
 	kudaki_entities "github.com/ilhammhdd/kudaki-entities"
 
@@ -80,32 +75,13 @@ func restListener() {
 	http.Handle("/store/search-items", rest.MethodValidator(http.MethodGet, rest.Authenticate(http.HandlerFunc(rest.SearchItems))))
 
 	// rental
-	http.Handle("/rental/checkout", rest.MethodValidator(http.MethodPost, rest.Authenticate(http.HandlerFunc(rest.Checkout))))
+	http.Handle("/rental/checkout", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.Checkout))))
+	http.Handle("/rental/cart/item", rest.MethodRouting{
+		PostHandler: rest.Authenticate(new(rest.AddCartItem)),
+	})
 	http.Handle("/rental/mock-index-cart", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rsClient := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudaki_entities.ClientName_CARTS.String())
 		rsClient.Drop()
-		err := rsClient.CreateIndex(kudakiredisearch.CartsSchema.Schema())
-		if errorkit.ErrorHandled(err) {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		unsanitaryDocUUID := adapters.RedisearchUnsanitary(uuid.New().String())
-		unsanitaryUserUUID := adapters.RedisearchUnsanitary(uuid.New().String())
-		doc := redisearch.NewDocument(unsanitaryDocUUID.Sanitize(), 1.0)
-		doc.Set("id", 1)
-		doc.Set("uuid", unsanitaryDocUUID.Sanitize())
-		doc.Set("user_uuid", unsanitaryUserUUID.Sanitize())
-		doc.Set("total_price", 100000)
-		doc.Set("open", 1)
-
-		errIndex := rsClient.IndexOptions(redisearch.DefaultIndexingOptions, doc)
-		if errorkit.ErrorHandled(errIndex) {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		w.WriteHeader(http.StatusOK)
 	}))
 
 	server := &http.Server{

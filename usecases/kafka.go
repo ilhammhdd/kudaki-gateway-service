@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"log"
 	"os"
 
 	"github.com/golang/protobuf/proto"
@@ -40,10 +41,15 @@ func Consume(unmarshalProto proto.Message, topic string, key string, consumer Ev
 	for {
 		select {
 		case msg := <-partCons.Messages():
+			log.Printf("consumed : topic = %s, partition = %d, offset = %d, key = %s", msg.Topic, msg.Partition, msg.Offset, string(msg.Key))
 			if unmarshallErr := proto.Unmarshal(msg.Value, unmarshalProto); unmarshallErr == nil {
 				if string(msg.Key) == (key) {
 					return unmarshalProto
+				} else {
+					log.Printf("out and in key not matched, out = %s, in = %s", key, string(msg.Key))
 				}
+			} else {
+				log.Printf("unmarshal error : %v", unmarshallErr)
 			}
 		case errs := <-partCons.Errors():
 			errorkit.ErrorHandled(errs.Err)

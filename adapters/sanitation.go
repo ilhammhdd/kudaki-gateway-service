@@ -2,9 +2,9 @@ package adapters
 
 import "strings"
 
-type RedisearchUnsanitary string
+type RedisearchText string
 
-func (ru RedisearchUnsanitary) Sanitize() string {
+func (rt RedisearchText) Sanitize() string {
 	replacer := strings.NewReplacer(`,`, `\,`, `.`, `\.`, `<`, `\<`, `>`, `\>`, `{`, `\{`, `}`, `\}`, `[`, `\[`, `]`, `\]`, `"`, `\"`, `'`, `\'`, `:`, `\:`, `;`, `\;`, `!`, `\!`, `@`, `\@`, `#`, `\#`, `$`, `\$`, `%`, `\%`, `^`, `\^`, `&`, `\&`, `*`, `\*`, `(`, `\(`, `)`, `\)`, `-`, `\-`, `+`, `\+`, `=`, `\=`, `~`, `\~`)
-	return replacer.Replace(string(ru))
+	return replacer.Replace(string(rt))
 }
