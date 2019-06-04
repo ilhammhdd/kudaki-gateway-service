@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"log"
 	"time"
 
 	"github.com/golang/protobuf/proto"
@@ -37,6 +38,7 @@ func (aci AddCartItem) Consume(topic string, key string) (inEvent proto.Message)
 }
 
 func (aci AddCartItem) Produce(topic string, key string, value []byte) (partition int32, offset int64, durationSeconds float64) {
+	log.Printf("about to produce ADD_CART_ITEM_REQUESTED : %v", string(value))
 	aci.Producer.Set(topic)
 	start := time.Now()
 	partition, offset, err := aci.Producer.SyncProduce(key, value)

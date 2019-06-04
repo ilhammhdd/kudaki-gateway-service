@@ -96,11 +96,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c89e35e1f94800ae99086c3912ccadad8796dc61a1567ed1f104ec9f753d0e78"
+  digest = "1:a3857502d40491c329c6be4e38e7826f91a0888c346ec7b3a4a8e57049d4a2d3"
   name = "github.com/ilhammhdd/kudaki-entities"
   packages = [
-    ".",
     "events",
+    "kudakiredisearch",
     "mountain",
     "rental",
     "rpc",
@@ -108,7 +108,7 @@
     "user",
   ]
   pruneopts = "UT"
-  revision = "cb586be730354b7efe0e53f600f8e1465e8e8a6a"
+  revision = "66d6b27f458740d6a20e28707c32a3575b69a967"
 
 [[projects]]
   digest = "1:259f9b7645983a7a823318d78aa96dec68af8891f706493ac1ec04d819cb977c"
@@ -142,15 +142,15 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "f3200d17e092c607f615320ecaad13d87ad9a2b3"
+  revision = "60506f45cf65977eb3a9c6e30f995f54a721c271"
 
 [[projects]]
   branch = "master"
-  digest = "1:668e8c66b8895d69391429b0f64a72c35603c94f364c94d4e5fab5053d57a0b6"
+  digest = "1:8f5108406bc43c7669b0d67d282e40d05c9f268615fcaf8c1f0f76965aa3f09f"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "69e3a3a65b5bed52b8194d33c59d955757d87523"
+  revision = "4c4f7f33c9ed00de01c4c741d2177abfcfe19307"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -186,7 +186,7 @@
   revision = "fb225487d10142b5bcc35abfc6cb9a0609614976"
 
 [[projects]]
-  digest = "1:c69a4c19c4f241e6b75ad65c5e7a1c4eec5705ae504624df4eb6fb659c2df46c"
+  digest = "1:e8800ddadd6bce3bc0c5ffd7bc55dbdddc6e750956c10cc10271cade542fccbe"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -223,8 +223,8 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "869adfc8d5a43efc0d05780ad109106f457f51e4"
-  version = "v1.21.0"
+  revision = "501c41df7f472c740d0674ff27122f3f48c80ce7"
+  version = "v1.21.1"
 
 [[projects]]
   digest = "1:6981402aef27693f4b2ec619117abd263fde29f8c1dfac46eef0f35038d37513"
@@ -244,8 +244,8 @@
     "github.com/ilhammhdd/go-toolkit/errorkit",
     "github.com/ilhammhdd/go-toolkit/jwtkit",
     "github.com/ilhammhdd/go-toolkit/safekit",
-    "github.com/ilhammhdd/kudaki-entities",
     "github.com/ilhammhdd/kudaki-entities/events",
+    "github.com/ilhammhdd/kudaki-entities/kudakiredisearch",
     "github.com/ilhammhdd/kudaki-entities/mountain",
     "github.com/ilhammhdd/kudaki-entities/rental",
     "github.com/ilhammhdd/kudaki-entities/rpc",

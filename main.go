@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -8,13 +9,12 @@ import (
 	"strings"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
-	kudaki_entities "github.com/ilhammhdd/kudaki-entities"
 
+	"github.com/ilhammhdd/kudaki-entities/kudakiredisearch"
 	"github.com/ilhammhdd/kudaki-entities/user"
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 	"github.com/ilhammhdd/go-toolkit/safekit"
-	_ "github.com/ilhammhdd/kudaki-entities/rental"
 	"github.com/ilhammhdd/kudaki-gateway-service/externals/rest"
 )
 
@@ -79,9 +79,56 @@ func restListener() {
 	http.Handle("/rental/cart/item", rest.MethodRouting{
 		PostHandler: rest.Authenticate(new(rest.AddCartItem)),
 	})
-	http.Handle("/rental/mock-index-cart", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		rsClient := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudaki_entities.ClientName_CARTS.String())
+
+	// mock
+	http.Handle("/redisearch/index/reset-all", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rsClient := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Cart.Name())
 		rsClient.Drop()
+
+		rsClient = redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Item.Name())
+		rsClient.Drop()
+
+		rsClient = redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.CartItem.Name())
+		rsClient.Drop()
+
+		w.WriteHeader(http.StatusOK)
+	}))
+	http.Handle("/redisearch/search", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.ParseMultipartForm(100000)
+
+		type responseData struct {
+			Total int                   `json:"total"`
+			Docs  []redisearch.Document `json:"docs"`
+		}
+
+		rsClient := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.CartItem.Name())
+		rawQuery := fmt.Sprintf(`@cart_item_uuid:"%s"`, kudakiredisearch.RedisearchText(r.MultipartForm.Value["cart_item_uuid"][0]).Sanitize())
+		docs, total, err := rsClient.Search(redisearch.NewQuery(rawQuery))
+		errorkit.ErrorHandled(err)
+
+		resCartItem := responseData{
+			Docs:  docs,
+			Total: total,
+		}
+		resCartItemByte, err := json.Marshal(resCartItem)
+		errorkit.ErrorHandled(err)
+		log.Printf("resCartItemByte : %v", string(resCartItemByte))
+
+		rsClient = redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Cart.Name())
+		rawQuery = fmt.Sprintf(`@cart_uuid:"%s"`, kudakiredisearch.RedisearchText(r.MultipartForm.Value["cart_uuid"][0]).Sanitize())
+		cartDocs, cartTotal, err := rsClient.Search(redisearch.NewQuery(rawQuery))
+		errorkit.ErrorHandled(err)
+
+		resCart := responseData{
+			Docs:  cartDocs,
+			Total: cartTotal,
+		}
+		resCartByte, err := json.Marshal(resCart)
+		errorkit.ErrorHandled(err)
+
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(resCartByte)
 	}))
 
 	server := &http.Server{

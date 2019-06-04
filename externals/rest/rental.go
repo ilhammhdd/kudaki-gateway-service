@@ -9,12 +9,11 @@ import (
 	"github.com/golang/protobuf/proto"
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
-	"github.com/ilhammhdd/kudaki-gateway-service/externals/kudakiredisearch"
 
 	"github.com/ilhammhdd/kudaki-gateway-service/externals/kafka"
 
-	kudaki_entities "github.com/ilhammhdd/kudaki-entities"
 	"github.com/ilhammhdd/kudaki-entities/events"
+	"github.com/ilhammhdd/kudaki-entities/kudakiredisearch"
 	"github.com/ilhammhdd/kudaki-gateway-service/usecases"
 
 	"github.com/ilhammhdd/kudaki-gateway-service/adapters"
@@ -29,7 +28,7 @@ type Checkout struct{}
 
 func (c Checkout) Validate(out proto.Message) (errs *[]string, ok bool) {
 	outEvent := out.(*events.CheckoutRequested)
-	rsClient := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudaki_entities.ClientName_CARTS.String())
+	rsClient := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), "cartclient")
 	unsanitaryUUID := adapters.RedisearchText(outEvent.Cart.Uuid)
 	rawQuery := fmt.Sprintf(`@uuid:"%s"`, unsanitaryUUID.Sanitize())
 
@@ -66,7 +65,7 @@ func (c Checkout) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		UsecaseProp:    &usecaseProp,
 	}
 	adapter := adapters.Checkout{
-		CartsSchema: kudakiredisearch.CartItemsSchema.Schema(),
+		CartsSchema: kudakiredisearch.CartItem.Schema(),
 	}
 
 	out := adapter.ParseRequestToEvent(r)
@@ -84,16 +83,16 @@ func (c Checkout) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 type AddCartItem struct{}
 
 func (aci AddCartItem) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if _, errs, valid := aci.ValidateRequest(r); !valid {
+	if _, errs, valid := aci.validateRequest(r); !valid {
 		resBody := adapters.ResponseBody{Errs: errs}
 		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 		return
 	}
 
-	aci.Handle(&w, r)
+	aci.handle(&w, r)
 }
 
-func (aci AddCartItem) ValidateRequest(r *http.Request) (existsedParams *[]string, errs *[]string, valid bool) {
+func (aci AddCartItem) validateRequest(r *http.Request) (existsedParams *[]string, errs *[]string, valid bool) {
 	restValidation := RestValidation{
 		Rules: map[string]string{
 			"cart_uuid":       RegexUUIDV4,
@@ -108,7 +107,7 @@ func (aci AddCartItem) ValidateRequest(r *http.Request) (existsedParams *[]strin
 	return
 }
 
-func (aci AddCartItem) Handle(w *http.ResponseWriter, r *http.Request) {
+func (aci AddCartItem) handle(w *http.ResponseWriter, r *http.Request) {
 
 	usecaseProp := usecases.EventDrivenUsecaseProp{
 		ConsumerTopic: events.RentalTopic_CART_ITEM_ADDED.String(),
@@ -125,7 +124,7 @@ func (aci AddCartItem) Handle(w *http.ResponseWriter, r *http.Request) {
 		UsecaseProp:    &usecaseProp,
 	}
 	adapter := &adapters.AddCartItem{
-		CartItemSchema: kudakiredisearch.CartItemsSchema.Schema(),
+		CartItemSchema: kudakiredisearch.CartItem.Schema(),
 	}
 	adapters.HandleEventDriven(adapterProp, adapter).WriteResponse(w)
 }

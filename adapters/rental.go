@@ -40,9 +40,8 @@ func (c Checkout) ParseRequestToEvent(r *http.Request) proto.Message {
 	errorkit.ErrorHandled(err)
 	var out events.CheckoutRequested
 	out.Cart = &rental.Cart{
-		Items: cr.Items,
-		User:  ParseUserFromJWT(jwt),
-		Uuid:  cr.CartUUID,
+		User: ParseUserFromJWT(jwt),
+		Uuid: cr.CartUUID,
 	}
 	out.Uid = uuid.New().String()
 
@@ -80,12 +79,19 @@ type AddCartItem struct {
 func (aci *AddCartItem) ParseRequestToEvent(r *http.Request) proto.Message {
 	var out events.AddCartItemRequested
 	out.Uid = uuid.New().String()
-	out.CartUuid = r.MultipartForm.Value["cart_uuid"][0]
+
+	if len(r.MultipartForm.Value["cart_uuid"]) > 0 {
+		out.CartUuid = r.MultipartForm.Value["cart_uuid"][0]
+	}
 	out.StorefrontUuid = r.MultipartForm.Value["storefront_uuid"][0]
 	out.ItemUuid = r.MultipartForm.Value["item_uuid"][0]
-	itemAmount64, err := strconv.ParseUint(r.MultipartForm.Value["item_amount"][0], 10, 32)
+	itemAmount64, err := strconv.ParseInt(r.MultipartForm.Value["item_amount"][0], 10, 32)
 	errorkit.ErrorHandled(err)
-	out.ItemAmount = uint32(itemAmount64)
+	out.ItemAmount = int32(itemAmount64)
+
+	jwt, err := jwtkit.GetJWT(jwtkit.JWTString(r.Header.Get("Kudaki-Token")))
+	errorkit.ErrorHandled(err)
+	out.User = ParseUserFromJWT(jwt)
 
 	return &out
 }
