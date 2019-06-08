@@ -9,8 +9,8 @@ import (
 )
 
 type EventDrivenHandler interface {
-	ParseRequestToKafkaMessage(*http.Request) (key string, message []byte)
-	ParseEventToResponse(proto.Message) *Response
+	ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte)
+	ParseEventToResponse(in proto.Message) *Response
 	initUsecaseHandler(outKey string) usecases.EventDrivenHandler
 }
 

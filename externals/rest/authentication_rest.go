@@ -39,3 +39,32 @@ func (s *Signup) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Producer: kafka.NewProduction()}
 	adapters.HandleEventDriven(r, adapter).WriteResponse(&w)
 }
+
+type Login struct{}
+
+func (l *Login) validate(r *http.Request) (errs *[]string, ok bool) {
+	r.ParseMultipartForm(32 << 20)
+
+	restValidation := RestValidation{
+		Rules: map[string]string{
+			"email":    RegexEmail,
+			"password": RegexPassword},
+		request: r,
+	}
+
+	return restValidation.Validate()
+}
+
+func (l *Login) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, ok := l.validate(r); !ok {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	adapter := adapters.Login{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction(),
+	}
+	adapters.HandleEventDriven(r, &adapter).WriteResponse(&w)
+}

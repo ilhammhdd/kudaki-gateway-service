@@ -32,8 +32,8 @@ func main() {
 }
 
 func restListener() {
-	// user
 	http.Handle("/signup", rest.MethodValidator(http.MethodPost, new(rest.Signup)))
+	http.Handle("/login", rest.MethodValidator(http.MethodPost, new(rest.Login)))
 
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%s", os.Getenv("REST_PORT"))}

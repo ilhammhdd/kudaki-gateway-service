@@ -64,3 +64,51 @@ func (s *Signup) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
 		Producer:    s.Producer,
 		InUnmarshal: inUnmarshal}
 }
+
+type Login struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
+
+func (l *Login) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.LoginRequested)
+	outEvent.Email = r.MultipartForm.Value["email"][0]
+	outEvent.Password = r.MultipartForm.Value["password"][0]
+	outEvent.Uid = uuid.New().String()
+
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, out
+}
+
+func (l *Login) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.Loggedin)
+
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody.Errs = &inEvent.EventStatus.Errors
+	}
+
+	return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
+}
+
+func (l *Login) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	inUnmarshal := usecases.KafkaMessageUnmarshal(func(key []byte, val []byte) (proto.Message, bool) {
+		var inEvent events.Loggedin
+		if err := proto.Unmarshal(val, &inEvent); err == nil {
+			if outKey == string(key) {
+				return &inEvent, true
+			}
+		}
+
+		return nil, false
+	})
+
+	return &usecases.EventDrivenUsecase{
+		Consumer:    l.Consumer,
+		InTopic:     events.UserTopic_LOGGED_IN.String(),
+		InUnmarshal: inUnmarshal,
+		OutTopic:    events.UserTopic_LOGIN_REQUESTED.String(),
+		Producer:    l.Producer}
+}
