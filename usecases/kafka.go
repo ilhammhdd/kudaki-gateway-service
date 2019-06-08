@@ -9,18 +9,13 @@ import (
 	sarama "gopkg.in/Shopify/sarama.v1"
 )
 
-type EventSourceKafka struct {
-	Esp EventSourceProducer
-	Esc EventSourceConsumer
-}
-
-type EventSourceProducer interface {
+type EventDrivenProducer interface {
 	Set(topic string)
 	Get() (topic string)
 	SyncProduce(key string, value []byte) (producedPartition int32, producedOffset int64, err error)
 }
 
-type EventSourceConsumer interface {
+type EventDrivenConsumer interface {
 	Set(topic string, partition int32, offset int64)
 	Get() (topic string, partition int32, offset int64)
 	Consume() (partCons sarama.PartitionConsumer, signals chan os.Signal, close chan bool)
@@ -33,7 +28,7 @@ type EventDrivenConsumerGroup interface {
 	Close()
 }
 
-func Consume(unmarshalProto proto.Message, topic string, key string, consumer EventSourceConsumer) proto.Message {
+func Consume(unmarshalProto proto.Message, topic string, key string, consumer EventDrivenConsumer) proto.Message {
 	consumer.Set(topic, 0, sarama.OffsetNewest)
 	partCons, sig, closeChan := consumer.Consume()
 	defer close(closeChan)

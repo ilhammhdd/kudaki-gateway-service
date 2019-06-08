@@ -9,22 +9,14 @@ import (
 )
 
 type EventDrivenHandler interface {
-	ParseRequestToEvent(*http.Request) proto.Message
-	ParseEventToKafkaMessage(proto.Message) (key string, message []byte)
+	ParseRequestToKafkaMessage(*http.Request) (key string, message []byte)
 	ParseEventToResponse(proto.Message) *Response
+	initUsecaseHandler(outKey string) usecases.EventDrivenHandler
 }
 
-type EventDrivenAdapterProp struct {
-	UsecaseHandler usecases.EventDrivenHandler
-	Request        *http.Request
-	UsecaseProp    *usecases.EventDrivenUsecaseProp
-}
-
-func HandleEventDriven(prop EventDrivenAdapterProp, edha EventDrivenHandler) *Response {
-	out := edha.ParseRequestToEvent(prop.Request)
-	outKey, outMsg := edha.ParseEventToKafkaMessage(out)
-	prop.UsecaseProp.ProducerKey = outKey
-	prop.UsecaseProp.ProducerMsg = outMsg
-	in := usecases.HandleEventDriven(prop.UsecaseProp, prop.UsecaseHandler)
-	return edha.ParseEventToResponse(in)
+func HandleEventDriven(r *http.Request, edha EventDrivenHandler) *Response {
+	outKey, outMsg := edha.ParseRequestToKafkaMessage(r)
+	usecaseHandler := edha.initUsecaseHandler(outKey)
+	inEvent := usecaseHandler.Handle(outKey, outMsg)
+	return edha.ParseEventToResponse(inEvent)
 }

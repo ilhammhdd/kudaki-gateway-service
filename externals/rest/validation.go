@@ -2,7 +2,6 @@ package rest
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -11,9 +10,8 @@ import (
 	"github.com/ilhammhdd/kudaki-entities/user"
 
 	"github.com/google/uuid"
-	"github.com/ilhammhdd/kudaki-entities/events"
 
-	"github.com/ilhammhdd/kudaki-entities/rpc"
+	kudakirpc "github.com/ilhammhdd/kudaki-entities/rpc"
 
 	"google.golang.org/grpc"
 
@@ -88,7 +86,6 @@ func (rv RestValidation) Validate() (*[]string, bool) {
 			valid = false
 			errs = append(errs, "multipart form required")
 		} else if val, ok := rv.request.MultipartForm.Value[param]; !ok {
-			log.Println("validating, ", param, "missing")
 			valid = false
 			errs = append(errs, fmt.Sprintf("%s multipart/form-data parameter not exists", param))
 		} else {
@@ -157,7 +154,6 @@ func HeaderParamValidator(rules map[string]string, h http.Header) (*[]string, bo
 
 	for param, rule := range rules {
 		if vals, ok := h[param]; !ok {
-			log.Println("Http Header, ", param, "missing")
 			valid = false
 			errs = append(errs, fmt.Sprintf("%s header parameter not exists", param))
 		} else {
@@ -165,7 +161,6 @@ func HeaderParamValidator(rules map[string]string, h http.Header) (*[]string, bo
 				regexOk, regexErr := regexp.MatchString(rule, val)
 				errorkit.ErrorHandled(regexErr)
 				if !regexOk {
-					log.Println("regex not ok, rule : ", rule, "value : ", val[0])
 					valid = false
 					errs = append(errs, fmt.Sprintf("%s %s", param, GetRegexErrorMessage(rule)))
 				}
@@ -196,7 +191,6 @@ func (upv *URLParamValidation) Validate( /* rules map[string]string, val url.Val
 	for param, rule := range upv.Rules {
 		vals, ok := upv.Values[param]
 		if !ok && len(upv.Values) > 0 {
-			log.Println("URLEncoding validating, ", param, "missing")
 			valid = false
 			errs = append(errs, fmt.Sprintf("%s url parameter not exists", param))
 		} else {
@@ -204,7 +198,6 @@ func (upv *URLParamValidation) Validate( /* rules map[string]string, val url.Val
 				regexOk, regexErr := regexp.MatchString(rule, val)
 				errorkit.ErrorHandled(regexErr)
 				if !regexOk {
-					log.Println("regex not ok, rule : ", rule, "value : ", val[0])
 					valid = false
 					errs = append(errs, fmt.Sprintf("%s %s", param, GetRegexErrorMessage(rule)))
 				}
@@ -228,7 +221,7 @@ func Authenticate(h http.Handler) http.Handler {
 			return
 		}
 
-		uar := events.UserAuthenticationRequested{
+		uar := kudakirpc.UserAuthenticationRequested{
 			Uid: uuid.New().String(),
 			Jwt: r.Header.Get("Kudaki-Token")}
 
@@ -237,7 +230,7 @@ func Authenticate(h http.Handler) http.Handler {
 
 		defer conn.Close()
 
-		client := rpc.NewUserClient(conn)
+		client := kudakirpc.NewUserClient(conn)
 
 		ua, err := client.UserAuthentication(r.Context(), &uar)
 		if err != nil {
@@ -275,9 +268,9 @@ func Authorize(role user.Role, h http.Handler) http.Handler {
 		conn, err := grpc.Dial(os.Getenv("USER_SERVICE_GRPC_ADDRESS"), grpc.WithInsecure())
 		errorkit.ErrorHandled(err)
 
-		uc := rpc.NewUserClient(conn)
+		uc := kudakirpc.NewUserClient(conn)
 
-		uar := &events.UserAuthorizationRequested{
+		uar := &kudakirpc.UserAuthorizationRequested{
 			Jwt:  r.Header.Get("Kudaki-Token"),
 			Role: role,
 			Uid:  uuid.New().String()}
