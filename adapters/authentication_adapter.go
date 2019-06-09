@@ -62,7 +62,7 @@ func (s *Signup) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
 		InTopic:     events.UserTopic_SIGNED_UP.String(),
 		OutTopic:    events.UserTopic_SIGN_UP_REQUESTED.String(),
 		Producer:    s.Producer,
-		InUnmarshal: inUnmarshal}
+		InUnmarshal: &inUnmarshal}
 }
 
 type Login struct {
@@ -110,7 +110,7 @@ func (l *Login) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
 	return &usecases.EventDrivenUsecase{
 		Consumer:    l.Consumer,
 		InTopic:     events.UserTopic_LOGGED_IN.String(),
-		InUnmarshal: inUnmarshal,
+		InUnmarshal: &inUnmarshal,
 		OutTopic:    events.UserTopic_LOGIN_REQUESTED.String(),
 		Producer:    l.Producer}
 }
@@ -155,8 +155,56 @@ func (vu *VerifyUser) initUsecaseHandler(outKey string) usecases.EventDrivenHand
 	return &usecases.EventDrivenUsecase{
 		Consumer:    vu.Consumer,
 		InTopic:     events.UserTopic_USER_VERIFIED.String(),
-		InUnmarshal: inUnmarshal,
+		InUnmarshal: &inUnmarshal,
 		OutTopic:    events.UserTopic_VERIFY_USER_REQUESTED.String(),
 		Producer:    vu.Producer,
 	}
+}
+
+type ChangePassword struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
+
+func (cp *ChangePassword) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.ChangePasswordRequested)
+	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
+	outEvent.NewPassword = r.MultipartForm.Value["new_password"][0]
+	outEvent.OldPassword = r.MultipartForm.Value["old_password"][0]
+	outEvent.Uid = uuid.New().String()
+
+	outByte, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, outByte
+}
+
+func (cp *ChangePassword) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.PasswordChanged)
+
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody.Errs = &inEvent.EventStatus.Errors
+	}
+	return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
+}
+
+func (cp *ChangePassword) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	inUnmarshal := usecases.KafkaMessageUnmarshal(func(key []byte, val []byte) (proto.Message, bool) {
+		var inEvent events.PasswordChanged
+
+		if err := proto.Unmarshal(val, &inEvent); err == nil {
+			if outKey == string(key) {
+				return &inEvent, true
+			}
+		}
+		return nil, false
+	})
+
+	return &usecases.EventDrivenUsecase{
+		Consumer:    cp.Consumer,
+		InTopic:     events.UserTopic_PASSWORD_CHANGED.String(),
+		InUnmarshal: &inUnmarshal,
+		OutTopic:    events.UserTopic_CHANGE_PASSWORD_REQUESTED.String(),
+		Producer:    cp.Producer}
 }

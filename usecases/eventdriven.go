@@ -24,7 +24,7 @@ type EventDrivenUsecase struct {
 	InTopic     string
 	Producer    EventDrivenProducer
 	Consumer    EventDrivenConsumer
-	InUnmarshal KafkaMessageUnmarshal
+	InUnmarshal *KafkaMessageUnmarshal
 }
 
 func (edu *EventDrivenUsecase) Handle(outKey string, outMsg []byte) (inEvent proto.Message) {
@@ -50,7 +50,7 @@ func (edu *EventDrivenUsecase) consume() (inEvent proto.Message) {
 	for {
 		select {
 		case msg := <-partCons.Messages():
-			if inEvent, ok = edu.InUnmarshal(msg.Key, msg.Value); ok {
+			if inEvent, ok = (*edu.InUnmarshal)(msg.Key, msg.Value); ok {
 				return
 			}
 		case errs := <-partCons.Errors():

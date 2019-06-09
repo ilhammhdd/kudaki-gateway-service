@@ -91,3 +91,28 @@ func (vu *VerifyUser) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Producer: kafka.NewProduction()}
 	adapters.HandleEventDriven(r, adapter).WriteResponse(&w)
 }
+
+type ChangePassword struct{}
+
+func (cp *ChangePassword) validate(r *http.Request) (errs *[]string, ok bool) {
+	r.ParseMultipartForm(32 << 20)
+
+	restValidation := RestValidation{
+		Rules: map[string]string{
+			"old_password": RegexPassword,
+			"new_password": RegexPassword},
+		request: r}
+
+	return restValidation.Validate()
+}
+
+func (cp *ChangePassword) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, ok := cp.validate(r); !ok {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	adapter := adapters.ChangePassword{Consumer: kafka.NewConsumption(), Producer: kafka.NewProduction()}
+	adapters.HandleEventDriven(r, &adapter).WriteResponse(&w)
+}
