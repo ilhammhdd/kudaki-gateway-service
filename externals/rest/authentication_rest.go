@@ -3,7 +3,7 @@ package rest
 import (
 	"net/http"
 
-	"github.com/ilhammhdd/kudaki-gateway-service/externals/kafka"
+	"github.com/ilhammhdd/kudaki-externals/kafka"
 
 	"github.com/ilhammhdd/kudaki-gateway-service/adapters"
 )
@@ -67,4 +67,27 @@ func (l *Login) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Producer: kafka.NewProduction(),
 	}
 	adapters.HandleEventDriven(r, &adapter).WriteResponse(&w)
+}
+
+type VerifyUser struct{}
+
+func (vu *VerifyUser) validate(r *http.Request) (errs *[]string, ok bool) {
+	paramValidation := URLParamValidation{
+		Rules:  map[string]string{"verify_token": RegexJWT},
+		Values: r.URL.Query(),
+	}
+	return paramValidation.Validate()
+}
+
+func (vu *VerifyUser) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, ok := vu.validate(r); !ok {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	adapter := &adapters.VerifyUser{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction()}
+	adapters.HandleEventDriven(r, adapter).WriteResponse(&w)
 }

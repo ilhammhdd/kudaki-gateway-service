@@ -90,6 +90,14 @@
   revision = "bd31f973d064d0cb75abcc1d04148633b386032b"
 
 [[projects]]
+  branch = "master"
+  digest = "1:bb424539a7b63cdecf83ae2484c7d8c9cc3b539219db6b8b5a33b31998d95df1"
+  name = "github.com/ilhammhdd/kudaki-externals"
+  packages = ["kafka"]
+  pruneopts = "UT"
+  revision = "a6330f849bc8542aff542e0f2a0f1026ceafaac0"
+
+[[projects]]
   digest = "1:259f9b7645983a7a823318d78aa96dec68af8891f706493ac1ec04d819cb977c"
   name = "github.com/pierrec/lz4"
   packages = [
@@ -224,6 +232,7 @@
     "github.com/ilhammhdd/kudaki-entities/events",
     "github.com/ilhammhdd/kudaki-entities/rpc",
     "github.com/ilhammhdd/kudaki-entities/user",
+    "github.com/ilhammhdd/kudaki-externals/kafka",
     "google.golang.org/grpc",
     "gopkg.in/Shopify/sarama.v1",
   ]

@@ -88,6 +88,8 @@ func (l *Login) ParseEventToResponse(in proto.Message) *Response {
 	var resBody ResponseBody
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
 		resBody.Errs = &inEvent.EventStatus.Errors
+	} else {
+		resBody.Data = map[string]string{"token": inEvent.User.Token}
 	}
 
 	return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
@@ -111,4 +113,50 @@ func (l *Login) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
 		InUnmarshal: inUnmarshal,
 		OutTopic:    events.UserTopic_LOGIN_REQUESTED.String(),
 		Producer:    l.Producer}
+}
+
+type VerifyUser struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
+
+func (vu *VerifyUser) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.VerifyUserRequested)
+	outEvent.Uid = uuid.New().String()
+	outEvent.VerifyToken = r.URL.Query().Get("verify_token")
+
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, out
+}
+
+func (vu *VerifyUser) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.UserVerified)
+
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody.Errs = &inEvent.EventStatus.Errors
+	}
+	return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
+}
+
+func (vu *VerifyUser) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	inUnmarshal := usecases.KafkaMessageUnmarshal(func(key []byte, val []byte) (proto.Message, bool) {
+		var inEvent events.UserVerified
+		if err := proto.Unmarshal(val, &inEvent); err == nil {
+			if outKey == string(key) {
+				return &inEvent, true
+			}
+		}
+		return nil, false
+	})
+
+	return &usecases.EventDrivenUsecase{
+		Consumer:    vu.Consumer,
+		InTopic:     events.UserTopic_USER_VERIFIED.String(),
+		InUnmarshal: inUnmarshal,
+		OutTopic:    events.UserTopic_VERIFY_USER_REQUESTED.String(),
+		Producer:    vu.Producer,
+	}
 }

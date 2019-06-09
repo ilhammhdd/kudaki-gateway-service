@@ -33,6 +33,7 @@ func main() {
 
 func restListener() {
 	http.Handle("/signup", rest.MethodValidator(http.MethodPost, new(rest.Signup)))
+	http.Handle("/user/verify", rest.MethodValidator(http.MethodGet, new(rest.VerifyUser)))
 	http.Handle("/login", rest.MethodValidator(http.MethodPost, new(rest.Login)))
 
 	server := &http.Server{
