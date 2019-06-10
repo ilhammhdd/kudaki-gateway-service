@@ -11,7 +11,7 @@ import (
 
 	"github.com/google/uuid"
 
-	kudakirpc "github.com/ilhammhdd/kudaki-entities/rpc"
+	kudakigrpc "github.com/ilhammhdd/kudaki-externals/grpc"
 
 	"google.golang.org/grpc"
 
@@ -221,7 +221,7 @@ func Authenticate(h http.Handler) http.Handler {
 			return
 		}
 
-		uar := kudakirpc.UserAuthenticationRequested{
+		uar := kudakigrpc.UserAuthenticationRequested{
 			Uid: uuid.New().String(),
 			Jwt: r.Header.Get("Kudaki-Token")}
 
@@ -230,7 +230,7 @@ func Authenticate(h http.Handler) http.Handler {
 
 		defer conn.Close()
 
-		client := kudakirpc.NewUserClient(conn)
+		client := kudakigrpc.NewUserClient(conn)
 
 		ua, err := client.UserAuthentication(r.Context(), &uar)
 		if err != nil {
@@ -268,9 +268,9 @@ func Authorize(role user.Role, h http.Handler) http.Handler {
 		conn, err := grpc.Dial(os.Getenv("USER_SERVICE_GRPC_ADDRESS"), grpc.WithInsecure())
 		errorkit.ErrorHandled(err)
 
-		uc := kudakirpc.NewUserClient(conn)
+		uc := kudakigrpc.NewUserClient(conn)
 
-		uar := &kudakirpc.UserAuthorizationRequested{
+		uar := &kudakigrpc.UserAuthorizationRequested{
 			Jwt:  r.Header.Get("Kudaki-Token"),
 			Role: role,
 			Uid:  uuid.New().String()}

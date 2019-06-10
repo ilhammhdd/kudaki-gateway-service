@@ -36,6 +36,10 @@ func restListener() {
 	http.Handle("/user/verify", rest.MethodValidator(http.MethodGet, new(rest.VerifyUser)))
 	http.Handle("/login", rest.MethodValidator(http.MethodPost, new(rest.Login)))
 	http.Handle("/user/password/change", rest.MethodValidator(http.MethodPut, rest.Authenticate(new(rest.ChangePassword))))
+	http.Handle("/user/password/reset", rest.MethodRouting{
+		PostHandler: new(rest.ResetPasswordSendEmail),
+		PutHandler:  new(rest.ResetPassword),
+	})
 
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%s", os.Getenv("REST_PORT"))}

@@ -116,3 +116,66 @@ func (cp *ChangePassword) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	adapter := adapters.ChangePassword{Consumer: kafka.NewConsumption(), Producer: kafka.NewProduction()}
 	adapters.HandleEventDriven(r, &adapter).WriteResponse(&w)
 }
+
+type ResetPasswordSendEmail struct{}
+
+func (rpse *ResetPasswordSendEmail) validate(r *http.Request) (*[]string, bool) {
+	r.ParseMultipartForm(32 << 20)
+
+	restValidation := RestValidation{
+		Rules:   map[string]string{"email": RegexEmail},
+		request: r}
+
+	return restValidation.Validate()
+}
+
+func (rpse *ResetPasswordSendEmail) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, ok := rpse.validate(r); !ok {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	adapter := adapters.ResetPasswordSendEmail{Consumer: kafka.NewConsumption(), Producer: kafka.NewProduction()}
+	adapters.HandleEventDriven(r, &adapter).WriteResponse(&w)
+}
+
+type ResetPassword struct{}
+
+func (rp *ResetPassword) validate(r *http.Request) (*[]string, bool) {
+	r.ParseMultipartForm(32 << 20)
+	var allErrs []string
+	var allOk bool = true
+
+	restValidation := RestValidation{
+		Rules:   map[string]string{"new_password": RegexPassword},
+		request: r}
+
+	if errs, ok := restValidation.Validate(); !ok {
+		allErrs = append(allErrs, *errs...)
+		allOk = false
+	}
+
+	urlValidation := URLParamValidation{
+		Rules: map[string]string{
+			"reset_token": RegexJWT},
+		Values: r.URL.Query()}
+
+	if errs, ok := urlValidation.Validate(); !ok {
+		allErrs = append(allErrs, *errs...)
+		allOk = false
+	}
+
+	return &allErrs, allOk
+}
+
+func (rp *ResetPassword) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, ok := rp.validate(r); !ok {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	adapter := adapters.ResetPassword{Consumer: kafka.NewConsumption(), Producer: kafka.NewProduction()}
+	adapters.HandleEventDriven(r, &adapter).WriteResponse(&w)
+}
