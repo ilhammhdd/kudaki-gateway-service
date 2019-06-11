@@ -13,6 +13,25 @@ import (
 
 type KafkaMessageUnmarshal func(key []byte, val []byte) (proto.Message, bool)
 
+type EventDrivenSourceHandler interface {
+	Handle(outKey string, outMsg []byte)
+}
+
+type EventDrivenSourceUsecase struct {
+	OutTopic string
+	Producer EventDrivenProducer
+}
+
+func (edsu *EventDrivenSourceUsecase) Handle(outKey string, outMsg []byte) {
+	edsu.Producer.Set(edsu.OutTopic)
+	start := time.Now()
+	partition, offset, err := edsu.Producer.SyncProduce(outKey, outMsg)
+	duration := time.Since(start)
+	errorkit.ErrorHandled(err)
+
+	log.Printf("produced %s : partition = %d, offset = %d, key = %s, duration = %f seconds", edsu.OutTopic, partition, offset, outKey, duration.Seconds())
+}
+
 type EventDrivenHandler interface {
 	Handle(outKey string, outMsg []byte) (inEvent proto.Message)
 	produce(outKey string, outMsg []byte)
@@ -38,7 +57,7 @@ func (edu *EventDrivenUsecase) produce(outKey string, outMsg []byte) {
 	part, offset, err := edu.Producer.SyncProduce(outKey, outMsg)
 	errorkit.ErrorHandled(err)
 	duration := time.Since(start)
-	log.Printf("produced %s : partition = %d, offset = %d, duration = %f seconds", edu.OutTopic, part, offset, duration.Seconds())
+	log.Printf("produced %s : partition = %d, offset = %d, key = %s, duration = %f seconds", edu.OutTopic, part, offset, outKey, duration.Seconds())
 }
 
 func (edu *EventDrivenUsecase) consume() (inEvent proto.Message) {

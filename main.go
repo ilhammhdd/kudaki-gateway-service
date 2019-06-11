@@ -40,6 +40,12 @@ func restListener() {
 		PostHandler: new(rest.ResetPasswordSendEmail),
 		PutHandler:  new(rest.ResetPassword),
 	})
+	http.Handle("/store/storefront/item", rest.MethodRouting{
+		PostHandler:   rest.Authenticate(new(rest.AddStorefrontItem)),
+		PutHandler:    rest.Authenticate(new(rest.UpdateStorefrontItem)),
+		DeleteHandler: rest.Authenticate(new(rest.DeleteStorefrontItem)),
+		GetHandler:    rest.Authenticate(new(rest.GetAllStorefrontItems)),
+	})
 
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%s", os.Getenv("REST_PORT"))}
