@@ -1,14 +1,18 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/RediSearch/redisearch-go/redisearch"
+
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 	"github.com/ilhammhdd/go-toolkit/safekit"
+	kudakiredisearch "github.com/ilhammhdd/kudaki-externals/redisearch"
 	"github.com/ilhammhdd/kudaki-gateway-service/externals/rest"
 )
 
@@ -44,8 +48,42 @@ func restListener() {
 		PostHandler:   rest.Authenticate(new(rest.AddStorefrontItem)),
 		PutHandler:    rest.Authenticate(new(rest.UpdateStorefrontItem)),
 		DeleteHandler: rest.Authenticate(new(rest.DeleteStorefrontItem)),
-		GetHandler:    rest.Authenticate(new(rest.GetAllStorefrontItems)),
 	})
+	http.Handle("/store/storefront/items", rest.Authenticate(new(rest.GetAllStorefrontItems)))
+
+	http.Handle("/mock/index/drop/all", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		client := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Item.Name())
+		client.Drop()
+		client = redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Storefront.Name())
+		client.Drop()
+		client = redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Profile.Name())
+		client.Drop()
+		client = redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.User.Name())
+		client.Drop()
+
+		w.WriteHeader(http.StatusOK)
+	}))
+	http.Handle("/mock/storefront/items", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		client := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Item.Name())
+		rawQuery := fmt.Sprintf(`@storefront_uuid:"%s"`, kudakiredisearch.RedisearchText("6647cd7a-25b2-41ee-9ac7-f15959139274").Sanitize())
+		docs, total, err := client.Search(redisearch.NewQuery(rawQuery))
+		errorkit.ErrorHandled(err)
+		log.Printf("searched %d storefront items", total)
+		log.Printf("item docs : %v", docs)
+
+		type responseData struct {
+			ItemDocs []redisearch.Document `json:"item_docs"`
+		}
+
+		var resData responseData
+		resData.ItemDocs = docs
+		resDataMarshalled, err := json.Marshal(resData)
+		errorkit.ErrorHandled(err)
+
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(resDataMarshalled)
+	}))
 
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%s", os.Getenv("REST_PORT"))}

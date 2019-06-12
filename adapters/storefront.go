@@ -4,6 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/RediSearch/redisearch-go/redisearch"
+
+	"github.com/ilhammhdd/kudaki-entities/store"
+
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 
 	"github.com/google/uuid"
@@ -179,6 +183,11 @@ func (dsi *DeleteStorefrontItem) initUsecaseHandler(outKey string) usecases.Even
 		InUnmarshal: &inUnmarshal}
 }
 
+type GetAllStorefrontItemsProcessResult struct {
+	Storefront         *store.Storefront
+	StorefrontItemDocs []redisearch.Document
+}
+
 type GetAllStorefrontItems struct {
 	Producer usecases.EventDrivenProducer
 }
@@ -203,8 +212,41 @@ func (gasi *GetAllStorefrontItems) ParseRequestToKafkaMessage(r *http.Request) (
 }
 
 func (gasi *GetAllStorefrontItems) ParseResultToResponse(result interface{}) *Response {
+	assertedResult := result.(*GetAllStorefrontItemsProcessResult)
 
-	return nil
+	var storefrontItems []*store.Item
+	for _, itemDoc := range assertedResult.StorefrontItemDocs {
+		amount, err := strconv.ParseInt(itemDoc.Properties["item_amount"].(string), 10, 32)
+		errorkit.ErrorHandled(err)
+		price, err := strconv.ParseInt(itemDoc.Properties["item_price"].(string), 10, 32)
+		errorkit.ErrorHandled(err)
+		rating, err := strconv.ParseFloat(itemDoc.Properties["item_rating"].(string), 10)
+		errorkit.ErrorHandled(err)
+
+		item := new(store.Item)
+		item.Amount = int32(amount)
+		item.Description = itemDoc.Properties["item_description"].(string)
+		item.Name = itemDoc.Properties["item_name"].(string)
+		item.Photo = itemDoc.Properties["item_photo"].(string)
+		item.Price = int32(price)
+		item.Rating = float32(rating)
+		item.Unit = itemDoc.Properties["item_unit"].(string)
+		item.Uuid = itemDoc.Properties["item_uuid"].(string)
+
+		storefrontItems = append(storefrontItems, item)
+	}
+
+	type responseData struct {
+		Storefront *store.Storefront `json:"storefront"`
+		Items      []*store.Item     `json:"items"`
+	}
+
+	resData := responseData{
+		Items:      storefrontItems,
+		Storefront: assertedResult.Storefront}
+
+	resBody := ResponseBody{Data: resData}
+	return NewResponse(http.StatusOK, &resBody)
 }
 
 func (gasi *GetAllStorefrontItems) initUseCaseSourceHandler(outKey string) usecases.EventDrivenSourceHandler {
