@@ -3,6 +3,8 @@ package adapters
 import (
 	"net/http"
 
+	"github.com/ilhammhdd/go-toolkit/safekit"
+
 	"github.com/ilhammhdd/kudaki-gateway-service/usecases"
 
 	"github.com/golang/protobuf/proto"
@@ -26,8 +28,10 @@ type EventDrivenSourceHandler interface {
 func HandleEventDrivenSource(r *http.Request, edsh EventDrivenSourceHandler, edsp EventDrivenSourceProcessor) *Response {
 	outKey, outMsg := edsh.ParseRequestToKafkaMessage(r)
 	result := edsp.Process(r)
-	usecaseHandler := edsh.initUseCaseSourceHandler(outKey)
-	usecaseHandler.Handle(outKey, outMsg)
+	safekit.Do(func() {
+		usecaseHandler := edsh.initUseCaseSourceHandler(outKey)
+		usecaseHandler.Handle(outKey, outMsg)
+	})
 	return edsh.ParseResultToResponse(result)
 }
 

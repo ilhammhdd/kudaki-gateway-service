@@ -63,7 +63,7 @@ func (usi *UpdateStorefrontItem) validate(r *http.Request) (errs *[]string, ok b
 			"unit":        RegexNotEmpty,
 			"price":       RegexNumber,
 			"description": RegexNotEmpty,
-			"photo":       RegexURL},
+			"photo":       RegexNotEmpty},
 		request: r}
 
 	return restValidation.Validate()

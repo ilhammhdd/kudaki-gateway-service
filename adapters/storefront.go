@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/ilhammhdd/kudaki-entities/events"
+	kudakiredisearch "github.com/ilhammhdd/kudaki-externals/redisearch"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/ilhammhdd/kudaki-gateway-service/usecases"
@@ -87,11 +88,15 @@ func (usi *UpdateStorefrontItem) ParseRequestToKafkaMessage(r *http.Request) (ke
 
 	amount, err := strconv.ParseInt(r.MultipartForm.Value["amount"][0], 10, 32)
 	errorkit.ErrorHandled(err)
+	price, err := strconv.ParseInt(r.MultipartForm.Value["price"][0], 10, 32)
+	errorkit.ErrorHandled(err)
 
 	outEvent.Amount = int32(amount)
 	outEvent.Description = r.MultipartForm.Value["description"][0]
+	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
 	outEvent.Name = r.MultipartForm.Value["name"][0]
 	outEvent.Photo = r.MultipartForm.Value["photo"][0]
+	outEvent.Price = int32(price)
 	outEvent.Uid = uuid.New().String()
 	outEvent.Unit = r.MultipartForm.Value["unit"][0]
 	outEvent.Uuid = r.MultipartForm.Value["uuid"][0]
@@ -216,12 +221,9 @@ func (gasi *GetAllStorefrontItems) ParseResultToResponse(result interface{}) *Re
 
 	var storefrontItems []*store.Item
 	for _, itemDoc := range assertedResult.StorefrontItemDocs {
-		amount, err := strconv.ParseInt(itemDoc.Properties["item_amount"].(string), 10, 32)
-		errorkit.ErrorHandled(err)
-		price, err := strconv.ParseInt(itemDoc.Properties["item_price"].(string), 10, 32)
-		errorkit.ErrorHandled(err)
-		rating, err := strconv.ParseFloat(itemDoc.Properties["item_rating"].(string), 10)
-		errorkit.ErrorHandled(err)
+		amount, _ := strconv.ParseInt(itemDoc.Properties["item_amount"].(string), 10, 32)
+		price, _ := strconv.ParseInt(itemDoc.Properties["item_price"].(string), 10, 32)
+		rating, _ := strconv.ParseFloat(itemDoc.Properties["item_rating"].(string), 10)
 
 		item := new(store.Item)
 		item.Amount = int32(amount)
@@ -231,7 +233,7 @@ func (gasi *GetAllStorefrontItems) ParseResultToResponse(result interface{}) *Re
 		item.Price = int32(price)
 		item.Rating = float32(rating)
 		item.Unit = itemDoc.Properties["item_unit"].(string)
-		item.Uuid = itemDoc.Properties["item_uuid"].(string)
+		item.Uuid = kudakiredisearch.RedisearchText(itemDoc.Properties["item_uuid"].(string)).UnSanitize()
 
 		storefrontItems = append(storefrontItems, item)
 	}

@@ -65,8 +65,8 @@ func restListener() {
 	}))
 	http.Handle("/mock/storefront/items", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		client := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Item.Name())
-		rawQuery := fmt.Sprintf(`@storefront_uuid:"%s"`, kudakiredisearch.RedisearchText("6647cd7a-25b2-41ee-9ac7-f15959139274").Sanitize())
-		docs, total, err := client.Search(redisearch.NewQuery(rawQuery))
+		// rawQuery := fmt.Sprintf(`@storefront_uuid:"%s"`, kudakiredisearch.RedisearchText("6647cd7a-25b2-41ee-9ac7-f15959139274").Sanitize())
+		docs, total, err := client.Search(redisearch.NewQuery( /* rawQuery */ `*`))
 		errorkit.ErrorHandled(err)
 		log.Printf("searched %d storefront items", total)
 		log.Printf("item docs : %v", docs)
