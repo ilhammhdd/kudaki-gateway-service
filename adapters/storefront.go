@@ -147,7 +147,8 @@ type DeleteStorefrontItem struct {
 func (dsi *DeleteStorefrontItem) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
 	outEvent := new(events.DeleteStorefrontItemRequested)
 
-	outEvent.ItemUuid = r.MultipartForm.Value["item_uuid"][0]
+	outEvent.ItemUuid = r.URL.Query().Get("item_uuid")
+	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
 	outEvent.Uid = uuid.New().String()
 
 	out, err := proto.Marshal(outEvent)
