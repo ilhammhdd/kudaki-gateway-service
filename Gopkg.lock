@@ -96,7 +96,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:defc97fe2f74d8444e3675d86598eaa4d2352b7299d52b02500a7547f2bb80fb"
+  digest = "1:d2ab7eda8225ae62bb22abea3f78174f4815adeccf518015583a6eb3821720a0"
   name = "github.com/ilhammhdd/kudaki-entities"
   packages = [
     "events",
@@ -106,11 +106,11 @@
     "user",
   ]
   pruneopts = "UT"
-  revision = "1cead21378314a06b668df5b314e2d62f53c9ce0"
+  revision = "cf3b3b4ee1f44f8faa39010b85886ca67045c11e"
 
 [[projects]]
   branch = "master"
-  digest = "1:4285f5368276feec1985a3bf7655035b52ede26af2ac1472e31ae9657f323fbe"
+  digest = "1:1ac6f8bbca767aa143e36d5fc9332f0d43e8bf72c333842b06b1dd2c10013874"
   name = "github.com/ilhammhdd/kudaki-externals"
   packages = [
     "grpc",
@@ -118,7 +118,7 @@
     "redisearch",
   ]
   pruneopts = "UT"
-  revision = "09113d4c5e03b83a64bc50bb81e84fc438e55e6b"
+  revision = "eefed371939a9d72d4b75aae2b4e521e20de0951"
 
 [[projects]]
   digest = "1:259f9b7645983a7a823318d78aa96dec68af8891f706493ac1ec04d819cb977c"

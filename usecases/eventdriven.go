@@ -13,16 +13,16 @@ import (
 
 type KafkaMessageUnmarshal func(key []byte, val []byte) (proto.Message, bool)
 
-type EventDrivenSourceHandler interface {
+type EventDrivenUpstreamHandler interface {
 	Handle(outKey string, outMsg []byte)
 }
 
-type EventDrivenSourceUsecase struct {
+type EventDrivenUpstreamUsecase struct {
 	OutTopic string
 	Producer EventDrivenProducer
 }
 
-func (edsu *EventDrivenSourceUsecase) Handle(outKey string, outMsg []byte) {
+func (edsu *EventDrivenUpstreamUsecase) Handle(outKey string, outMsg []byte) {
 	edsu.Producer.Set(edsu.OutTopic)
 	start := time.Now()
 	partition, offset, err := edsu.Producer.SyncProduce(outKey, outMsg)

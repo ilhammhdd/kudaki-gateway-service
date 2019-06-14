@@ -6,8 +6,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/ilhammhdd/kudaki-entities/store"
-
 	"github.com/RediSearch/redisearch-go/redisearch"
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
@@ -108,9 +106,9 @@ func (dsi *DeleteStorefrontItem) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	adapters.HandleEventDriven(r, &adapter).WriteResponse(&w)
 }
 
-type GetAllStorefrontItems struct{}
+type GetAllUsersStorefrontItems struct{}
 
-func (gasi *GetAllStorefrontItems) validate(r *http.Request) (errs *[]string, ok bool) {
+func (gasi *GetAllUsersStorefrontItems) validate(r *http.Request) (errs *[]string, ok bool) {
 	urlValidation := URLParamValidation{
 		Rules: map[string]string{
 			"offset": RegexNumber,
@@ -120,18 +118,18 @@ func (gasi *GetAllStorefrontItems) validate(r *http.Request) (errs *[]string, ok
 	return urlValidation.Validate()
 }
 
-func (gasi *GetAllStorefrontItems) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (gasi *GetAllUsersStorefrontItems) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if errs, valid := gasi.validate(r); !valid {
 		resBody := adapters.ResponseBody{Errs: errs}
 		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 		return
 	}
 
-	adapter := &adapters.GetAllStorefrontItems{Producer: kafka.NewProduction()}
-	adapters.HandleEventDrivenSource(r, adapter, gasi).WriteResponse(&w)
+	adapter := &adapters.GetAllUsersStorefrontItems{Producer: kafka.NewProduction()}
+	adapters.HandleEventDrivenUpstream(r, adapter, gasi).WriteResponse(&w)
 }
 
-func (gasi *GetAllStorefrontItems) Process(r *http.Request) (result interface{}) {
+func (gasi *GetAllUsersStorefrontItems) Process(r *http.Request) (result interface{}) {
 	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
 	errorkit.ErrorHandled(err)
 	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 64)
@@ -141,15 +139,15 @@ func (gasi *GetAllStorefrontItems) Process(r *http.Request) (result interface{})
 	storefront := gasi.retrieveStorefront(usr.Uuid)
 	var storefrontItemDocs []redisearch.Document
 	if storefront != nil {
-		storefrontItemDocs = gasi.retrieveStorefrontItems(int(offset), int(limit), storefront.Uuid)
+		storefrontItemDocs = gasi.retrieveStorefrontItems(int(offset), int(limit), storefront.Properties["storefront_uuid"].(string))
 	}
 
-	return &adapters.GetAllStorefrontItemsProcessResult{
+	return &adapters.GetAllUsersStorefrontItemsProcessResult{
 		Storefront:         storefront,
-		StorefrontItemDocs: storefrontItemDocs}
+		StorefrontItemDocs: &storefrontItemDocs}
 }
 
-func (gasi *GetAllStorefrontItems) getUserFromKudakiToken(kudakiToken string) *user.User {
+func (gasi *GetAllUsersStorefrontItems) getUserFromKudakiToken(kudakiToken string) *user.User {
 	jwt, err := jwtkit.GetJWT(jwtkit.JWTString(kudakiToken))
 	errorkit.ErrorHandled(err)
 
@@ -165,7 +163,7 @@ func (gasi *GetAllStorefrontItems) getUserFromKudakiToken(kudakiToken string) *u
 	return usr
 }
 
-func (gasi *GetAllStorefrontItems) retrieveStorefront(userUUID string) *store.Storefront {
+func (gasi *GetAllUsersStorefrontItems) retrieveStorefront(userUUID string) *redisearch.Document {
 	client := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Storefront.Name())
 	client.CreateIndex(kudakiredisearch.Storefront.Schema())
 	rawQuery := fmt.Sprintf(`@user_uuid:"%s"`, kudakiredisearch.RedisearchText(userUUID).Sanitize())
@@ -173,7 +171,7 @@ func (gasi *GetAllStorefrontItems) retrieveStorefront(userUUID string) *store.St
 	errorkit.ErrorHandled(err)
 
 	if total != 0 {
-		totalItem, err := strconv.ParseInt(docs[0].Properties["storefront_total_item"].(string), 10, 32)
+		/* totalItem, err := strconv.ParseInt(docs[0].Properties["storefront_total_item"].(string), 10, 32)
 		errorkit.ErrorHandled(err)
 		rating, err := strconv.ParseFloat(docs[0].Properties["storefront_rating"].(string), 10)
 		errorkit.ErrorHandled(err)
@@ -183,20 +181,18 @@ func (gasi *GetAllStorefrontItems) retrieveStorefront(userUUID string) *store.St
 		storefront.Uuid = unsanitizedStorefrontUUID
 		storefront.TotalItem = int32(totalItem)
 		storefront.Rating = float32(rating)
-		return &storefront
+		return &storefront */
+		return &docs[0]
 	}
 	return nil
 }
 
-func (gasi *GetAllStorefrontItems) retrieveStorefrontItems(offset int, num int, storefrontUUID string) []redisearch.Document {
+func (gasi *GetAllUsersStorefrontItems) retrieveStorefrontItems(offset int, num int, storefrontUUID string) []redisearch.Document {
 	client := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Item.Name())
 	client.CreateIndex(kudakiredisearch.Item.Schema())
-	rawQuery := fmt.Sprintf(`@storefront_uuid:"%s"`, kudakiredisearch.RedisearchText(storefrontUUID).Sanitize())
-	itemDocs, total, err := client.Search(redisearch.NewQuery(rawQuery).Limit(offset, num))
+	rawQuery := fmt.Sprintf(`@storefront_uuid:"%s"`, storefrontUUID)
+	itemDocs, _, err := client.Search(redisearch.NewQuery(rawQuery).Limit(offset, num))
 	errorkit.ErrorHandled(err)
 
-	if total != 0 {
-		return itemDocs
-	}
-	return nil
+	return itemDocs
 }

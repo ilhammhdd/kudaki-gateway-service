@@ -6,13 +6,10 @@ import (
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 
-	"github.com/ilhammhdd/kudaki-entities/store"
-
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 
 	"github.com/google/uuid"
 	"github.com/ilhammhdd/kudaki-entities/events"
-	kudakiredisearch "github.com/ilhammhdd/kudaki-externals/redisearch"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/ilhammhdd/kudaki-gateway-service/usecases"
@@ -189,17 +186,17 @@ func (dsi *DeleteStorefrontItem) initUsecaseHandler(outKey string) usecases.Even
 		InUnmarshal: &inUnmarshal}
 }
 
-type GetAllStorefrontItemsProcessResult struct {
-	Storefront         *store.Storefront
-	StorefrontItemDocs []redisearch.Document
+type GetAllUsersStorefrontItemsProcessResult struct {
+	Storefront         *redisearch.Document
+	StorefrontItemDocs *[]redisearch.Document
 }
 
-type GetAllStorefrontItems struct {
+type GetAllUsersStorefrontItems struct {
 	Producer usecases.EventDrivenProducer
 }
 
-func (gasi *GetAllStorefrontItems) ParseRequestToKafkaMessage(r *http.Request) (outKey string, outMsg []byte) {
-	outEvent := new(events.RetrieveStorefrontItemsRequested)
+func (gasi *GetAllUsersStorefrontItems) ParseRequestToKafkaMessage(r *http.Request) (outKey string, outMsg []byte) {
+	outEvent := new(events.RetrieveUsersStorefrontItemsRequested)
 
 	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 32)
 	errorkit.ErrorHandled(err)
@@ -209,18 +206,18 @@ func (gasi *GetAllStorefrontItems) ParseRequestToKafkaMessage(r *http.Request) (
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
 	outEvent.Limit = int32(limit)
 	outEvent.Offset = int32(offset)
-	outEvent.Uid = uuid.New().String()
+	outEvent.Uuid = uuid.New().String()
 
 	outByte, err := proto.Marshal(outEvent)
 	errorkit.ErrorHandled(err)
 
-	return outEvent.Uid, outByte
+	return outEvent.Uuid, outByte
 }
 
-func (gasi *GetAllStorefrontItems) ParseResultToResponse(result interface{}) *Response {
-	assertedResult := result.(*GetAllStorefrontItemsProcessResult)
+func (gasi *GetAllUsersStorefrontItems) ParseResultToResponse(result interface{}) *Response {
+	assertedResult := result.(*GetAllUsersStorefrontItemsProcessResult)
 
-	var storefrontItems []*store.Item
+	/* var storefrontItems []*store.Item
 	for _, itemDoc := range assertedResult.StorefrontItemDocs {
 		amount, _ := strconv.ParseInt(itemDoc.Properties["item_amount"].(string), 10, 32)
 		price, _ := strconv.ParseInt(itemDoc.Properties["item_price"].(string), 10, 32)
@@ -237,23 +234,25 @@ func (gasi *GetAllStorefrontItems) ParseResultToResponse(result interface{}) *Re
 		item.Uuid = kudakiredisearch.RedisearchText(itemDoc.Properties["item_uuid"].(string)).UnSanitize()
 
 		storefrontItems = append(storefrontItems, item)
-	}
+	} */
 
 	type responseData struct {
-		Storefront *store.Storefront `json:"storefront"`
-		Items      []*store.Item     `json:"items"`
+		// Storefront *store.Storefront `json:"storefront"`
+		Storefront *redisearch.Document `json:"storefront"`
+		// Items      []*store.Item     `json:"items"`
+		Items *[]redisearch.Document `json:"items"`
 	}
 
 	resData := responseData{
-		Items:      storefrontItems,
+		Items:      assertedResult.StorefrontItemDocs,
 		Storefront: assertedResult.Storefront}
 
 	resBody := ResponseBody{Data: resData}
 	return NewResponse(http.StatusOK, &resBody)
 }
 
-func (gasi *GetAllStorefrontItems) initUseCaseSourceHandler(outKey string) usecases.EventDrivenSourceHandler {
-	return &usecases.EventDrivenSourceUsecase{
+func (gasi *GetAllUsersStorefrontItems) initUseCaseUpstreamHandler(outKey string) usecases.EventDrivenUpstreamHandler {
+	return &usecases.EventDrivenUpstreamUsecase{
 		OutTopic: events.StoreTopic_RETRIEVE_STOREFRONT_ITEMS_REQUESTED.String(),
 		Producer: gasi.Producer}
 }

@@ -15,21 +15,21 @@ type Event struct {
 	Uid     string
 }
 
-type EventDrivenSourceProcessor interface {
+type EventDrivenUpstreamProcessor interface {
 	Process(r *http.Request) (result interface{})
 }
 
-type EventDrivenSourceHandler interface {
+type EventDrivenUpstreamHandler interface {
 	ParseRequestToKafkaMessage(r *http.Request) (outKey string, outMsg []byte)
 	ParseResultToResponse(result interface{}) *Response
-	initUseCaseSourceHandler(outKey string) usecases.EventDrivenSourceHandler
+	initUseCaseUpstreamHandler(outKey string) usecases.EventDrivenUpstreamHandler
 }
 
-func HandleEventDrivenSource(r *http.Request, edsh EventDrivenSourceHandler, edsp EventDrivenSourceProcessor) *Response {
+func HandleEventDrivenUpstream(r *http.Request, edsh EventDrivenUpstreamHandler, edsp EventDrivenUpstreamProcessor) *Response {
 	outKey, outMsg := edsh.ParseRequestToKafkaMessage(r)
 	result := edsp.Process(r)
 	safekit.Do(func() {
-		usecaseHandler := edsh.initUseCaseSourceHandler(outKey)
+		usecaseHandler := edsh.initUseCaseUpstreamHandler(outKey)
 		usecaseHandler.Handle(outKey, outMsg)
 	})
 	return edsh.ParseResultToResponse(result)
