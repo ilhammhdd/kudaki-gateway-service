@@ -22,8 +22,8 @@
   name = "github.com/eapache/go-resiliency"
   packages = ["breaker"]
   pruneopts = "UT"
-  revision = "ea41b0fad31007accc7f806884dcdf3da98b79ce"
-  version = "v1.1.0"
+  revision = "5efd2ed019fd331ec2defc6f3bd98882f1e3e636"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
@@ -51,6 +51,14 @@
   pruneopts = "UT"
   revision = "a69d19351219b6dd56f274f96d85a7014a2ec34e"
   version = "v1.6.0"
+
+[[projects]]
+  digest = "1:ec6f9bf5e274c833c911923c9193867f3f18788c461f76f05f62bb1510e0ae65"
+  name = "github.com/go-sql-driver/mysql"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "72cd26f257d44c1114970e19afddcd812016007e"
+  version = "v1.4.1"
 
 [[projects]]
   digest = "1:239c4c7fd2159585454003d9be7207167970194216193a8a210b8d29576f19c9"
@@ -96,7 +104,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d2ab7eda8225ae62bb22abea3f78174f4815adeccf518015583a6eb3821720a0"
+  digest = "1:7951d3292dbc4a10f08badb98b2fdd7b8ad07745d66ac29df3f18dc8b8e09ec2"
   name = "github.com/ilhammhdd/kudaki-entities"
   packages = [
     "events",
@@ -106,11 +114,11 @@
     "user",
   ]
   pruneopts = "UT"
-  revision = "cf3b3b4ee1f44f8faa39010b85886ca67045c11e"
+  revision = "796139347662d55ff36a7b89f9717b2e3aebe5cc"
 
 [[projects]]
   branch = "master"
-  digest = "1:1ac6f8bbca767aa143e36d5fc9332f0d43e8bf72c333842b06b1dd2c10013874"
+  digest = "1:6733d30f28e6e4dbd02d85e9007a2f2bd06518c3c78591e2a098696a249993bc"
   name = "github.com/ilhammhdd/kudaki-externals"
   packages = [
     "grpc",
@@ -118,7 +126,7 @@
     "redisearch",
   ]
   pruneopts = "UT"
-  revision = "eefed371939a9d72d4b75aae2b4e521e20de0951"
+  revision = "b48b69a96f9919ca51cdec173b43717ea98f5b90"
 
 [[projects]]
   digest = "1:259f9b7645983a7a823318d78aa96dec68af8891f706493ac1ec04d819cb977c"
@@ -152,15 +160,15 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "3f473d35a33aa6fdd203e306dc439b797820e3f1"
+  revision = "d28f0bde5980168871434b95cfc858db9f2a7a99"
 
 [[projects]]
   branch = "master"
-  digest = "1:010311506e3917b54487c35a4277e2709678a40c1587d82492c40b78b6a0a01d"
+  digest = "1:f928471955a5e8c1d148de46c6660e9fc4d08fa0ed065f90d9adba8fe1fe6101"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "93c9922d18aeb82498a065f07aec7ad7fa60dfb7"
+  revision = "b47fdc937951267e2d980171881317deea47f29b"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
@@ -186,6 +194,14 @@
   pruneopts = "UT"
   revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
   version = "v0.3.2"
+
+[[projects]]
+  digest = "1:c25289f43ac4a68d88b02245742347c94f1e108c534dda442188015ff80669b3"
+  name = "google.golang.org/appengine"
+  packages = ["cloudsql"]
+  pruneopts = "UT"
+  revision = "b2f4a3cf3c67576a2ee09e1fe62656a5086ce880"
+  version = "v1.6.1"
 
 [[projects]]
   branch = "master"
@@ -249,13 +265,13 @@
   analyzer-version = 1
   input-imports = [
     "github.com/RediSearch/redisearch-go/redisearch",
+    "github.com/go-sql-driver/mysql",
     "github.com/golang/protobuf/proto",
     "github.com/google/uuid",
     "github.com/ilhammhdd/go-toolkit/errorkit",
     "github.com/ilhammhdd/go-toolkit/jwtkit",
     "github.com/ilhammhdd/go-toolkit/safekit",
     "github.com/ilhammhdd/kudaki-entities/events",
-    "github.com/ilhammhdd/kudaki-entities/store",
     "github.com/ilhammhdd/kudaki-entities/user",
     "github.com/ilhammhdd/kudaki-externals/grpc",
     "github.com/ilhammhdd/kudaki-externals/kafka",

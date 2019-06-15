@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/google/uuid"
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
@@ -67,4 +68,43 @@ func (aci *AddCartItem) initUsecaseHandler(outKey string) usecases.EventDrivenHa
 		InUnmarshal: &inUnmarshal,
 		OutTopic:    events.RentalTopic_ADD_CART_ITEM_REQUESTED.String(),
 		Producer:    aci.Producer}
+}
+
+type RetrieveCartItems struct {
+	Producer usecases.EventDrivenProducer
+}
+
+func (rci *RetrieveCartItems) ParseRequestToKafkaMessage(r *http.Request) (outKey string, outMsg []byte) {
+	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 32)
+	errorkit.ErrorHandled(err)
+	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 32)
+	errorkit.ErrorHandled(err)
+
+	outEvent := new(events.RetreiveCartItemsRequested)
+	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
+	outEvent.Limit = int32(limit)
+	outEvent.Offset = int32(offset)
+	outEvent.Uuid = uuid.New().String()
+
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uuid, out
+}
+
+type RetrieveCartItemsResult struct {
+	CartDoc       *redisearch.Document   `json:"cart"`
+	CartItemsDocs *[]redisearch.Document `json:"cart_item"`
+}
+
+func (rci *RetrieveCartItems) ParseResultToResponse(result interface{}) *Response {
+	resBody := ResponseBody{Data: result}
+
+	return NewResponse(http.StatusOK, &resBody)
+}
+
+func (rci *RetrieveCartItems) initUseCaseUpstreamHandler(outKey string) usecases.EventDrivenUpstreamHandler {
+	return &usecases.EventDrivenUpstreamUsecase{
+		OutTopic: events.RentalTopic_RETRIEVE_CART_ITEMS_REQUESTED.String(),
+		Producer: rci.Producer}
 }
