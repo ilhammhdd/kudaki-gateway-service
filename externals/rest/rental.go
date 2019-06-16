@@ -108,3 +108,17 @@ func (rci *RetrieveCartItems) retrieveCartItems(sanitizedCartUUID string, offset
 
 	return nil
 }
+
+type DeleteCartItem struct{}
+
+func (dci *DeleteCartItem) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (dci *DeleteCartItem) validate(r *http.Request) (errs *[]string, ok bool) {
+	urlValidation := URLParamValidation{
+		Rules:  map[string]string{"cart_item_uuid": RegexUUIDV4},
+		Values: r.URL.Query()}
+
+	return urlValidation.Validate()
+}

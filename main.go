@@ -54,7 +54,8 @@ func restListener() {
 	http.Handle("/store/items", rest.Authenticate(new(rest.RetrieveItems)))
 
 	http.Handle("/rental/cart/item", rest.MethodRouting{
-		PostHandler: rest.Authenticate(new(rest.AddCartItem)),
+		PostHandler:   rest.Authenticate(new(rest.AddCartItem)),
+		DeleteHandler: rest.Authenticate(new(rest.DeleteCartItem)),
 	})
 	http.Handle("/rental/cart/items", rest.MethodValidator(http.MethodGet, rest.Authenticate(new(rest.RetrieveCartItems))))
 

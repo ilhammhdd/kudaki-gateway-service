@@ -108,3 +108,20 @@ func (rci *RetrieveCartItems) initUseCaseUpstreamHandler(outKey string) usecases
 		OutTopic: events.RentalTopic_RETRIEVE_CART_ITEMS_REQUESTED.String(),
 		Producer: rci.Producer}
 }
+
+type DeleteCartItem struct{}
+
+func (dci *DeleteCartItem) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+
+	return "", nil
+}
+
+func (dci *DeleteCartItem) ParseEventToResponse(in proto.Message) *Response {
+
+	return nil
+}
+
+func (dci *DeleteCartItem) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+
+	return nil
+}
