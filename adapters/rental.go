@@ -156,3 +156,55 @@ func (dci *DeleteCartItem) initUsecaseHandler(outKey string) usecases.EventDrive
 		OutTopic:    events.RentalTopic_DELETE_CART_ITEM_REQUESTED.String(),
 		Producer:    dci.Producer}
 }
+
+type UpdateCartItem struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
+
+func (uci *UpdateCartItem) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	totalItem, err := strconv.ParseInt(r.URL.Query().Get("total_item"), 10, 32)
+	errorkit.ErrorHandled(err)
+
+	outEvent := &events.UpdateCartItemRequested{
+		CartItemUuid: r.URL.Query().Get("cart_item_uuid"),
+		KudakiToken:  r.Header.Get("Kudaki-Token"),
+		TotalItem:    int32(totalItem),
+		Uid:          uuid.New().String()}
+
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, out
+}
+
+func (uci *UpdateCartItem) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.CartItemUpdated)
+
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
+		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
+	}
+
+	return NewResponse(http.StatusOK, &resBody)
+}
+
+func (uci *UpdateCartItem) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	inUnmarshal := usecases.KafkaMessageUnmarshal(func(key []byte, val []byte) (proto.Message, bool) {
+		var inEvent events.CartItemUpdated
+		if proto.Unmarshal(val, &inEvent) == nil {
+			if outKey == string(key) {
+				return &inEvent, true
+			}
+		}
+		return nil, false
+	})
+
+	return &usecases.EventDrivenUsecase{
+		Consumer:    uci.Consumer,
+		InTopic:     events.RentalTopic_CART_ITEM_UPDATED.String(),
+		InUnmarshal: &inUnmarshal,
+		OutTopic:    events.RentalTopic_UPDATE_CART_ITEM_REQUESTED.String(),
+		Producer:    uci.Producer}
+}

@@ -134,3 +134,28 @@ func (dci *DeleteCartItem) validate(r *http.Request) (errs *[]string, ok bool) {
 
 	return urlValidation.Validate()
 }
+
+type UpdateCartItem struct{}
+
+func (uci *UpdateCartItem) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, valid := uci.validate(r); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	adapter := &adapters.UpdateCartItem{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction()}
+	adapters.HandleEventDriven(r, adapter).WriteResponse(&w)
+}
+
+func (uci *UpdateCartItem) validate(r *http.Request) (errs *[]string, ok bool) {
+	urlValidation := URLParamValidation{
+		Rules: map[string]string{
+			"cart_item_uuid": RegexUUIDV4,
+			"total_item":     RegexNumber},
+		Values: r.URL.Query()}
+
+	return urlValidation.Validate()
+}

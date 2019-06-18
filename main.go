@@ -7,12 +7,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/RediSearch/redisearch-go/redisearch"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 	"github.com/ilhammhdd/go-toolkit/safekit"
-	kudakiredisearch "github.com/ilhammhdd/kudaki-externals/redisearch"
 	"github.com/ilhammhdd/kudaki-gateway-service/externals/rest"
 )
 
@@ -56,22 +54,10 @@ func restListener() {
 	http.Handle("/rental/cart/item", rest.MethodRouting{
 		PostHandler:   rest.Authenticate(new(rest.AddCartItem)),
 		DeleteHandler: rest.Authenticate(new(rest.DeleteCartItem)),
+		PutHandler:    rest.Authenticate(new(rest.UpdateCartItem)),
 	})
 	http.Handle("/rental/cart/items", rest.MethodValidator(http.MethodGet, rest.Authenticate(new(rest.RetrieveCartItems))))
 
-	http.Handle("/mock/indices/drop", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		client := redisearch.NewClient("178.62.107.160:6380", kudakiredisearch.Storefront.Name())
-		client.Drop()
-
-		client = redisearch.NewClient("178.62.107.160:6380", kudakiredisearch.Item.Name())
-		client.Drop()
-
-		client = redisearch.NewClient("178.62.107.160:6380", kudakiredisearch.Cart.Name())
-		client.Drop()
-
-		client = redisearch.NewClient("178.62.107.160:6380", kudakiredisearch.CartItem.Name())
-		client.Drop()
-	}))
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%s", os.Getenv("REST_PORT"))}
 
