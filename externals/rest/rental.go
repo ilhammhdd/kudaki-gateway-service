@@ -151,11 +151,11 @@ func (uci *UpdateCartItem) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uci *UpdateCartItem) validate(r *http.Request) (errs *[]string, ok bool) {
-	urlValidation := URLParamValidation{
+	restValidation := RestValidation{
 		Rules: map[string]string{
 			"cart_item_uuid": RegexUUIDV4,
 			"total_item":     RegexNumber},
-		Values: r.URL.Query()}
+		request: r}
 
-	return urlValidation.Validate()
+	return restValidation.Validate()
 }
