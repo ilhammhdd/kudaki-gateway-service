@@ -72,7 +72,6 @@ func restListener() {
 		client = redisearch.NewClient("178.62.107.160:6380", kudakiredisearch.CartItem.Name())
 		client.Drop()
 	}))
-
 	server := &http.Server{
 		Addr: fmt.Sprintf(":%s", os.Getenv("REST_PORT"))}
 

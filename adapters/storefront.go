@@ -217,30 +217,9 @@ func (gasi *GetAllUsersStorefrontItems) ParseRequestToKafkaMessage(r *http.Reque
 func (gasi *GetAllUsersStorefrontItems) ParseResultToResponse(result interface{}) *Response {
 	assertedResult := result.(*GetAllUsersStorefrontItemsProcessResult)
 
-	/* var storefrontItems []*store.Item
-	for _, itemDoc := range assertedResult.StorefrontItemDocs {
-		amount, _ := strconv.ParseInt(itemDoc.Properties["item_amount"].(string), 10, 32)
-		price, _ := strconv.ParseInt(itemDoc.Properties["item_price"].(string), 10, 32)
-		rating, _ := strconv.ParseFloat(itemDoc.Properties["item_rating"].(string), 10)
-
-		item := new(store.Item)
-		item.Amount = int32(amount)
-		item.Description = itemDoc.Properties["item_description"].(string)
-		item.Name = itemDoc.Properties["item_name"].(string)
-		item.Photo = itemDoc.Properties["item_photo"].(string)
-		item.Price = int32(price)
-		item.Rating = float32(rating)
-		item.Unit = itemDoc.Properties["item_unit"].(string)
-		item.Uuid = kudakiredisearch.RedisearchText(itemDoc.Properties["item_uuid"].(string)).UnSanitize()
-
-		storefrontItems = append(storefrontItems, item)
-	} */
-
 	type responseData struct {
-		// Storefront *store.Storefront `json:"storefront"`
-		Storefront *redisearch.Document `json:"storefront"`
-		// Items      []*store.Item     `json:"items"`
-		Items *[]redisearch.Document `json:"items"`
+		Storefront *redisearch.Document   `json:"storefront"`
+		Items      *[]redisearch.Document `json:"items"`
 	}
 
 	resData := responseData{

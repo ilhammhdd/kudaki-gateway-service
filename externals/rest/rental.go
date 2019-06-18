@@ -83,7 +83,10 @@ func (rci *RetrieveCartItems) retrieveCart(userUUID string) *redisearch.Document
 	client := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Cart.Name())
 	client.CreateIndex(kudakiredisearch.Cart.Schema())
 
-	rawQuery := fmt.Sprintf(`@user_uuid:"%s"`, kudakiredisearch.RedisearchText(userUUID).Sanitize())
+	// rawQuery := fmt.Sprintf(`@user_uuid:"%s"`, kudakiredisearch.RedisearchText(userUUID).Sanitize())
+	sanitizer := new(kudakiredisearch.RedisearchText)
+	sanitizer.Set(userUUID)
+	rawQuery := fmt.Sprintf(`@user_uuid:"%s"`, sanitizer.Sanitize())
 	docs, total, err := client.Search(redisearch.NewQuery(rawQuery))
 	errorkit.ErrorHandled(err)
 
@@ -112,7 +115,16 @@ func (rci *RetrieveCartItems) retrieveCartItems(sanitizedCartUUID string, offset
 type DeleteCartItem struct{}
 
 func (dci *DeleteCartItem) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, valid := dci.validate(r); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
 
+	adapter := &adapters.DeleteCartItem{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction()}
+	adapters.HandleEventDriven(r, adapter).WriteResponse(&w)
 }
 
 func (dci *DeleteCartItem) validate(r *http.Request) (errs *[]string, ok bool) {

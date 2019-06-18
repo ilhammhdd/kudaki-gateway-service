@@ -166,7 +166,10 @@ func (gasi *GetAllUsersStorefrontItems) getUserFromKudakiToken(kudakiToken strin
 func (gasi *GetAllUsersStorefrontItems) retrieveStorefront(userUUID string) *redisearch.Document {
 	client := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Storefront.Name())
 	client.CreateIndex(kudakiredisearch.Storefront.Schema())
-	rawQuery := fmt.Sprintf(`@user_uuid:"%s"`, kudakiredisearch.RedisearchText(userUUID).Sanitize())
+	// rawQuery := fmt.Sprintf(`@user_uuid:"%s"`, kudakiredisearch.RedisearchText(userUUID).Sanitize())
+	sanitizer := new(kudakiredisearch.RedisearchText)
+	sanitizer.Set(userUUID)
+	rawQuery := fmt.Sprintf(`@user_uuid:"%s"`, sanitizer.Sanitize())
 	docs, total, err := client.Search(redisearch.NewQuery(rawQuery))
 	errorkit.ErrorHandled(err)
 

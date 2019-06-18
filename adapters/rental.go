@@ -109,19 +109,50 @@ func (rci *RetrieveCartItems) initUseCaseUpstreamHandler(outKey string) usecases
 		Producer: rci.Producer}
 }
 
-type DeleteCartItem struct{}
+type DeleteCartItem struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
 
 func (dci *DeleteCartItem) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.DeleteCartItemRequested)
+	outEvent.CartItemUuid = r.URL.Query().Get("cart_item_uuid")
+	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
+	outEvent.Uid = uuid.New().String()
 
-	return "", nil
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, out
 }
 
 func (dci *DeleteCartItem) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.CartItemDeleted)
 
-	return nil
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody.Errs = &inEvent.EventStatus.Errors
+	}
+
+	return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
 }
 
 func (dci *DeleteCartItem) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	inUnmarshal := usecases.KafkaMessageUnmarshal(func(key []byte, val []byte) (proto.Message, bool) {
+		var inEvent events.CartItemDeleted
+		if proto.Unmarshal(val, &inEvent) == nil {
+			if outKey == string(key) {
+				return &inEvent, true
+			}
+			return nil, false
+		}
+		return nil, false
+	})
 
-	return nil
+	return &usecases.EventDrivenUsecase{
+		Consumer:    dci.Consumer,
+		InTopic:     events.RentalTopic_CART_ITEM_DELETED.String(),
+		InUnmarshal: &inUnmarshal,
+		OutTopic:    events.RentalTopic_DELETE_CART_ITEM_REQUESTED.String(),
+		Producer:    dci.Producer}
 }

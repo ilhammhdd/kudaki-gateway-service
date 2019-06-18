@@ -118,7 +118,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6733d30f28e6e4dbd02d85e9007a2f2bd06518c3c78591e2a098696a249993bc"
+  digest = "1:57ea4ba64149f1899877bd5a832159f3e028a413903d30c5154e465803fb0048"
   name = "github.com/ilhammhdd/kudaki-externals"
   packages = [
     "grpc",
@@ -126,7 +126,7 @@
     "redisearch",
   ]
   pruneopts = "UT"
-  revision = "b48b69a96f9919ca51cdec173b43717ea98f5b90"
+  revision = "a87eb2daf8dc60b0d5f91fb3ad842c12eb4ad1b8"
 
 [[projects]]
   digest = "1:259f9b7645983a7a823318d78aa96dec68af8891f706493ac1ec04d819cb977c"
@@ -164,11 +164,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f928471955a5e8c1d148de46c6660e9fc4d08fa0ed065f90d9adba8fe1fe6101"
+  digest = "1:249fd56fb36a223aee164e2dc35e3b3a1b92dd3873dfb60216280b9fb9d4a784"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "b47fdc937951267e2d980171881317deea47f29b"
+  revision = "15dcb6c0061f497a3f66e3ea034b629c6dd4d99e"
 
 [[projects]]
   digest = "1:8d8faad6b12a3a4c819a3f9618cb6ee1fa1cfc33253abeeea8b55336721e3405"
