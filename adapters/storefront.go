@@ -195,7 +195,7 @@ type GetAllUsersStorefrontItems struct {
 	Producer usecases.EventDrivenProducer
 }
 
-func (gasi *GetAllUsersStorefrontItems) ParseRequestToKafkaMessage(r *http.Request) (outKey string, outMsg []byte) {
+func (gasi *GetAllUsersStorefrontItems) ParseRequestToKafkaMessage(r *http.Request) (out proto.Message, outKey string, outMsg []byte) {
 	outEvent := new(events.RetrieveUsersStorefrontItemsRequested)
 
 	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 32)
@@ -211,20 +211,32 @@ func (gasi *GetAllUsersStorefrontItems) ParseRequestToKafkaMessage(r *http.Reque
 	outByte, err := proto.Marshal(outEvent)
 	errorkit.ErrorHandled(err)
 
-	return outEvent.Uuid, outByte
+	return outEvent, outEvent.Uuid, outByte
 }
 
 func (gasi *GetAllUsersStorefrontItems) ParseResultToResponse(result interface{}) *Response {
 	assertedResult := result.(*GetAllUsersStorefrontItemsProcessResult)
 
 	type responseData struct {
-		Storefront *redisearch.Document   `json:"storefront"`
-		Items      *[]redisearch.Document `json:"items"`
+		Storefront map[string]interface{}   `json:"storefront"`
+		Items      []map[string]interface{} `json:"items"`
+	}
+
+	var storefrontData map[string]interface{}
+	var itemsData []map[string]interface{}
+
+	storefrontData = assertedResult.Storefront.Properties
+	for i := 0; i < len(*assertedResult.StorefrontItemDocs); i++ {
+		itemsData = append(itemsData, (*assertedResult.StorefrontItemDocs)[0].Properties)
 	}
 
 	resData := responseData{
-		Items:      assertedResult.StorefrontItemDocs,
-		Storefront: assertedResult.Storefront}
+		Items:      itemsData,
+		Storefront: storefrontData}
+
+	// resData := responseData{
+	// 	Items:      assertedResult.StorefrontItemDocs,
+	// 	Storefront: assertedResult.Storefront}
 
 	resBody := ResponseBody{Data: resData}
 	return NewResponse(http.StatusOK, &resBody)

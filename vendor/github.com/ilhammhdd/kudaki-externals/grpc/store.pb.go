@@ -7,7 +7,7 @@ import (
 	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	events "github.com/ilhammhdd/kudaki-entities/events"
+	store "github.com/ilhammhdd/kudaki-entities/store"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -28,20 +28,22 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 func init() { proto.RegisterFile("grpc/store.proto", fileDescriptor_f000a2b738285d05) }
 
 var fileDescriptor_f000a2b738285d05 = []byte{
-	// 201 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x48, 0x2f, 0x2a, 0x48,
-	0xd6, 0x2f, 0x2e, 0xc9, 0x2f, 0x4a, 0xd5, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x2e, 0x2a,
-	0x48, 0x96, 0x12, 0x4a, 0x2d, 0x4b, 0xcd, 0x2b, 0x29, 0x46, 0x96, 0x30, 0x9a, 0xcc, 0xc4, 0xc5,
-	0x1a, 0x0c, 0xe2, 0x0b, 0x05, 0x71, 0x09, 0x3a, 0xa6, 0xa4, 0x80, 0xd9, 0x69, 0x45, 0xf9, 0x79,
-	0x25, 0x9e, 0x25, 0xa9, 0xb9, 0x42, 0x8a, 0x7a, 0x60, 0x3d, 0x7a, 0x18, 0x32, 0x41, 0xa9, 0x85,
-	0xa5, 0xa9, 0xc5, 0x25, 0xa9, 0x29, 0x52, 0x52, 0x50, 0x25, 0xa8, 0xf2, 0x8e, 0x29, 0x29, 0xa9,
-	0x29, 0x42, 0x51, 0x5c, 0x22, 0x2e, 0xa9, 0x39, 0xa9, 0x25, 0xa9, 0x68, 0xc6, 0xaa, 0x40, 0xf5,
-	0x60, 0x93, 0x44, 0x98, 0x2c, 0x83, 0xd5, 0x64, 0x88, 0x1e, 0xb0, 0xd9, 0xa1, 0x05, 0x29, 0x89,
-	0x38, 0xcd, 0xc6, 0x26, 0x49, 0xc8, 0x6c, 0x88, 0x9e, 0x14, 0x27, 0x9d, 0x28, 0xad, 0xf4, 0xcc,
-	0x92, 0x8c, 0xd2, 0x24, 0xbd, 0xe4, 0xfc, 0x5c, 0xfd, 0xcc, 0x9c, 0x8c, 0xc4, 0xdc, 0xdc, 0x8c,
-	0x94, 0x14, 0xfd, 0xec, 0xd2, 0x94, 0xc4, 0xec, 0x4c, 0xdd, 0xd4, 0x8a, 0x92, 0xd4, 0xa2, 0xbc,
-	0xc4, 0x9c, 0x62, 0x7d, 0x50, 0x40, 0x27, 0xb1, 0x81, 0x83, 0xd2, 0x18, 0x10, 0x00, 0x00, 0xff,
-	0xff, 0x46, 0x4e, 0x63, 0xc8, 0x77, 0x01, 0x00, 0x00,
+	// 233 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x91, 0xbf, 0x4a, 0x04, 0x31,
+	0x10, 0x87, 0x39, 0x04, 0xff, 0x8c, 0x08, 0x6b, 0x10, 0x8b, 0x7d, 0x04, 0x39, 0x13, 0x38, 0x1b,
+	0xc1, 0xea, 0xc4, 0xc6, 0xd6, 0xc5, 0xc6, 0x2e, 0x97, 0x19, 0x6f, 0xc3, 0x6d, 0x36, 0x21, 0x99,
+	0x05, 0x9f, 0xc5, 0x97, 0xf1, 0xd5, 0x24, 0xc9, 0xa1, 0x68, 0xa5, 0x5b, 0xe6, 0x9b, 0xfc, 0xbe,
+	0x99, 0x61, 0xa0, 0xd9, 0xc6, 0x60, 0x54, 0x62, 0x1f, 0x49, 0x86, 0xe8, 0xd9, 0x8b, 0x83, 0x18,
+	0x4c, 0x7b, 0x59, 0x48, 0xe5, 0xaf, 0xd1, 0x8f, 0x5c, 0x8b, 0x6d, 0x53, 0xb9, 0x65, 0x72, 0x7b,
+	0x72, 0xbe, 0x17, 0x68, 0x9e, 0x52, 0x45, 0xab, 0x8f, 0x05, 0x9c, 0x74, 0xf9, 0xdf, 0x13, 0x05,
+	0x2f, 0x6e, 0xe1, 0x6c, 0x8d, 0xd8, 0x7d, 0x99, 0x44, 0x2b, 0x69, 0x64, 0xcb, 0x96, 0x92, 0xac,
+	0x7d, 0xbf, 0x6b, 0xed, 0xa9, 0x8c, 0xc1, 0xc8, 0xae, 0xd8, 0xc4, 0x1d, 0x34, 0xcf, 0x01, 0x35,
+	0xd3, 0xcc, 0xf0, 0x03, 0x0d, 0x34, 0x2b, 0xbc, 0x7a, 0x5f, 0xc0, 0xf1, 0x23, 0x93, 0x2b, 0x0b,
+	0x2c, 0xe1, 0x68, 0x8d, 0x98, 0x9f, 0xe2, 0xe2, 0xb7, 0x20, 0xd3, 0x9f, 0x7d, 0x15, 0x40, 0x1d,
+	0xfa, 0x1f, 0x81, 0x3a, 0xe8, 0x1f, 0x03, 0xf7, 0xcb, 0x97, 0xab, 0xad, 0xe5, 0x7e, 0xda, 0x48,
+	0xe3, 0x9d, 0xb2, 0x43, 0xaf, 0x9d, 0xeb, 0x11, 0xd5, 0x6e, 0x42, 0xbd, 0xb3, 0xd7, 0xf4, 0xc6,
+	0x14, 0x47, 0x3d, 0x24, 0x95, 0x2f, 0xb3, 0x39, 0x2c, 0x37, 0xb9, 0xf9, 0x0c, 0x00, 0x00, 0xff,
+	0xff, 0xd9, 0xeb, 0xf2, 0x74, 0xe9, 0x01, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -52,144 +54,288 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// StoreClient is the client API for Store service.
+// StoreRepoClient is the client API for StoreRepo service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type StoreClient interface {
-	AddStorefrontItem(ctx context.Context, in *events.AddStorefrontItemRequested, opts ...grpc.CallOption) (*events.StorefrontItemAdded, error)
-	DeleteStorefrontItem(ctx context.Context, in *events.DeleteStorefrontItemRequested, opts ...grpc.CallOption) (*events.StorefrontItemDeleted, error)
-	UpdateStorefrontItem(ctx context.Context, in *events.UpdateStorefrontItemRequested, opts ...grpc.CallOption) (*events.StorefrontItemUpdated, error)
+type StoreRepoClient interface {
+	AddStorefront(ctx context.Context, in *store.Storefront, opts ...grpc.CallOption) (*Status, error)
+	UpdateStorefront(ctx context.Context, in *store.Storefront, opts ...grpc.CallOption) (*Status, error)
+	DeleteStorefront(ctx context.Context, in *store.Storefront, opts ...grpc.CallOption) (*Status, error)
 }
 
-type storeClient struct {
+type storeRepoClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewStoreClient(cc *grpc.ClientConn) StoreClient {
-	return &storeClient{cc}
+func NewStoreRepoClient(cc *grpc.ClientConn) StoreRepoClient {
+	return &storeRepoClient{cc}
 }
 
-func (c *storeClient) AddStorefrontItem(ctx context.Context, in *events.AddStorefrontItemRequested, opts ...grpc.CallOption) (*events.StorefrontItemAdded, error) {
-	out := new(events.StorefrontItemAdded)
-	err := c.cc.Invoke(ctx, "/rpc.Store/AddStorefrontItem", in, out, opts...)
+func (c *storeRepoClient) AddStorefront(ctx context.Context, in *store.Storefront, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.StoreRepo/AddStorefront", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *storeClient) DeleteStorefrontItem(ctx context.Context, in *events.DeleteStorefrontItemRequested, opts ...grpc.CallOption) (*events.StorefrontItemDeleted, error) {
-	out := new(events.StorefrontItemDeleted)
-	err := c.cc.Invoke(ctx, "/rpc.Store/DeleteStorefrontItem", in, out, opts...)
+func (c *storeRepoClient) UpdateStorefront(ctx context.Context, in *store.Storefront, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.StoreRepo/UpdateStorefront", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *storeClient) UpdateStorefrontItem(ctx context.Context, in *events.UpdateStorefrontItemRequested, opts ...grpc.CallOption) (*events.StorefrontItemUpdated, error) {
-	out := new(events.StorefrontItemUpdated)
-	err := c.cc.Invoke(ctx, "/rpc.Store/UpdateStorefrontItem", in, out, opts...)
+func (c *storeRepoClient) DeleteStorefront(ctx context.Context, in *store.Storefront, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.StoreRepo/DeleteStorefront", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// StoreServer is the server API for Store service.
-type StoreServer interface {
-	AddStorefrontItem(context.Context, *events.AddStorefrontItemRequested) (*events.StorefrontItemAdded, error)
-	DeleteStorefrontItem(context.Context, *events.DeleteStorefrontItemRequested) (*events.StorefrontItemDeleted, error)
-	UpdateStorefrontItem(context.Context, *events.UpdateStorefrontItemRequested) (*events.StorefrontItemUpdated, error)
+// StoreRepoServer is the server API for StoreRepo service.
+type StoreRepoServer interface {
+	AddStorefront(context.Context, *store.Storefront) (*Status, error)
+	UpdateStorefront(context.Context, *store.Storefront) (*Status, error)
+	DeleteStorefront(context.Context, *store.Storefront) (*Status, error)
 }
 
-// UnimplementedStoreServer can be embedded to have forward compatible implementations.
-type UnimplementedStoreServer struct {
+// UnimplementedStoreRepoServer can be embedded to have forward compatible implementations.
+type UnimplementedStoreRepoServer struct {
 }
 
-func (*UnimplementedStoreServer) AddStorefrontItem(ctx context.Context, req *events.AddStorefrontItemRequested) (*events.StorefrontItemAdded, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddStorefrontItem not implemented")
+func (*UnimplementedStoreRepoServer) AddStorefront(ctx context.Context, req *store.Storefront) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddStorefront not implemented")
 }
-func (*UnimplementedStoreServer) DeleteStorefrontItem(ctx context.Context, req *events.DeleteStorefrontItemRequested) (*events.StorefrontItemDeleted, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteStorefrontItem not implemented")
+func (*UnimplementedStoreRepoServer) UpdateStorefront(ctx context.Context, req *store.Storefront) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateStorefront not implemented")
 }
-func (*UnimplementedStoreServer) UpdateStorefrontItem(ctx context.Context, req *events.UpdateStorefrontItemRequested) (*events.StorefrontItemUpdated, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateStorefrontItem not implemented")
-}
-
-func RegisterStoreServer(s *grpc.Server, srv StoreServer) {
-	s.RegisterService(&_Store_serviceDesc, srv)
+func (*UnimplementedStoreRepoServer) DeleteStorefront(ctx context.Context, req *store.Storefront) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteStorefront not implemented")
 }
 
-func _Store_AddStorefrontItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(events.AddStorefrontItemRequested)
+func RegisterStoreRepoServer(s *grpc.Server, srv StoreRepoServer) {
+	s.RegisterService(&_StoreRepo_serviceDesc, srv)
+}
+
+func _StoreRepo_AddStorefront_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(store.Storefront)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StoreServer).AddStorefrontItem(ctx, in)
+		return srv.(StoreRepoServer).AddStorefront(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/rpc.Store/AddStorefrontItem",
+		FullMethod: "/rpc.StoreRepo/AddStorefront",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StoreServer).AddStorefrontItem(ctx, req.(*events.AddStorefrontItemRequested))
+		return srv.(StoreRepoServer).AddStorefront(ctx, req.(*store.Storefront))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Store_DeleteStorefrontItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(events.DeleteStorefrontItemRequested)
+func _StoreRepo_UpdateStorefront_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(store.Storefront)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StoreServer).DeleteStorefrontItem(ctx, in)
+		return srv.(StoreRepoServer).UpdateStorefront(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/rpc.Store/DeleteStorefrontItem",
+		FullMethod: "/rpc.StoreRepo/UpdateStorefront",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StoreServer).DeleteStorefrontItem(ctx, req.(*events.DeleteStorefrontItemRequested))
+		return srv.(StoreRepoServer).UpdateStorefront(ctx, req.(*store.Storefront))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Store_UpdateStorefrontItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(events.UpdateStorefrontItemRequested)
+func _StoreRepo_DeleteStorefront_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(store.Storefront)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StoreServer).UpdateStorefrontItem(ctx, in)
+		return srv.(StoreRepoServer).DeleteStorefront(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/rpc.Store/UpdateStorefrontItem",
+		FullMethod: "/rpc.StoreRepo/DeleteStorefront",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StoreServer).UpdateStorefrontItem(ctx, req.(*events.UpdateStorefrontItemRequested))
+		return srv.(StoreRepoServer).DeleteStorefront(ctx, req.(*store.Storefront))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Store_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "rpc.Store",
-	HandlerType: (*StoreServer)(nil),
+var _StoreRepo_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "rpc.StoreRepo",
+	HandlerType: (*StoreRepoServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "AddStorefrontItem",
-			Handler:    _Store_AddStorefrontItem_Handler,
+			MethodName: "AddStorefront",
+			Handler:    _StoreRepo_AddStorefront_Handler,
 		},
 		{
-			MethodName: "DeleteStorefrontItem",
-			Handler:    _Store_DeleteStorefrontItem_Handler,
+			MethodName: "UpdateStorefront",
+			Handler:    _StoreRepo_UpdateStorefront_Handler,
 		},
 		{
-			MethodName: "UpdateStorefrontItem",
-			Handler:    _Store_UpdateStorefrontItem_Handler,
+			MethodName: "DeleteStorefront",
+			Handler:    _StoreRepo_DeleteStorefront_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "grpc/store.proto",
+}
+
+// ItemRepoClient is the client API for ItemRepo service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type ItemRepoClient interface {
+	AddItem(ctx context.Context, in *store.Item, opts ...grpc.CallOption) (*Status, error)
+	UpdateItem(ctx context.Context, in *store.Item, opts ...grpc.CallOption) (*Status, error)
+	DeleteItem(ctx context.Context, in *store.Item, opts ...grpc.CallOption) (*Status, error)
+}
+
+type itemRepoClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewItemRepoClient(cc *grpc.ClientConn) ItemRepoClient {
+	return &itemRepoClient{cc}
+}
+
+func (c *itemRepoClient) AddItem(ctx context.Context, in *store.Item, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.ItemRepo/AddItem", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *itemRepoClient) UpdateItem(ctx context.Context, in *store.Item, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.ItemRepo/UpdateItem", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *itemRepoClient) DeleteItem(ctx context.Context, in *store.Item, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.ItemRepo/DeleteItem", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ItemRepoServer is the server API for ItemRepo service.
+type ItemRepoServer interface {
+	AddItem(context.Context, *store.Item) (*Status, error)
+	UpdateItem(context.Context, *store.Item) (*Status, error)
+	DeleteItem(context.Context, *store.Item) (*Status, error)
+}
+
+// UnimplementedItemRepoServer can be embedded to have forward compatible implementations.
+type UnimplementedItemRepoServer struct {
+}
+
+func (*UnimplementedItemRepoServer) AddItem(ctx context.Context, req *store.Item) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddItem not implemented")
+}
+func (*UnimplementedItemRepoServer) UpdateItem(ctx context.Context, req *store.Item) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateItem not implemented")
+}
+func (*UnimplementedItemRepoServer) DeleteItem(ctx context.Context, req *store.Item) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteItem not implemented")
+}
+
+func RegisterItemRepoServer(s *grpc.Server, srv ItemRepoServer) {
+	s.RegisterService(&_ItemRepo_serviceDesc, srv)
+}
+
+func _ItemRepo_AddItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(store.Item)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ItemRepoServer).AddItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.ItemRepo/AddItem",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ItemRepoServer).AddItem(ctx, req.(*store.Item))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ItemRepo_UpdateItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(store.Item)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ItemRepoServer).UpdateItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.ItemRepo/UpdateItem",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ItemRepoServer).UpdateItem(ctx, req.(*store.Item))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ItemRepo_DeleteItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(store.Item)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ItemRepoServer).DeleteItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.ItemRepo/DeleteItem",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ItemRepoServer).DeleteItem(ctx, req.(*store.Item))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _ItemRepo_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "rpc.ItemRepo",
+	HandlerType: (*ItemRepoServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "AddItem",
+			Handler:    _ItemRepo_AddItem_Handler,
+		},
+		{
+			MethodName: "UpdateItem",
+			Handler:    _ItemRepo_UpdateItem_Handler,
+		},
+		{
+			MethodName: "DeleteItem",
+			Handler:    _ItemRepo_DeleteItem_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

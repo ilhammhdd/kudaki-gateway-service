@@ -1,15 +1,13 @@
 package rest
 
 import (
-	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
+	"github.com/golang/protobuf/proto"
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 	"github.com/ilhammhdd/kudaki-externals/kafka"
-	kudakiredisearch "github.com/ilhammhdd/kudaki-externals/redisearch"
 
 	"github.com/ilhammhdd/kudaki-gateway-service/adapters"
 )
@@ -61,7 +59,7 @@ func (rci *RetrieveCartItems) validate(r *http.Request) (errs *[]string, ok bool
 	return urlValidation.Validate()
 }
 
-func (rci *RetrieveCartItems) Process(r *http.Request) (result interface{}) {
+func (rci *RetrieveCartItems) Process(r *http.Request, out proto.Message) (result interface{}) {
 	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 32)
 	errorkit.ErrorHandled(err)
 	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 32)
@@ -80,34 +78,34 @@ func (rci *RetrieveCartItems) Process(r *http.Request) (result interface{}) {
 }
 
 func (rci *RetrieveCartItems) retrieveCart(userUUID string) *redisearch.Document {
-	client := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Cart.Name())
-	client.CreateIndex(kudakiredisearch.Cart.Schema())
+	// client := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.Cart.Name())
+	// client.CreateIndex(kudakiredisearch.Cart.Schema())
 
-	// rawQuery := fmt.Sprintf(`@user_uuid:"%s"`, kudakiredisearch.RedisearchText(userUUID).Sanitize())
-	sanitizer := new(kudakiredisearch.RedisearchText)
-	sanitizer.Set(userUUID)
-	rawQuery := fmt.Sprintf(`@user_uuid:"%s"`, sanitizer.Sanitize())
-	docs, total, err := client.Search(redisearch.NewQuery(rawQuery))
-	errorkit.ErrorHandled(err)
+	// // rawQuery := fmt.Sprintf(`@user_uuid:"%s"`, kudakiredisearch.RedisearchText(userUUID).Sanitize())
+	// sanitizer := new(kudakiredisearch.RedisearchText)
+	// sanitizer.Set(userUUID)
+	// rawQuery := fmt.Sprintf(`@user_uuid:"%s"`, sanitizer.Sanitize())
+	// docs, total, err := client.Search(redisearch.NewQuery(rawQuery))
+	// errorkit.ErrorHandled(err)
 
-	if total != 0 {
-		return &docs[0]
-	}
+	// if total != 0 {
+	// 	return &docs[0]
+	// }
 
 	return nil
 }
 
 func (rci *RetrieveCartItems) retrieveCartItems(sanitizedCartUUID string, offset int, limit int) *[]redisearch.Document {
-	client := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.CartItem.Name())
-	client.CreateIndex(kudakiredisearch.CartItem.Schema())
+	// client := redisearch.NewClient(os.Getenv("REDISEARCH_SERVER"), kudakiredisearch.CartItem.Name())
+	// client.CreateIndex(kudakiredisearch.CartItem.Schema())
 
-	rawQuery := fmt.Sprintf(`@cart_uuid:"%s"`, sanitizedCartUUID)
-	docs, total, err := client.Search(redisearch.NewQuery(rawQuery).Limit(offset, limit))
-	errorkit.ErrorHandled(err)
+	// rawQuery := fmt.Sprintf(`@cart_uuid:"%s"`, sanitizedCartUUID)
+	// docs, total, err := client.Search(redisearch.NewQuery(rawQuery).Limit(offset, limit))
+	// errorkit.ErrorHandled(err)
 
-	if total != 0 {
-		return &docs
-	}
+	// if total != 0 {
+	// 	return &docs
+	// }
 
 	return nil
 }

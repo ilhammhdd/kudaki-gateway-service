@@ -50,6 +50,7 @@ func restListener() {
 	})
 	http.Handle("/store/storefront/items", rest.Authenticate(new(rest.GetAllUsersStorefrontItems)))
 	http.Handle("/store/items", rest.Authenticate(new(rest.RetrieveItems)))
+	http.Handle("/store/items/search", rest.Authenticate(new(rest.SearchItems)))
 
 	http.Handle("/rental/cart/item", rest.MethodRouting{
 		PostHandler:   rest.Authenticate(new(rest.AddCartItem)),

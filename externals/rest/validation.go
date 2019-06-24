@@ -176,7 +176,7 @@ type URLParamValidation struct {
 	Values url.Values
 }
 
-func (upv *URLParamValidation) Validate( /* rules map[string]string, val url.Values */ ) (*[]string, bool) {
+func (upv *URLParamValidation) Validate() (*[]string, bool) {
 
 	valid := true
 	var errs []string
@@ -208,6 +208,33 @@ func (upv *URLParamValidation) Validate( /* rules map[string]string, val url.Val
 	return &errs, valid
 }
 
+func (upv *URLParamValidation) ValidateIfExists() (*[]string, bool) {
+
+	valid := true
+	var errs []string
+
+	if len(upv.Values) == 0 {
+		valid = false
+		errs = append(errs, "url parameters needed")
+
+		return &errs, valid
+	}
+
+	for param, rule := range upv.Rules {
+		vals, _ := upv.Values[param]
+		for _, val := range vals {
+			regexOk, regexErr := regexp.MatchString(rule, val)
+			errorkit.ErrorHandled(regexErr)
+			if !regexOk {
+				valid = false
+				errs = append(errs, fmt.Sprintf("%s %s", param, GetRegexErrorMessage(rule)))
+			}
+		}
+	}
+
+	return &errs, valid
+}
+
 func Authenticate(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rules := map[string]string{
@@ -225,7 +252,7 @@ func Authenticate(h http.Handler) http.Handler {
 			Uid: uuid.New().String(),
 			Jwt: r.Header.Get("Kudaki-Token")}
 
-		conn, err := grpc.Dial(os.Getenv("USER_SERVICE_GRPC_ADDRESS"), grpc.WithInsecure())
+		conn, err := grpc.Dial(os.Getenv("USER_AUTH_SERVICE_GRPC_ADDRESS"), grpc.WithInsecure())
 		errorkit.ErrorHandled(err)
 
 		defer conn.Close()

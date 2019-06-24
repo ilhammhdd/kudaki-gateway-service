@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/ilhammhdd/kudaki-externals/kafka"
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
@@ -38,7 +39,7 @@ func (ri *RetrieveItems) validate(r *http.Request) (errs *[]string, ok bool) {
 	return urlValidation.Validate()
 }
 
-func (ri *RetrieveItems) Process(r *http.Request) (result interface{}) {
+func (ri *RetrieveItems) Process(r *http.Request, out proto.Message) (result interface{}) {
 	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 32)
 	errorkit.ErrorHandled(err)
 	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 32)
@@ -53,4 +54,32 @@ func (ri *RetrieveItems) Process(r *http.Request) (result interface{}) {
 	return adapters.RetrieveItemsProcessResult{
 		Total:     total,
 		ItemsDocs: &itemDocs}
+}
+
+type SearchItems struct{}
+
+func (si *SearchItems) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, valid := si.validate(r); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+}
+
+func (si *SearchItems) validate(r *http.Request) (errs *[]string, ok bool) {
+	urlValidation := URLParamValidation{
+		Rules: map[string]string{
+			"keyword":   RegexNotEmpty,
+			"quantity":  RegexNumber,
+			"min_price": RegexNumber,
+			"max_price": RegexNumber,
+			"rating":    RegexNumber},
+		Values: r.URL.Query()}
+
+	return urlValidation.ValidateIfExists()
+}
+
+func (si *SearchItems) Process(r *http.Request, out proto.Message) (result interface{}) {
+
+	return nil
 }

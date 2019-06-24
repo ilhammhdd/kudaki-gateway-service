@@ -248,35 +248,39 @@ func init() {
 func init() { proto.RegisterFile("grpc/user.proto", fileDescriptor_3f3a799ad09b2336) }
 
 var fileDescriptor_3f3a799ad09b2336 = []byte{
-	// 447 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x54, 0x5d, 0x8b, 0xd3, 0x40,
-	0x14, 0xa5, 0xa6, 0x2e, 0x78, 0xd7, 0x6d, 0xdd, 0x5b, 0x5c, 0x4a, 0x44, 0x5d, 0xfa, 0xb2, 0x22,
-	0x9a, 0xe8, 0xfa, 0xec, 0xc3, 0x2a, 0x82, 0xc2, 0x2a, 0x92, 0xa2, 0x0f, 0xbe, 0x48, 0x36, 0x73,
-	0x4d, 0x66, 0x9b, 0xce, 0xc4, 0xf9, 0xb0, 0x2a, 0x08, 0xfe, 0x51, 0xff, 0x8b, 0xcc, 0x24, 0x6d,
-	0x52, 0x53, 0xf4, 0xcd, 0xb7, 0xde, 0x73, 0xce, 0x9c, 0x39, 0x87, 0xb9, 0x0d, 0x8c, 0x73, 0x55,
-	0x65, 0xb1, 0xd5, 0xa4, 0xa2, 0x4a, 0x49, 0x23, 0x31, 0x50, 0x55, 0x16, 0x1e, 0xd2, 0x17, 0x12,
-	0x46, 0x77, 0xf0, 0x70, 0xd2, 0x40, 0xda, 0xa4, 0xc6, 0xea, 0x06, 0x1c, 0x3b, 0x41, 0x47, 0x35,
-	0x3b, 0x83, 0x5b, 0xef, 0x34, 0xa9, 0x33, 0x6b, 0x0a, 0x12, 0x86, 0x67, 0xa9, 0xe1, 0x52, 0x24,
-	0xf4, 0xd9, 0x92, 0x36, 0xc4, 0xf0, 0x06, 0x04, 0x96, 0xb3, 0xe9, 0xe0, 0x78, 0x70, 0xef, 0x5a,
-	0xe2, 0x7e, 0x3a, 0xe4, 0x72, 0x65, 0xa6, 0x57, 0x6a, 0xe4, 0x72, 0x65, 0x66, 0x3f, 0x07, 0x70,
-	0xf8, 0x87, 0xc7, 0xce, 0x93, 0x8f, 0xe0, 0xba, 0x8f, 0xf4, 0xb1, 0x4e, 0xe4, 0x2d, 0xf6, 0x4f,
-	0x0f, 0x22, 0x0f, 0x46, 0x73, 0x0f, 0x26, 0xfb, 0x7e, 0xaa, 0x07, 0x3c, 0x81, 0xa1, 0x8b, 0x3a,
-	0x0d, 0xbc, 0x72, 0x12, 0x39, 0x77, 0xc3, 0x49, 0x47, 0xbe, 0x80, 0xbb, 0x33, 0xf1, 0x82, 0x19,
-	0x87, 0x70, 0x9d, 0x40, 0x2a, 0xfe, 0xfd, 0x9f, 0x25, 0x4e, 0x60, 0xa8, 0x64, 0x49, 0x3e, 0xc2,
-	0xa8, 0x67, 0x9c, 0xc8, 0x92, 0x12, 0x2f, 0x58, 0xb7, 0x0d, 0xda, 0xb6, 0x3f, 0x60, 0xd4, 0xbd,
-	0xea, 0x3f, 0x37, 0x3d, 0xfd, 0x15, 0xc0, 0xd0, 0x8d, 0xf8, 0x18, 0xf6, 0xe6, 0x3c, 0x17, 0xb6,
-	0xc2, 0xa3, 0xb5, 0xaf, 0x1f, 0x37, 0xb5, 0xc3, 0x71, 0x07, 0x27, 0x66, 0x2b, 0x7c, 0x0a, 0xf0,
-	0x9e, 0x14, 0xff, 0xf4, 0xcd, 0x1b, 0x84, 0x0d, 0xdd, 0x42, 0xed, 0xd1, 0x49, 0xc3, 0x39, 0xd4,
-	0xf3, 0x9c, 0x18, 0xc6, 0x70, 0xf5, 0x5c, 0xe6, 0x5c, 0xe0, 0xcd, 0x86, 0xf5, 0x53, 0xff, 0xbe,
-	0x73, 0x99, 0xe7, 0xc4, 0xb8, 0xc0, 0x37, 0x80, 0xfd, 0xdd, 0xc2, 0xe3, 0x48, 0x55, 0x59, 0xf4,
-	0x97, 0xa5, 0x0b, 0x8f, 0x76, 0x29, 0x88, 0xe1, 0xab, 0x76, 0xcf, 0x36, 0xaf, 0x8c, 0x77, 0xb7,
-	0xc4, 0xfd, 0xd7, 0x0f, 0x27, 0x3d, 0x01, 0x31, 0x7c, 0x09, 0xa3, 0xe7, 0x45, 0x2a, 0x72, 0x7a,
-	0x9b, 0x6a, 0xbd, 0x92, 0x8a, 0xe1, 0x9d, 0x26, 0xfd, 0x36, 0xdc, 0x0d, 0x55, 0xf3, 0x6b, 0xa6,
-	0xd6, 0x31, 0x7c, 0x0d, 0x07, 0x09, 0x69, 0x32, 0x1b, 0xa3, 0xdb, 0x8d, 0x70, 0x0b, 0x6d, 0x7d,
-	0x76, 0xd2, 0x2f, 0x96, 0x29, 0x2f, 0xe7, 0x24, 0xcc, 0xb3, 0x07, 0x1f, 0xee, 0xe7, 0xdc, 0x14,
-	0xf6, 0x22, 0xca, 0xe4, 0x32, 0xe6, 0x65, 0x91, 0x2e, 0x97, 0x05, 0x63, 0xf1, 0xc2, 0xb2, 0x74,
-	0xc1, 0x1f, 0xd2, 0x57, 0x43, 0x4a, 0xa4, 0xa5, 0x8e, 0xdd, 0x67, 0xe0, 0x62, 0xcf, 0xff, 0x89,
-	0x9f, 0xfc, 0x0e, 0x00, 0x00, 0xff, 0xff, 0xda, 0x95, 0x25, 0x1c, 0x15, 0x04, 0x00, 0x00,
+	// 498 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x54, 0x4d, 0x6f, 0xd4, 0x30,
+	0x14, 0x54, 0xd8, 0x8a, 0x8f, 0xb7, 0xf4, 0x63, 0xbd, 0xa8, 0x5a, 0x05, 0x10, 0xd5, 0x5e, 0x8a,
+	0xf8, 0x70, 0x20, 0x70, 0x45, 0x90, 0x8a, 0x0b, 0x17, 0x54, 0x05, 0xed, 0x85, 0x0b, 0x4a, 0xe3,
+	0xd7, 0xae, 0xdb, 0x6c, 0x1c, 0x6c, 0xa7, 0x8b, 0x90, 0x90, 0xf8, 0x17, 0x88, 0x23, 0x77, 0x7e,
+	0x0f, 0xbf, 0x07, 0xf9, 0x39, 0x6d, 0x37, 0xbb, 0x2b, 0x68, 0x8b, 0xc4, 0x2d, 0x1e, 0xcf, 0x1b,
+	0xcf, 0x8c, 0x15, 0xc3, 0xfa, 0x81, 0xae, 0xf2, 0xa8, 0x36, 0xa8, 0x79, 0xa5, 0x95, 0x55, 0xac,
+	0xa3, 0xab, 0x3c, 0xec, 0xe3, 0x31, 0x96, 0xd6, 0x44, 0xc6, 0x66, 0xb6, 0x36, 0x7e, 0x27, 0x5c,
+	0x77, 0xac, 0x19, 0x6a, 0xc8, 0x08, 0xa8, 0xb4, 0xda, 0x97, 0x05, 0x36, 0x58, 0x8f, 0xf4, 0x66,
+	0xe7, 0x86, 0x09, 0xdc, 0x1e, 0x19, 0xd4, 0x49, 0x6d, 0xc7, 0x58, 0x5a, 0x99, 0x67, 0x56, 0xaa,
+	0x32, 0xc5, 0x8f, 0x35, 0x1a, 0x8b, 0x82, 0x6d, 0x40, 0xa7, 0x96, 0x62, 0x10, 0x6c, 0x05, 0xf7,
+	0x6f, 0xa4, 0xee, 0xd3, 0x21, 0x87, 0x53, 0x3b, 0xb8, 0xe2, 0x91, 0xc3, 0xa9, 0x1d, 0x7e, 0x0d,
+	0xa0, 0x37, 0xa7, 0xb1, 0x74, 0xf2, 0x09, 0xdc, 0x24, 0xe7, 0x1f, 0xbc, 0x01, 0x92, 0xe8, 0xc6,
+	0xab, 0x9c, 0x40, 0xfe, 0x8e, 0xc0, 0xb4, 0x4b, 0x2b, 0xbf, 0x60, 0xdb, 0xb0, 0xe2, 0x52, 0x0c,
+	0x3a, 0xc4, 0xec, 0x73, 0xa7, 0x6e, 0x25, 0x1a, 0x4e, 0x39, 0xdd, 0x99, 0x29, 0x11, 0x86, 0x12,
+	0xc2, 0x13, 0x07, 0x4a, 0xcb, 0xcf, 0x7f, 0x0d, 0xb1, 0x0d, 0x2b, 0x5a, 0x15, 0x48, 0x16, 0xd6,
+	0x16, 0x84, 0x53, 0x55, 0x60, 0x4a, 0x84, 0x93, 0xb4, 0x9d, 0xb3, 0xb4, 0x5f, 0x60, 0x6d, 0xf6,
+	0xa8, 0xff, 0x9c, 0x34, 0xfe, 0x11, 0xc0, 0x8a, 0x5b, 0xb2, 0xb7, 0xc0, 0x16, 0x2f, 0x8e, 0x6d,
+	0x71, 0x5d, 0xe5, 0xfc, 0x0f, 0x37, 0x1a, 0x6e, 0x2e, 0x63, 0xa0, 0x60, 0x6f, 0xce, 0x2e, 0xf1,
+	0xb4, 0x42, 0x76, 0xaf, 0x45, 0x5e, 0xac, 0x36, 0xec, 0x2f, 0x10, 0x50, 0xc4, 0xdf, 0x02, 0xb8,
+	0x4e, 0x96, 0xb1, 0x52, 0xec, 0x21, 0x5c, 0x4b, 0x84, 0x20, 0xcb, 0xcb, 0x62, 0x85, 0x5d, 0x52,
+	0x68, 0x6a, 0xe0, 0x00, 0xa3, 0x4a, 0x64, 0x16, 0xcf, 0xcf, 0x7f, 0x8d, 0x05, 0x9e, 0x97, 0x1f,
+	0xff, 0x0c, 0xa0, 0xbb, 0xeb, 0x7f, 0x09, 0x32, 0xf7, 0x14, 0x20, 0x11, 0xa2, 0x41, 0xd8, 0xe6,
+	0xdc, 0x7c, 0x83, 0xb7, 0x8f, 0x7c, 0x0e, 0xab, 0xde, 0xe2, 0x45, 0xa7, 0xbc, 0xd1, 0x8b, 0x4c,
+	0xc5, 0xdf, 0x03, 0x60, 0xa3, 0xf2, 0x18, 0xb5, 0xdc, 0x97, 0x28, 0x4e, 0x2b, 0x7d, 0x09, 0x3d,
+	0x57, 0x69, 0x6b, 0x83, 0xdd, 0x9d, 0x0f, 0xdf, 0xda, 0x6e, 0xbb, 0xd9, 0x81, 0x5b, 0x4d, 0x6d,
+	0x97, 0xd6, 0x88, 0x7f, 0x05, 0xd0, 0x4b, 0xd1, 0xa0, 0xdd, 0xcd, 0x8c, 0x99, 0x2a, 0x2d, 0xc8,
+	0xda, 0x0b, 0xd8, 0x48, 0x84, 0x68, 0xe1, 0xec, 0xce, 0xfc, 0xef, 0x35, 0xbb, 0xdb, 0x36, 0xf6,
+	0x0a, 0xfa, 0xbe, 0xdc, 0x7f, 0x51, 0xf0, 0xd1, 0x2e, 0xab, 0xb0, 0xf3, 0xe8, 0xfd, 0x83, 0x03,
+	0x69, 0xc7, 0xf5, 0x1e, 0xcf, 0xd5, 0x24, 0x92, 0xc5, 0x38, 0x9b, 0x4c, 0xc6, 0x42, 0x44, 0x47,
+	0xb5, 0xc8, 0x8e, 0xe4, 0x63, 0xfc, 0x64, 0x51, 0x97, 0x59, 0x61, 0x22, 0xf7, 0x98, 0xee, 0x5d,
+	0xa5, 0x67, 0xf4, 0xd9, 0xef, 0x00, 0x00, 0x00, 0xff, 0xff, 0xa2, 0xda, 0x32, 0xeb, 0xab, 0x05,
+	0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -291,13 +295,8 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type UserClient interface {
-	Signup(ctx context.Context, in *events.SignupRequested, opts ...grpc.CallOption) (*events.Signedup, error)
-	VerifyUser(ctx context.Context, in *events.VerifyUserRequested, opts ...grpc.CallOption) (*events.UserVerified, error)
-	Login(ctx context.Context, in *events.LoginRequested, opts ...grpc.CallOption) (*events.Loggedin, error)
 	UserAuthentication(ctx context.Context, in *UserAuthenticationRequested, opts ...grpc.CallOption) (*UserAuthenticated, error)
 	UserAuthorization(ctx context.Context, in *UserAuthorizationRequested, opts ...grpc.CallOption) (*UserAuthorized, error)
-	ChangePassword(ctx context.Context, in *events.ChangePasswordRequested, opts ...grpc.CallOption) (*events.PasswordChanged, error)
-	ResetPassword(ctx context.Context, in *events.ResetPasswordRequested, opts ...grpc.CallOption) (*events.ResetPasswordEmailSent, error)
 }
 
 type userClient struct {
@@ -306,33 +305,6 @@ type userClient struct {
 
 func NewUserClient(cc *grpc.ClientConn) UserClient {
 	return &userClient{cc}
-}
-
-func (c *userClient) Signup(ctx context.Context, in *events.SignupRequested, opts ...grpc.CallOption) (*events.Signedup, error) {
-	out := new(events.Signedup)
-	err := c.cc.Invoke(ctx, "/rpc.User/Signup", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userClient) VerifyUser(ctx context.Context, in *events.VerifyUserRequested, opts ...grpc.CallOption) (*events.UserVerified, error) {
-	out := new(events.UserVerified)
-	err := c.cc.Invoke(ctx, "/rpc.User/VerifyUser", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userClient) Login(ctx context.Context, in *events.LoginRequested, opts ...grpc.CallOption) (*events.Loggedin, error) {
-	out := new(events.Loggedin)
-	err := c.cc.Invoke(ctx, "/rpc.User/Login", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *userClient) UserAuthentication(ctx context.Context, in *UserAuthenticationRequested, opts ...grpc.CallOption) (*UserAuthenticated, error) {
@@ -353,117 +325,25 @@ func (c *userClient) UserAuthorization(ctx context.Context, in *UserAuthorizatio
 	return out, nil
 }
 
-func (c *userClient) ChangePassword(ctx context.Context, in *events.ChangePasswordRequested, opts ...grpc.CallOption) (*events.PasswordChanged, error) {
-	out := new(events.PasswordChanged)
-	err := c.cc.Invoke(ctx, "/rpc.User/ChangePassword", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userClient) ResetPassword(ctx context.Context, in *events.ResetPasswordRequested, opts ...grpc.CallOption) (*events.ResetPasswordEmailSent, error) {
-	out := new(events.ResetPasswordEmailSent)
-	err := c.cc.Invoke(ctx, "/rpc.User/ResetPassword", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // UserServer is the server API for User service.
 type UserServer interface {
-	Signup(context.Context, *events.SignupRequested) (*events.Signedup, error)
-	VerifyUser(context.Context, *events.VerifyUserRequested) (*events.UserVerified, error)
-	Login(context.Context, *events.LoginRequested) (*events.Loggedin, error)
 	UserAuthentication(context.Context, *UserAuthenticationRequested) (*UserAuthenticated, error)
 	UserAuthorization(context.Context, *UserAuthorizationRequested) (*UserAuthorized, error)
-	ChangePassword(context.Context, *events.ChangePasswordRequested) (*events.PasswordChanged, error)
-	ResetPassword(context.Context, *events.ResetPasswordRequested) (*events.ResetPasswordEmailSent, error)
 }
 
 // UnimplementedUserServer can be embedded to have forward compatible implementations.
 type UnimplementedUserServer struct {
 }
 
-func (*UnimplementedUserServer) Signup(ctx context.Context, req *events.SignupRequested) (*events.Signedup, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Signup not implemented")
-}
-func (*UnimplementedUserServer) VerifyUser(ctx context.Context, req *events.VerifyUserRequested) (*events.UserVerified, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method VerifyUser not implemented")
-}
-func (*UnimplementedUserServer) Login(ctx context.Context, req *events.LoginRequested) (*events.Loggedin, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
-}
 func (*UnimplementedUserServer) UserAuthentication(ctx context.Context, req *UserAuthenticationRequested) (*UserAuthenticated, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserAuthentication not implemented")
 }
 func (*UnimplementedUserServer) UserAuthorization(ctx context.Context, req *UserAuthorizationRequested) (*UserAuthorized, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserAuthorization not implemented")
 }
-func (*UnimplementedUserServer) ChangePassword(ctx context.Context, req *events.ChangePasswordRequested) (*events.PasswordChanged, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ChangePassword not implemented")
-}
-func (*UnimplementedUserServer) ResetPassword(ctx context.Context, req *events.ResetPasswordRequested) (*events.ResetPasswordEmailSent, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ResetPassword not implemented")
-}
 
 func RegisterUserServer(s *grpc.Server, srv UserServer) {
 	s.RegisterService(&_User_serviceDesc, srv)
-}
-
-func _User_Signup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(events.SignupRequested)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServer).Signup(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/rpc.User/Signup",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).Signup(ctx, req.(*events.SignupRequested))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _User_VerifyUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(events.VerifyUserRequested)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServer).VerifyUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/rpc.User/VerifyUser",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).VerifyUser(ctx, req.(*events.VerifyUserRequested))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _User_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(events.LoginRequested)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServer).Login(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/rpc.User/Login",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).Login(ctx, req.(*events.LoginRequested))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _User_UserAuthentication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -502,58 +382,10 @@ func _User_UserAuthorization_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _User_ChangePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(events.ChangePasswordRequested)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServer).ChangePassword(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/rpc.User/ChangePassword",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).ChangePassword(ctx, req.(*events.ChangePasswordRequested))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _User_ResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(events.ResetPasswordRequested)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServer).ResetPassword(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/rpc.User/ResetPassword",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).ResetPassword(ctx, req.(*events.ResetPasswordRequested))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 var _User_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "rpc.User",
 	HandlerType: (*UserServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Signup",
-			Handler:    _User_Signup_Handler,
-		},
-		{
-			MethodName: "VerifyUser",
-			Handler:    _User_VerifyUser_Handler,
-		},
-		{
-			MethodName: "Login",
-			Handler:    _User_Login_Handler,
-		},
 		{
 			MethodName: "UserAuthentication",
 			Handler:    _User_UserAuthentication_Handler,
@@ -562,13 +394,545 @@ var _User_serviceDesc = grpc.ServiceDesc{
 			MethodName: "UserAuthorization",
 			Handler:    _User_UserAuthorization_Handler,
 		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "grpc/user.proto",
+}
+
+// UserRepoClient is the client API for UserRepo service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type UserRepoClient interface {
+	AddUser(ctx context.Context, in *user.User, opts ...grpc.CallOption) (*Status, error)
+	UpdateUser(ctx context.Context, in *user.User, opts ...grpc.CallOption) (*Status, error)
+	DeleteUser(ctx context.Context, in *user.User, opts ...grpc.CallOption) (*Status, error)
+}
+
+type userRepoClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewUserRepoClient(cc *grpc.ClientConn) UserRepoClient {
+	return &userRepoClient{cc}
+}
+
+func (c *userRepoClient) AddUser(ctx context.Context, in *user.User, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.UserRepo/AddUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userRepoClient) UpdateUser(ctx context.Context, in *user.User, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.UserRepo/UpdateUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userRepoClient) DeleteUser(ctx context.Context, in *user.User, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.UserRepo/DeleteUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// UserRepoServer is the server API for UserRepo service.
+type UserRepoServer interface {
+	AddUser(context.Context, *user.User) (*Status, error)
+	UpdateUser(context.Context, *user.User) (*Status, error)
+	DeleteUser(context.Context, *user.User) (*Status, error)
+}
+
+// UnimplementedUserRepoServer can be embedded to have forward compatible implementations.
+type UnimplementedUserRepoServer struct {
+}
+
+func (*UnimplementedUserRepoServer) AddUser(ctx context.Context, req *user.User) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddUser not implemented")
+}
+func (*UnimplementedUserRepoServer) UpdateUser(ctx context.Context, req *user.User) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
+}
+func (*UnimplementedUserRepoServer) DeleteUser(ctx context.Context, req *user.User) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteUser not implemented")
+}
+
+func RegisterUserRepoServer(s *grpc.Server, srv UserRepoServer) {
+	s.RegisterService(&_UserRepo_serviceDesc, srv)
+}
+
+func _UserRepo_AddUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(user.User)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserRepoServer).AddUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.UserRepo/AddUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserRepoServer).AddUser(ctx, req.(*user.User))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserRepo_UpdateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(user.User)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserRepoServer).UpdateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.UserRepo/UpdateUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserRepoServer).UpdateUser(ctx, req.(*user.User))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserRepo_DeleteUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(user.User)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserRepoServer).DeleteUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.UserRepo/DeleteUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserRepoServer).DeleteUser(ctx, req.(*user.User))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _UserRepo_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "rpc.UserRepo",
+	HandlerType: (*UserRepoServer)(nil),
+	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ChangePassword",
-			Handler:    _User_ChangePassword_Handler,
+			MethodName: "AddUser",
+			Handler:    _UserRepo_AddUser_Handler,
 		},
 		{
-			MethodName: "ResetPassword",
-			Handler:    _User_ResetPassword_Handler,
+			MethodName: "UpdateUser",
+			Handler:    _UserRepo_UpdateUser_Handler,
+		},
+		{
+			MethodName: "DeleteUser",
+			Handler:    _UserRepo_DeleteUser_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "grpc/user.proto",
+}
+
+// ProfileRepoClient is the client API for ProfileRepo service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type ProfileRepoClient interface {
+	AddProfile(ctx context.Context, in *user.Profile, opts ...grpc.CallOption) (*Status, error)
+	UpdateProfile(ctx context.Context, in *user.Profile, opts ...grpc.CallOption) (*Status, error)
+	DeleteProfile(ctx context.Context, in *user.Profile, opts ...grpc.CallOption) (*Status, error)
+}
+
+type profileRepoClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewProfileRepoClient(cc *grpc.ClientConn) ProfileRepoClient {
+	return &profileRepoClient{cc}
+}
+
+func (c *profileRepoClient) AddProfile(ctx context.Context, in *user.Profile, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.ProfileRepo/AddProfile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileRepoClient) UpdateProfile(ctx context.Context, in *user.Profile, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.ProfileRepo/UpdateProfile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *profileRepoClient) DeleteProfile(ctx context.Context, in *user.Profile, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.ProfileRepo/DeleteProfile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ProfileRepoServer is the server API for ProfileRepo service.
+type ProfileRepoServer interface {
+	AddProfile(context.Context, *user.Profile) (*Status, error)
+	UpdateProfile(context.Context, *user.Profile) (*Status, error)
+	DeleteProfile(context.Context, *user.Profile) (*Status, error)
+}
+
+// UnimplementedProfileRepoServer can be embedded to have forward compatible implementations.
+type UnimplementedProfileRepoServer struct {
+}
+
+func (*UnimplementedProfileRepoServer) AddProfile(ctx context.Context, req *user.Profile) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddProfile not implemented")
+}
+func (*UnimplementedProfileRepoServer) UpdateProfile(ctx context.Context, req *user.Profile) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateProfile not implemented")
+}
+func (*UnimplementedProfileRepoServer) DeleteProfile(ctx context.Context, req *user.Profile) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteProfile not implemented")
+}
+
+func RegisterProfileRepoServer(s *grpc.Server, srv ProfileRepoServer) {
+	s.RegisterService(&_ProfileRepo_serviceDesc, srv)
+}
+
+func _ProfileRepo_AddProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(user.Profile)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileRepoServer).AddProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.ProfileRepo/AddProfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileRepoServer).AddProfile(ctx, req.(*user.Profile))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProfileRepo_UpdateProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(user.Profile)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileRepoServer).UpdateProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.ProfileRepo/UpdateProfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileRepoServer).UpdateProfile(ctx, req.(*user.Profile))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProfileRepo_DeleteProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(user.Profile)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProfileRepoServer).DeleteProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.ProfileRepo/DeleteProfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProfileRepoServer).DeleteProfile(ctx, req.(*user.Profile))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _ProfileRepo_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "rpc.ProfileRepo",
+	HandlerType: (*ProfileRepoServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "AddProfile",
+			Handler:    _ProfileRepo_AddProfile_Handler,
+		},
+		{
+			MethodName: "UpdateProfile",
+			Handler:    _ProfileRepo_UpdateProfile_Handler,
+		},
+		{
+			MethodName: "DeleteProfile",
+			Handler:    _ProfileRepo_DeleteProfile_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "grpc/user.proto",
+}
+
+// UnverifiedUserRepoClient is the client API for UnverifiedUserRepo service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type UnverifiedUserRepoClient interface {
+	AddUnverifiedUser(ctx context.Context, in *user.UnverifiedUser, opts ...grpc.CallOption) (*Status, error)
+	DeleteUnverifiedUser(ctx context.Context, in *user.UnverifiedUser, opts ...grpc.CallOption) (*Status, error)
+}
+
+type unverifiedUserRepoClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewUnverifiedUserRepoClient(cc *grpc.ClientConn) UnverifiedUserRepoClient {
+	return &unverifiedUserRepoClient{cc}
+}
+
+func (c *unverifiedUserRepoClient) AddUnverifiedUser(ctx context.Context, in *user.UnverifiedUser, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.UnverifiedUserRepo/AddUnverifiedUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *unverifiedUserRepoClient) DeleteUnverifiedUser(ctx context.Context, in *user.UnverifiedUser, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.UnverifiedUserRepo/DeleteUnverifiedUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// UnverifiedUserRepoServer is the server API for UnverifiedUserRepo service.
+type UnverifiedUserRepoServer interface {
+	AddUnverifiedUser(context.Context, *user.UnverifiedUser) (*Status, error)
+	DeleteUnverifiedUser(context.Context, *user.UnverifiedUser) (*Status, error)
+}
+
+// UnimplementedUnverifiedUserRepoServer can be embedded to have forward compatible implementations.
+type UnimplementedUnverifiedUserRepoServer struct {
+}
+
+func (*UnimplementedUnverifiedUserRepoServer) AddUnverifiedUser(ctx context.Context, req *user.UnverifiedUser) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddUnverifiedUser not implemented")
+}
+func (*UnimplementedUnverifiedUserRepoServer) DeleteUnverifiedUser(ctx context.Context, req *user.UnverifiedUser) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteUnverifiedUser not implemented")
+}
+
+func RegisterUnverifiedUserRepoServer(s *grpc.Server, srv UnverifiedUserRepoServer) {
+	s.RegisterService(&_UnverifiedUserRepo_serviceDesc, srv)
+}
+
+func _UnverifiedUserRepo_AddUnverifiedUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(user.UnverifiedUser)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UnverifiedUserRepoServer).AddUnverifiedUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.UnverifiedUserRepo/AddUnverifiedUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UnverifiedUserRepoServer).AddUnverifiedUser(ctx, req.(*user.UnverifiedUser))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UnverifiedUserRepo_DeleteUnverifiedUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(user.UnverifiedUser)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UnverifiedUserRepoServer).DeleteUnverifiedUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.UnverifiedUserRepo/DeleteUnverifiedUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UnverifiedUserRepoServer).DeleteUnverifiedUser(ctx, req.(*user.UnverifiedUser))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _UnverifiedUserRepo_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "rpc.UnverifiedUserRepo",
+	HandlerType: (*UnverifiedUserRepoServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "AddUnverifiedUser",
+			Handler:    _UnverifiedUserRepo_AddUnverifiedUser_Handler,
+		},
+		{
+			MethodName: "DeleteUnverifiedUser",
+			Handler:    _UnverifiedUserRepo_DeleteUnverifiedUser_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "grpc/user.proto",
+}
+
+// ResetPasswordRepoClient is the client API for ResetPasswordRepo service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type ResetPasswordRepoClient interface {
+	AddResetPassword(ctx context.Context, in *user.ResetPassword, opts ...grpc.CallOption) (*Status, error)
+	UpdateResetPassword(ctx context.Context, in *user.ResetPassword, opts ...grpc.CallOption) (*Status, error)
+	DeleteResetPassword(ctx context.Context, in *user.ResetPassword, opts ...grpc.CallOption) (*Status, error)
+}
+
+type resetPasswordRepoClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewResetPasswordRepoClient(cc *grpc.ClientConn) ResetPasswordRepoClient {
+	return &resetPasswordRepoClient{cc}
+}
+
+func (c *resetPasswordRepoClient) AddResetPassword(ctx context.Context, in *user.ResetPassword, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.ResetPasswordRepo/AddResetPassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resetPasswordRepoClient) UpdateResetPassword(ctx context.Context, in *user.ResetPassword, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.ResetPasswordRepo/UpdateResetPassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resetPasswordRepoClient) DeleteResetPassword(ctx context.Context, in *user.ResetPassword, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.ResetPasswordRepo/DeleteResetPassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ResetPasswordRepoServer is the server API for ResetPasswordRepo service.
+type ResetPasswordRepoServer interface {
+	AddResetPassword(context.Context, *user.ResetPassword) (*Status, error)
+	UpdateResetPassword(context.Context, *user.ResetPassword) (*Status, error)
+	DeleteResetPassword(context.Context, *user.ResetPassword) (*Status, error)
+}
+
+// UnimplementedResetPasswordRepoServer can be embedded to have forward compatible implementations.
+type UnimplementedResetPasswordRepoServer struct {
+}
+
+func (*UnimplementedResetPasswordRepoServer) AddResetPassword(ctx context.Context, req *user.ResetPassword) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddResetPassword not implemented")
+}
+func (*UnimplementedResetPasswordRepoServer) UpdateResetPassword(ctx context.Context, req *user.ResetPassword) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateResetPassword not implemented")
+}
+func (*UnimplementedResetPasswordRepoServer) DeleteResetPassword(ctx context.Context, req *user.ResetPassword) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteResetPassword not implemented")
+}
+
+func RegisterResetPasswordRepoServer(s *grpc.Server, srv ResetPasswordRepoServer) {
+	s.RegisterService(&_ResetPasswordRepo_serviceDesc, srv)
+}
+
+func _ResetPasswordRepo_AddResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(user.ResetPassword)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResetPasswordRepoServer).AddResetPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.ResetPasswordRepo/AddResetPassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResetPasswordRepoServer).AddResetPassword(ctx, req.(*user.ResetPassword))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResetPasswordRepo_UpdateResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(user.ResetPassword)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResetPasswordRepoServer).UpdateResetPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.ResetPasswordRepo/UpdateResetPassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResetPasswordRepoServer).UpdateResetPassword(ctx, req.(*user.ResetPassword))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ResetPasswordRepo_DeleteResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(user.ResetPassword)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResetPasswordRepoServer).DeleteResetPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.ResetPasswordRepo/DeleteResetPassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResetPasswordRepoServer).DeleteResetPassword(ctx, req.(*user.ResetPassword))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _ResetPasswordRepo_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "rpc.ResetPasswordRepo",
+	HandlerType: (*ResetPasswordRepoServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "AddResetPassword",
+			Handler:    _ResetPasswordRepo_AddResetPassword_Handler,
+		},
+		{
+			MethodName: "UpdateResetPassword",
+			Handler:    _ResetPasswordRepo_UpdateResetPassword_Handler,
+		},
+		{
+			MethodName: "DeleteResetPassword",
+			Handler:    _ResetPasswordRepo_DeleteResetPassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

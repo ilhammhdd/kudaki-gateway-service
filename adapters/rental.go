@@ -34,10 +34,10 @@ func (aci *AddCartItem) ParseRequestToKafkaMessage(r *http.Request) (key string,
 	outEvent.StorefrontUuid = r.MultipartForm.Value["storefront_uuid"][0]
 	outEvent.Uid = uuid.New().String()
 
-	out, err := proto.Marshal(outEvent)
+	outByte, err := proto.Marshal(outEvent)
 	errorkit.ErrorHandled(err)
 
-	return outEvent.Uid, out
+	return outEvent.Uid, outByte
 }
 
 func (aci *AddCartItem) ParseEventToResponse(in proto.Message) *Response {
@@ -74,7 +74,7 @@ type RetrieveCartItems struct {
 	Producer usecases.EventDrivenProducer
 }
 
-func (rci *RetrieveCartItems) ParseRequestToKafkaMessage(r *http.Request) (outKey string, outMsg []byte) {
+func (rci *RetrieveCartItems) ParseRequestToKafkaMessage(r *http.Request) (out proto.Message, outKey string, outMsg []byte) {
 	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 32)
 	errorkit.ErrorHandled(err)
 	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 32)
@@ -86,10 +86,10 @@ func (rci *RetrieveCartItems) ParseRequestToKafkaMessage(r *http.Request) (outKe
 	outEvent.Offset = int32(offset)
 	outEvent.Uuid = uuid.New().String()
 
-	out, err := proto.Marshal(outEvent)
+	outByte, err := proto.Marshal(outEvent)
 	errorkit.ErrorHandled(err)
 
-	return outEvent.Uuid, out
+	return outEvent, outEvent.Uuid, outByte
 }
 
 type RetrieveCartItemsResult struct {
@@ -120,10 +120,10 @@ func (dci *DeleteCartItem) ParseRequestToKafkaMessage(r *http.Request) (key stri
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
 	outEvent.Uid = uuid.New().String()
 
-	out, err := proto.Marshal(outEvent)
+	outByte, err := proto.Marshal(outEvent)
 	errorkit.ErrorHandled(err)
 
-	return outEvent.Uid, out
+	return outEvent.Uid, outByte
 }
 
 func (dci *DeleteCartItem) ParseEventToResponse(in proto.Message) *Response {
@@ -172,10 +172,10 @@ func (uci *UpdateCartItem) ParseRequestToKafkaMessage(r *http.Request) (key stri
 		TotalItem:    int32(totalItem),
 		Uid:          uuid.New().String()}
 
-	out, err := proto.Marshal(outEvent)
+	outByte, err := proto.Marshal(outEvent)
 	errorkit.ErrorHandled(err)
 
-	return outEvent.Uid, out
+	return outEvent.Uid, outByte
 }
 
 func (uci *UpdateCartItem) ParseEventToResponse(in proto.Message) *Response {

@@ -7,7 +7,7 @@ import (
 	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	events "github.com/ilhammhdd/kudaki-entities/events"
+	rental "github.com/ilhammhdd/kudaki-entities/rental"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -28,19 +28,24 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 func init() { proto.RegisterFile("grpc/rental.proto", fileDescriptor_b2d1c840373f7857) }
 
 var fileDescriptor_b2d1c840373f7857 = []byte{
-	// 183 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x54, 0x8f, 0x41, 0x8f, 0x82, 0x30,
-	0x10, 0x46, 0xb3, 0xd9, 0x84, 0x6c, 0xba, 0x27, 0xba, 0x7b, 0x30, 0xf8, 0x0f, 0x8c, 0xb6, 0x89,
-	0x1e, 0xbc, 0x8a, 0x9c, 0xbc, 0x72, 0xf4, 0x56, 0x3a, 0x13, 0x4a, 0xa0, 0x14, 0xcb, 0xd4, 0x78,
-	0xf7, 0x8f, 0x1b, 0x08, 0x44, 0xbc, 0xbe, 0xf7, 0xbe, 0x64, 0x86, 0xc5, 0xa5, 0xef, 0xb4, 0xf4,
-	0xd8, 0x92, 0x6a, 0x44, 0xe7, 0x1d, 0x39, 0xfe, 0xed, 0x3b, 0x9d, 0xfc, 0xe1, 0x1d, 0x5b, 0xea,
-	0x3f, 0xcc, 0xfe, 0xf9, 0xc5, 0xa2, 0x7c, 0x04, 0xfc, 0xc8, 0x7e, 0x32, 0x83, 0xba, 0x76, 0x81,
-	0xf8, 0x4a, 0x8c, 0xb1, 0x98, 0x41, 0x8e, 0xb7, 0x80, 0x3d, 0x21, 0x24, 0xf1, 0xd2, 0x20, 0x0c,
-	0xf1, 0x89, 0xfd, 0xa6, 0x00, 0x99, 0xf2, 0x74, 0x21, 0xb4, 0x7c, 0x3d, 0x15, 0x0b, 0xf6, 0x9e,
-	0xff, 0xcf, 0xf3, 0xc9, 0xa4, 0x00, 0x08, 0xe7, 0xed, 0x75, 0x53, 0x56, 0x64, 0x42, 0x21, 0xb4,
-	0xb3, 0xb2, 0x6a, 0x8c, 0xb2, 0xd6, 0x00, 0xc8, 0x3a, 0x80, 0xaa, 0xab, 0x1d, 0x3e, 0x08, 0x7d,
-	0xab, 0x9a, 0x5e, 0x0e, 0xaf, 0x15, 0xd1, 0x78, 0xfa, 0xe1, 0x15, 0x00, 0x00, 0xff, 0xff, 0x6b,
-	0x39, 0xa4, 0x7b, 0xe9, 0x00, 0x00, 0x00,
+	// 264 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x92, 0xcf, 0x4a, 0x03, 0x31,
+	0x10, 0xc6, 0x29, 0x82, 0xc2, 0x54, 0x84, 0x2e, 0x54, 0x70, 0x1f, 0x41, 0x6c, 0x22, 0x15, 0xc1,
+	0xab, 0x7f, 0x2e, 0x5e, 0x2b, 0x5e, 0xbc, 0x48, 0x9a, 0x0c, 0xdd, 0xb0, 0x9b, 0x4d, 0x98, 0x9d,
+	0x05, 0xdf, 0xc6, 0xe7, 0xf0, 0xed, 0x24, 0x9b, 0x94, 0x56, 0xa8, 0xe0, 0x7a, 0xfd, 0xcd, 0x7c,
+	0x5f, 0x7e, 0x90, 0x81, 0xd9, 0x86, 0x82, 0x96, 0x84, 0x2d, 0xab, 0x46, 0x04, 0xf2, 0xec, 0x8b,
+	0x23, 0x0a, 0xba, 0x9c, 0x25, 0x24, 0xb5, 0x22, 0x4e, 0xbc, 0x3c, 0xdf, 0x43, 0xef, 0x96, 0xd1,
+	0x65, 0x3e, 0xdf, 0xf2, 0x0a, 0x75, 0xed, 0xfb, 0xed, 0x7a, 0x6a, 0xee, 0x58, 0x71, 0xdf, 0x25,
+	0xb4, 0xfc, 0x9c, 0x00, 0xac, 0x86, 0xe5, 0x15, 0x06, 0x5f, 0x2c, 0xe0, 0xe4, 0xde, 0x98, 0x47,
+	0x45, 0x5c, 0xcc, 0x05, 0xb6, 0x6c, 0xd9, 0x62, 0x27, 0xb2, 0x4b, 0xc4, 0xe5, 0x54, 0x50, 0xd0,
+	0xe2, 0x65, 0xe8, 0x28, 0xae, 0x01, 0x5e, 0x83, 0x51, 0x8c, 0x63, 0x12, 0x4f, 0xd8, 0xe0, 0xdf,
+	0x13, 0xcb, 0xaf, 0x09, 0x9c, 0x46, 0xfa, 0xcc, 0xe8, 0x06, 0xc7, 0x5b, 0x98, 0x66, 0xc7, 0x88,
+	0x8a, 0x8b, 0x83, 0x1d, 0x71, 0xf4, 0xf3, 0xe5, 0x3b, 0x38, 0xdb, 0xb9, 0x8e, 0x4d, 0xee, 0x9c,
+	0xc7, 0x24, 0x93, 0x7b, 0xfe, 0x03, 0xda, 0x73, 0xcf, 0xe8, 0x50, 0x4f, 0x1e, 0xfd, 0xe6, 0xfe,
+	0x8f, 0x64, 0x76, 0x1f, 0x99, 0x7c, 0xb8, 0x7a, 0xbb, 0xdc, 0x58, 0xae, 0xfa, 0xb5, 0xd0, 0xde,
+	0x49, 0xdb, 0x54, 0xca, 0xb9, 0xca, 0x18, 0x59, 0xf7, 0x46, 0xd5, 0x76, 0x81, 0x1f, 0x8c, 0xd4,
+	0xaa, 0xa6, 0x93, 0xf1, 0xa8, 0xd6, 0xc7, 0xc3, 0x39, 0xdd, 0x7c, 0x07, 0x00, 0x00, 0xff, 0xff,
+	0x87, 0xd7, 0x04, 0x49, 0xbd, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -51,108 +56,432 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// RentalClient is the client API for Rental service.
+// RentalRepoClient is the client API for RentalRepo service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type RentalClient interface {
-	Checkout(ctx context.Context, in *events.CheckoutRequested, opts ...grpc.CallOption) (*events.Checkedout, error)
-	AddCartItem(ctx context.Context, in *events.AddCartItemRequested, opts ...grpc.CallOption) (*events.CartItemAdded, error)
+type RentalRepoClient interface {
+	AddCart(ctx context.Context, in *rental.Cart, opts ...grpc.CallOption) (*Status, error)
+	UpdateCart(ctx context.Context, in *rental.Cart, opts ...grpc.CallOption) (*Status, error)
+	DeleteCart(ctx context.Context, in *rental.Cart, opts ...grpc.CallOption) (*Status, error)
 }
 
-type rentalClient struct {
+type rentalRepoClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewRentalClient(cc *grpc.ClientConn) RentalClient {
-	return &rentalClient{cc}
+func NewRentalRepoClient(cc *grpc.ClientConn) RentalRepoClient {
+	return &rentalRepoClient{cc}
 }
 
-func (c *rentalClient) Checkout(ctx context.Context, in *events.CheckoutRequested, opts ...grpc.CallOption) (*events.Checkedout, error) {
-	out := new(events.Checkedout)
-	err := c.cc.Invoke(ctx, "/rpc.Rental/Checkout", in, out, opts...)
+func (c *rentalRepoClient) AddCart(ctx context.Context, in *rental.Cart, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.RentalRepo/AddCart", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *rentalClient) AddCartItem(ctx context.Context, in *events.AddCartItemRequested, opts ...grpc.CallOption) (*events.CartItemAdded, error) {
-	out := new(events.CartItemAdded)
-	err := c.cc.Invoke(ctx, "/rpc.Rental/AddCartItem", in, out, opts...)
+func (c *rentalRepoClient) UpdateCart(ctx context.Context, in *rental.Cart, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.RentalRepo/UpdateCart", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// RentalServer is the server API for Rental service.
-type RentalServer interface {
-	Checkout(context.Context, *events.CheckoutRequested) (*events.Checkedout, error)
-	AddCartItem(context.Context, *events.AddCartItemRequested) (*events.CartItemAdded, error)
+func (c *rentalRepoClient) DeleteCart(ctx context.Context, in *rental.Cart, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.RentalRepo/DeleteCart", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
-// UnimplementedRentalServer can be embedded to have forward compatible implementations.
-type UnimplementedRentalServer struct {
+// RentalRepoServer is the server API for RentalRepo service.
+type RentalRepoServer interface {
+	AddCart(context.Context, *rental.Cart) (*Status, error)
+	UpdateCart(context.Context, *rental.Cart) (*Status, error)
+	DeleteCart(context.Context, *rental.Cart) (*Status, error)
 }
 
-func (*UnimplementedRentalServer) Checkout(ctx context.Context, req *events.CheckoutRequested) (*events.Checkedout, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Checkout not implemented")
-}
-func (*UnimplementedRentalServer) AddCartItem(ctx context.Context, req *events.AddCartItemRequested) (*events.CartItemAdded, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddCartItem not implemented")
+// UnimplementedRentalRepoServer can be embedded to have forward compatible implementations.
+type UnimplementedRentalRepoServer struct {
 }
 
-func RegisterRentalServer(s *grpc.Server, srv RentalServer) {
-	s.RegisterService(&_Rental_serviceDesc, srv)
+func (*UnimplementedRentalRepoServer) AddCart(ctx context.Context, req *rental.Cart) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddCart not implemented")
+}
+func (*UnimplementedRentalRepoServer) UpdateCart(ctx context.Context, req *rental.Cart) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCart not implemented")
+}
+func (*UnimplementedRentalRepoServer) DeleteCart(ctx context.Context, req *rental.Cart) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCart not implemented")
 }
 
-func _Rental_Checkout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(events.CheckoutRequested)
+func RegisterRentalRepoServer(s *grpc.Server, srv RentalRepoServer) {
+	s.RegisterService(&_RentalRepo_serviceDesc, srv)
+}
+
+func _RentalRepo_AddCart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rental.Cart)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RentalServer).Checkout(ctx, in)
+		return srv.(RentalRepoServer).AddCart(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/rpc.Rental/Checkout",
+		FullMethod: "/rpc.RentalRepo/AddCart",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RentalServer).Checkout(ctx, req.(*events.CheckoutRequested))
+		return srv.(RentalRepoServer).AddCart(ctx, req.(*rental.Cart))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Rental_AddCartItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(events.AddCartItemRequested)
+func _RentalRepo_UpdateCart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rental.Cart)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RentalServer).AddCartItem(ctx, in)
+		return srv.(RentalRepoServer).UpdateCart(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/rpc.Rental/AddCartItem",
+		FullMethod: "/rpc.RentalRepo/UpdateCart",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RentalServer).AddCartItem(ctx, req.(*events.AddCartItemRequested))
+		return srv.(RentalRepoServer).UpdateCart(ctx, req.(*rental.Cart))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Rental_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "rpc.Rental",
-	HandlerType: (*RentalServer)(nil),
+func _RentalRepo_DeleteCart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rental.Cart)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RentalRepoServer).DeleteCart(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.RentalRepo/DeleteCart",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RentalRepoServer).DeleteCart(ctx, req.(*rental.Cart))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _RentalRepo_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "rpc.RentalRepo",
+	HandlerType: (*RentalRepoServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Checkout",
-			Handler:    _Rental_Checkout_Handler,
+			MethodName: "AddCart",
+			Handler:    _RentalRepo_AddCart_Handler,
 		},
 		{
+			MethodName: "UpdateCart",
+			Handler:    _RentalRepo_UpdateCart_Handler,
+		},
+		{
+			MethodName: "DeleteCart",
+			Handler:    _RentalRepo_DeleteCart_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "grpc/rental.proto",
+}
+
+// CartItemRepoClient is the client API for CartItemRepo service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type CartItemRepoClient interface {
+	AddCartItem(ctx context.Context, in *rental.CartItem, opts ...grpc.CallOption) (*Status, error)
+	UpdateCartItem(ctx context.Context, in *rental.CartItem, opts ...grpc.CallOption) (*Status, error)
+	DeleteCartItem(ctx context.Context, in *rental.CartItem, opts ...grpc.CallOption) (*Status, error)
+}
+
+type cartItemRepoClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewCartItemRepoClient(cc *grpc.ClientConn) CartItemRepoClient {
+	return &cartItemRepoClient{cc}
+}
+
+func (c *cartItemRepoClient) AddCartItem(ctx context.Context, in *rental.CartItem, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.CartItemRepo/AddCartItem", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cartItemRepoClient) UpdateCartItem(ctx context.Context, in *rental.CartItem, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.CartItemRepo/UpdateCartItem", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cartItemRepoClient) DeleteCartItem(ctx context.Context, in *rental.CartItem, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.CartItemRepo/DeleteCartItem", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// CartItemRepoServer is the server API for CartItemRepo service.
+type CartItemRepoServer interface {
+	AddCartItem(context.Context, *rental.CartItem) (*Status, error)
+	UpdateCartItem(context.Context, *rental.CartItem) (*Status, error)
+	DeleteCartItem(context.Context, *rental.CartItem) (*Status, error)
+}
+
+// UnimplementedCartItemRepoServer can be embedded to have forward compatible implementations.
+type UnimplementedCartItemRepoServer struct {
+}
+
+func (*UnimplementedCartItemRepoServer) AddCartItem(ctx context.Context, req *rental.CartItem) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddCartItem not implemented")
+}
+func (*UnimplementedCartItemRepoServer) UpdateCartItem(ctx context.Context, req *rental.CartItem) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCartItem not implemented")
+}
+func (*UnimplementedCartItemRepoServer) DeleteCartItem(ctx context.Context, req *rental.CartItem) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCartItem not implemented")
+}
+
+func RegisterCartItemRepoServer(s *grpc.Server, srv CartItemRepoServer) {
+	s.RegisterService(&_CartItemRepo_serviceDesc, srv)
+}
+
+func _CartItemRepo_AddCartItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rental.CartItem)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CartItemRepoServer).AddCartItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.CartItemRepo/AddCartItem",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CartItemRepoServer).AddCartItem(ctx, req.(*rental.CartItem))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CartItemRepo_UpdateCartItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rental.CartItem)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CartItemRepoServer).UpdateCartItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.CartItemRepo/UpdateCartItem",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CartItemRepoServer).UpdateCartItem(ctx, req.(*rental.CartItem))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CartItemRepo_DeleteCartItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rental.CartItem)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CartItemRepoServer).DeleteCartItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.CartItemRepo/DeleteCartItem",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CartItemRepoServer).DeleteCartItem(ctx, req.(*rental.CartItem))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _CartItemRepo_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "rpc.CartItemRepo",
+	HandlerType: (*CartItemRepoServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
 			MethodName: "AddCartItem",
-			Handler:    _Rental_AddCartItem_Handler,
+			Handler:    _CartItemRepo_AddCartItem_Handler,
+		},
+		{
+			MethodName: "UpdateCartItem",
+			Handler:    _CartItemRepo_UpdateCartItem_Handler,
+		},
+		{
+			MethodName: "DeleteCartItem",
+			Handler:    _CartItemRepo_DeleteCartItem_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "grpc/rental.proto",
+}
+
+// CheckoutrepoClient is the client API for Checkoutrepo service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type CheckoutrepoClient interface {
+	AddCheckout(ctx context.Context, in *rental.Checkout, opts ...grpc.CallOption) (*Status, error)
+	UpdateCheckout(ctx context.Context, in *rental.Checkout, opts ...grpc.CallOption) (*Status, error)
+	DeleteCheckout(ctx context.Context, in *rental.Checkout, opts ...grpc.CallOption) (*Status, error)
+}
+
+type checkoutrepoClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewCheckoutrepoClient(cc *grpc.ClientConn) CheckoutrepoClient {
+	return &checkoutrepoClient{cc}
+}
+
+func (c *checkoutrepoClient) AddCheckout(ctx context.Context, in *rental.Checkout, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.Checkoutrepo/AddCheckout", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *checkoutrepoClient) UpdateCheckout(ctx context.Context, in *rental.Checkout, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.Checkoutrepo/UpdateCheckout", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *checkoutrepoClient) DeleteCheckout(ctx context.Context, in *rental.Checkout, opts ...grpc.CallOption) (*Status, error) {
+	out := new(Status)
+	err := c.cc.Invoke(ctx, "/rpc.Checkoutrepo/DeleteCheckout", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// CheckoutrepoServer is the server API for Checkoutrepo service.
+type CheckoutrepoServer interface {
+	AddCheckout(context.Context, *rental.Checkout) (*Status, error)
+	UpdateCheckout(context.Context, *rental.Checkout) (*Status, error)
+	DeleteCheckout(context.Context, *rental.Checkout) (*Status, error)
+}
+
+// UnimplementedCheckoutrepoServer can be embedded to have forward compatible implementations.
+type UnimplementedCheckoutrepoServer struct {
+}
+
+func (*UnimplementedCheckoutrepoServer) AddCheckout(ctx context.Context, req *rental.Checkout) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddCheckout not implemented")
+}
+func (*UnimplementedCheckoutrepoServer) UpdateCheckout(ctx context.Context, req *rental.Checkout) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCheckout not implemented")
+}
+func (*UnimplementedCheckoutrepoServer) DeleteCheckout(ctx context.Context, req *rental.Checkout) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCheckout not implemented")
+}
+
+func RegisterCheckoutrepoServer(s *grpc.Server, srv CheckoutrepoServer) {
+	s.RegisterService(&_Checkoutrepo_serviceDesc, srv)
+}
+
+func _Checkoutrepo_AddCheckout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rental.Checkout)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CheckoutrepoServer).AddCheckout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.Checkoutrepo/AddCheckout",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CheckoutrepoServer).AddCheckout(ctx, req.(*rental.Checkout))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Checkoutrepo_UpdateCheckout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rental.Checkout)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CheckoutrepoServer).UpdateCheckout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.Checkoutrepo/UpdateCheckout",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CheckoutrepoServer).UpdateCheckout(ctx, req.(*rental.Checkout))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Checkoutrepo_DeleteCheckout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(rental.Checkout)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CheckoutrepoServer).DeleteCheckout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc.Checkoutrepo/DeleteCheckout",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CheckoutrepoServer).DeleteCheckout(ctx, req.(*rental.Checkout))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _Checkoutrepo_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "rpc.Checkoutrepo",
+	HandlerType: (*CheckoutrepoServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "AddCheckout",
+			Handler:    _Checkoutrepo_AddCheckout_Handler,
+		},
+		{
+			MethodName: "UpdateCheckout",
+			Handler:    _Checkoutrepo_UpdateCheckout_Handler,
+		},
+		{
+			MethodName: "DeleteCheckout",
+			Handler:    _Checkoutrepo_DeleteCheckout_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
