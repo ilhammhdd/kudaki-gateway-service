@@ -7,11 +7,11 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/ilhammhdd/kudaki-entities/user"
+	"github.com/ilhammhdd/kudaki-gateway-service/entities/aggregates/user"
 
 	"github.com/google/uuid"
 
-	kudakigrpc "github.com/ilhammhdd/kudaki-externals/grpc"
+	grpc_exteral "github.com/ilhammhdd/kudaki-gateway-service/externals/grpc"
 
 	"google.golang.org/grpc"
 
@@ -20,26 +20,32 @@ import (
 )
 
 const (
-	RegexEmail               = `^[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})$`
-	RegexEmailErrMessage     = "not a valid email address"
-	RegexPassword            = `^[\w_!@#$%*]{6,30}$`
-	RegexPasswordErrMessage  = "not a valid, allowed alphanumeric with _!@#$%* symbols, minimal 6 and maximal 30 in length"
-	RegexNotEmpty            = `.*\S.*`
-	RegexNotEmptyErrMessage  = "can't be empty"
-	RegexURL                 = `^((((h)(t)|(f))(t)(p)((s)?))\://)?(www.|[a-zA-Z0-9].)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,6}(\:[0-9]{1,5})*(/($|[a-zA-Z0-9\.\,\;\?\'\\\+&amp;%\$#\=~_\-]+))*$`
-	RegexURLErrMessage       = "not a valid url"
-	RegexJWT                 = `^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$`
-	RegexJWTErrMessage       = "not a valid jwt"
-	RegexNumber              = `^[0-9]+`
-	RegexNumberErrMessage    = "not a number"
-	RegexLatitude            = `^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$`
-	RegexLatitudeErrMessage  = "not a latitude value"
-	RegexLongitude           = `^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$`
-	RegexLongitudeErrMessage = "not a longitude value"
-	RegexRole                = `^(USER|ORGANIZER)$`
-	RegexRoleErrMessage      = "not a valid one"
-	RegexUUIDV4              = `^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$`
-	RegexUUIDV4ErrMessage    = "not a valid UUID v4 form"
+	RegexEmail                       = `^[A-Za-z0-9](([_\.\-]?[a-zA-Z0-9]+)*)@([A-Za-z0-9]+)(([\.\-]?[a-zA-Z0-9]+)*)\.([A-Za-z]{2,})$`
+	RegexEmailErrMessage             = "not a valid email address"
+	RegexPassword                    = `^[\w_!@#$%*]{6,30}$`
+	RegexPasswordErrMessage          = "not a valid, allowed alphanumeric with _!@#$%* symbols, minimal 6 and maximal 30 in length"
+	RegexNotEmpty                    = `.*\S.*`
+	RegexNotEmptyErrMessage          = "can't be empty"
+	RegexURL                         = `^((((h)(t)|(f))(t)(p)((s)?))\://)?(www.|[a-zA-Z0-9].)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,6}(\:[0-9]{1,5})*(/($|[a-zA-Z0-9\.\,\;\?\'\\\+&amp;%\$#\=~_\-]+))*$`
+	RegexURLErrMessage               = "not a valid url"
+	RegexJWT                         = `^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$`
+	RegexJWTErrMessage               = "not a valid jwt"
+	RegexNumber                      = `^[0-9]+`
+	RegexNumberErrMessage            = "not a number"
+	RegexLatitude                    = `^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$`
+	RegexLatitudeErrMessage          = "not a latitude value"
+	RegexLongitude                   = `^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$`
+	RegexLongitudeErrMessage         = "not a longitude value"
+	RegexRole                        = `^(USER|ORGANIZER)$`
+	RegexRoleErrMessage              = "not a valid one"
+	RegexUUIDV4                      = `^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$`
+	RegexUUIDV4ErrMessage            = "not a valid UUID v4 form"
+	RegexUnitofMeasurement           = `^(MM|CM|DM|M|DAM|HM|KM)$`
+	RegexUnitofMeasurementErrMessage = "not a valid unit of measurement"
+	RegexPriceDuration               = `^(DAY|WEEK|MONTH|YEAR)$`
+	RegexPriceDurationErrMessage     = "not a valid price duration"
+	RegexOrderStatus                 = `^(PENDING|APPROVED|DISAPPROVED|PROCESSED|RENTED|DONE)$`
+	RegexOrderStatusErrMessage       = "not a valid order status"
 )
 
 type RestValidator interface {
@@ -128,6 +134,12 @@ func GetRegexErrorMessage(rule string) string {
 		return RegexRoleErrMessage
 	case RegexUUIDV4:
 		return RegexUUIDV4ErrMessage
+	case RegexPriceDuration:
+		return RegexPriceDurationErrMessage
+	case RegexUnitofMeasurement:
+		return RegexUnitofMeasurementErrMessage
+	case RegexOrderStatus:
+		return RegexOrderStatusErrMessage
 	default:
 		return "regex error message not defined"
 	}
@@ -248,7 +260,7 @@ func Authenticate(h http.Handler) http.Handler {
 			return
 		}
 
-		uar := kudakigrpc.UserAuthenticationRequested{
+		uar := grpc_exteral.AuthenticateUser{
 			Uid: uuid.New().String(),
 			Jwt: r.Header.Get("Kudaki-Token")}
 
@@ -257,7 +269,7 @@ func Authenticate(h http.Handler) http.Handler {
 
 		defer conn.Close()
 
-		client := kudakigrpc.NewUserClient(conn)
+		client := grpc_exteral.NewUserClient(conn)
 
 		ua, err := client.UserAuthentication(r.Context(), &uar)
 		if err != nil {
@@ -278,7 +290,7 @@ func Authenticate(h http.Handler) http.Handler {
 	})
 }
 
-func Authorize(role user.Role, h http.Handler) http.Handler {
+func Authorize(role user.UserRole, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		headerErr, ok := HeaderParamValidator(
@@ -295,12 +307,12 @@ func Authorize(role user.Role, h http.Handler) http.Handler {
 		conn, err := grpc.Dial(os.Getenv("USER_SERVICE_GRPC_ADDRESS"), grpc.WithInsecure())
 		errorkit.ErrorHandled(err)
 
-		uc := kudakigrpc.NewUserClient(conn)
+		uc := grpc_exteral.NewUserClient(conn)
 
-		uar := &kudakigrpc.UserAuthorizationRequested{
-			Jwt:  r.Header.Get("Kudaki-Token"),
-			Role: role,
-			Uid:  uuid.New().String()}
+		uar := &grpc_exteral.AuthorizeUser{
+			Jwt:      r.Header.Get("Kudaki-Token"),
+			UserRole: role,
+			Uid:      uuid.New().String()}
 
 		uad, err := uc.UserAuthorization(r.Context(), uar)
 		errorkit.ErrorHandled(err)

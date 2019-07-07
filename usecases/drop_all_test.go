@@ -9,7 +9,7 @@ import (
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/ilhammhdd/go-toolkit/errorkit"
-	kudakiredisearch "github.com/ilhammhdd/kudaki-externals/redisearch"
+	kudakiredisearch "github.com/ilhammhdd/kudaki-gateway-service/externals/redisearch"
 )
 
 func TestDropAllIndices(t *testing.T) {

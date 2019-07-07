@@ -32,6 +32,7 @@ schema:
     - .realize
     - vendor
     - deployment
+    - .vendor-new
     scripts:
     - type: before
       command: taskkill /IM "kudaki-gateway-service.exe" /F
