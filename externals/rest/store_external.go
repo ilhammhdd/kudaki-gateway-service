@@ -34,7 +34,6 @@ func (asi *AddStorefrontItem) validate(r *http.Request) (errs *[]string, ok bool
 			"price":               RegexNumber,
 			"description":         RegexNotEmpty,
 			"photo":               RegexNotEmpty,
-			"storefront_uuid":     RegexNotEmpty,
 			"price_duration":      RegexPriceDuration,
 			"length":              RegexNumber,
 			"width":               RegexNumber,
@@ -92,13 +91,19 @@ func (usi *UpdateStorefrontItem) validate(r *http.Request) (errs *[]string, ok b
 
 	restValidation := RestValidation{
 		Rules: map[string]string{
-			"item_uuid":   RegexUUIDV4,
-			"name":        RegexNotEmpty,
-			"amount":      RegexNumber,
-			"unit":        RegexNotEmpty,
-			"price":       RegexNumber,
-			"description": RegexNotEmpty,
-			"photo":       RegexNotEmpty},
+			"item_uuid":           RegexUUIDV4,
+			"name":                RegexNotEmpty,
+			"amount":              RegexNumber,
+			"unit":                RegexNotEmpty,
+			"price":               RegexNumber,
+			"description":         RegexNotEmpty,
+			"photo":               RegexNotEmpty,
+			"price_duration":      RegexPriceDuration,
+			"length":              RegexNumber,
+			"width":               RegexNumber,
+			"height":              RegexNumber,
+			"unit_of_measurement": RegexUnitofMeasurement,
+			"color":               RegexNotEmpty},
 		request: r}
 
 	return restValidation.Validate()
@@ -121,12 +126,11 @@ func (rsi *RetrieveStorefrontItems) ServeHTTP(w http.ResponseWriter, r *http.Req
 func (rsi *RetrieveStorefrontItems) validate(r *http.Request) (errs *[]string, ok bool) {
 	urlParamValidation := URLParamValidation{
 		Rules: map[string]string{
-			"limit":           RegexNumber,
-			"offset":          RegexNumber,
-			"storefront_uuid": RegexUUIDV4},
+			"limit":  RegexNumber,
+			"offset": RegexNumber},
 		Values: r.URL.Query()}
 
-	return urlParamValidation.ValidateIfExists()
+	return urlParamValidation.Validate()
 }
 
 // ----------------------------------------------
@@ -174,7 +178,7 @@ func (si *SearchItems) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (si *SearchItems) validate(r *http.Request) (errs *[]string, ok bool) {
 	urlParamValidation := URLParamValidation{
 		Rules: map[string]string{
-			"keyword": RegexUUIDV4,
+			"keyword": RegexNotEmpty,
 			"offset":  RegexNumber,
 			"limit":   RegexNumber},
 		Values: r.URL.Query()}
@@ -205,7 +209,8 @@ func (ri *ReviewItem) validate(r *http.Request) (errs *[]string, ok bool) {
 	restValidation := RestValidation{
 		Rules: map[string]string{
 			"rating":    RegexNumber,
-			"item_uuid": RegexUUIDV4},
+			"item_uuid": RegexUUIDV4,
+			"review":    RegexNotEmpty},
 		request: r}
 
 	return restValidation.Validate()

@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -23,7 +24,7 @@ type AddStorefrontItem struct {
 }
 
 func (asi *AddStorefrontItem) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
-	outEvent := /* new(events.AddStorefrontItemRequested) */ new(events.AddStorefrontItem)
+	outEvent := new(events.AddStorefrontItem)
 
 	amount, err := strconv.ParseInt(r.MultipartForm.Value["amount"][0], 10, 32)
 	errorkit.ErrorHandled(err)
@@ -81,9 +82,9 @@ func (asi *AddStorefrontItem) CheckInEvent(outKey string, inKey, inVal []byte) (
 
 func (asi *AddStorefrontItem) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
 	return &usecases.EventDrivenUsecase{
-		Consumer: asi.Consumer,
-		InTopic:/* events.StoreTopic_STOREFRONT_ITEM_ADDED.String() */ events.StorefrontServiceEventTopic_STOREFRONT_ITEM_ADDED.String(),
-		OutTopic:/* events.StoreTopic_ADD_STOREFRONT_ITEM_REQUESTED.String() */ events.StorefrontServiceCommandTopic_ADD_STOREFRONT_ITEM.String(),
+		Consumer:       asi.Consumer,
+		InTopic:        events.StorefrontServiceEventTopic_STOREFRONT_ITEM_ADDED.String(),
+		OutTopic:       events.StorefrontServiceCommandTopic_ADD_STOREFRONT_ITEM.String(),
 		Producer:       asi.Producer,
 		InEventChecker: asi}
 }
@@ -143,11 +144,17 @@ type UpdateStorefrontItem struct {
 }
 
 func (usi *UpdateStorefrontItem) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
-	outEvent := /* new(events.UpdateStorefrontItemRequested) */ new(events.UpdateStorefrontItem)
+	outEvent := new(events.UpdateStorefrontItem)
 
 	amount, err := strconv.ParseInt(r.MultipartForm.Value["amount"][0], 10, 32)
 	errorkit.ErrorHandled(err)
 	price, err := strconv.ParseInt(r.MultipartForm.Value["price"][0], 10, 32)
+	errorkit.ErrorHandled(err)
+	length, err := strconv.ParseInt(r.MultipartForm.Value["length"][0], 10, 32)
+	errorkit.ErrorHandled(err)
+	width, err := strconv.ParseInt(r.MultipartForm.Value["width"][0], 10, 32)
+	errorkit.ErrorHandled(err)
+	height, err := strconv.ParseInt(r.MultipartForm.Value["height"][0], 10, 32)
 	errorkit.ErrorHandled(err)
 
 	outEvent.Amount = int32(amount)
@@ -159,6 +166,13 @@ func (usi *UpdateStorefrontItem) ParseRequestToKafkaMessage(r *http.Request) (ke
 	outEvent.Uid = uuid.New().String()
 	outEvent.Unit = r.MultipartForm.Value["unit"][0]
 	outEvent.ItemUuid = r.MultipartForm.Value["item_uuid"][0]
+
+	outEvent.PriceDuration = store.PriceDuration(store.PriceDuration_value[r.MultipartForm.Value["price_duration"][0]])
+	outEvent.Length = int32(length)
+	outEvent.Width = int32(width)
+	outEvent.Height = int32(height)
+	outEvent.UnitOfMeasurement = store.UnitofMeasurement(store.UnitofMeasurement_value[r.MultipartForm.Value["unit_of_measurement"][0]])
+	outEvent.Color = r.MultipartForm.Value["color"][0]
 
 	out, err := proto.Marshal(outEvent)
 	errorkit.ErrorHandled(err)
@@ -190,9 +204,9 @@ func (usi *UpdateStorefrontItem) CheckInEvent(outKey string, inKey, inVal []byte
 
 func (usi *UpdateStorefrontItem) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
 	return &usecases.EventDrivenUsecase{
-		Consumer: usi.Consumer,
-		InTopic:/* events.StoreTopic_STOREFRONT_ITEM_UPDATED.String() */ events.StorefrontServiceEventTopic_STOREFRONT_ITEM_UPDATED.String(),
-		OutTopic:/* events.StoreTopic_UPDATE_STOREFRONT_ITEM_REQUESTED.String() */ events.StorefrontServiceCommandTopic_UPDATE_STOREFRONT_ITEM.String(),
+		Consumer:       usi.Consumer,
+		InTopic:        events.StorefrontServiceEventTopic_STOREFRONT_ITEM_UPDATED.String(),
+		OutTopic:       events.StorefrontServiceCommandTopic_UPDATE_STOREFRONT_ITEM.String(),
 		Producer:       usi.Producer,
 		InEventChecker: usi}
 }
@@ -203,7 +217,7 @@ type RetrieveStorefrontItems struct {
 }
 
 func (rsfi *RetrieveStorefrontItems) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
-	outEvent := /* new(events.RetrieveUsersStorefrontItemsRequested) */ new(events.RetrieveStorefrontItems)
+	outEvent := new(events.RetrieveStorefrontItems)
 
 	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 32)
 	errorkit.ErrorHandled(err)
@@ -213,7 +227,9 @@ func (rsfi *RetrieveStorefrontItems) ParseRequestToKafkaMessage(r *http.Request)
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
 	outEvent.Limit = int32(limit)
 	outEvent.Offset = int32(offset)
-	outEvent.StorefrontUuid = r.URL.Query().Get("storefront_uuid")
+	if storefrontUUID := r.URL.Query().Get("storefront_uuid"); storefrontUUID != "" {
+		outEvent.StorefrontUuid = storefrontUUID
+	}
 	outEvent.Uid = uuid.New().String()
 
 	outByte, err := proto.Marshal(outEvent)
@@ -229,7 +245,7 @@ func (rsfi *RetrieveStorefrontItems) ParseEventToResponse(in proto.Message) *Res
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
 		resBody.Errs = &inEvent.EventStatus.Errors
 	}
-	resBody.Data = inEvent.Result
+	resBody.Data = json.RawMessage(inEvent.Result)
 
 	return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
 }
@@ -285,7 +301,7 @@ func (ri *RetrieveItems) ParseEventToResponse(in proto.Message) *Response {
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
 		resBody.Errs = &inEvent.EventStatus.Errors
 	}
-	resBody.Data = inEvent.Result
+	resBody.Data = json.RawMessage(inEvent.Result)
 
 	return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
 }
@@ -317,12 +333,12 @@ type SearchItems struct {
 func (si *SearchItems) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
 	outEvent := /* new(events.SearchItemsRequested) */ new(events.SearchItems)
 
-	limit, err := strconv.ParseInt(r.MultipartForm.Value["limit"][0], 10, 32)
+	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 32)
 	errorkit.ErrorHandled(err)
-	offset, err := strconv.ParseInt(r.MultipartForm.Value["offset"][0], 10, 32)
+	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 32)
 	errorkit.ErrorHandled(err)
 
-	outEvent.Keyword = r.MultipartForm.Value["keyword"][0]
+	outEvent.Keyword = r.URL.Query().Get("keyword")
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
 	outEvent.Limit = int32(limit)
 	outEvent.Offset = int32(offset)
@@ -351,7 +367,7 @@ func (si *SearchItems) ParseEventToResponse(in proto.Message) *Response {
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
 		resBody.Errs = &inEvent.EventStatus.Errors
 	}
-	resBody.Data = inEvent.Result
+	resBody.Data = json.RawMessage(inEvent.Result)
 
 	return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
 }
@@ -379,6 +395,7 @@ func (ri *ReviewItem) ParseRequestToKafkaMessage(r *http.Request) (key string, m
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
 	outEvent.ItemUuid = r.MultipartForm.Value["item_uuid"][0]
 	outEvent.Rating = float32(rating)
+	outEvent.Review = r.MultipartForm.Value["review"][0]
 	outEvent.Uid = uuid.New().String()
 
 	out, err := proto.Marshal(outEvent)
