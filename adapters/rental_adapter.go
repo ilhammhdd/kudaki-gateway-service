@@ -22,11 +22,14 @@ type AddCartItem struct {
 func (aci *AddCartItem) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
 	itemAmount, err := strconv.ParseInt(r.MultipartForm.Value["item_amount"][0], 10, 32)
 	errorkit.ErrorHandled(err)
+	durationFrom, err := strconv.ParseInt(r.MultipartForm.Value["duration_from"][0], 10, 64)
+	errorkit.ErrorHandled(err)
+	durationTo, err := strconv.ParseInt(r.MultipartForm.Value["duration_to"][0], 10, 64)
+	errorkit.ErrorHandled(err)
 
 	outEvent := new(events.AddCartItem)
-	if len(r.MultipartForm.Value["cart_uuid"]) != 0 {
-		outEvent.CartUuid = r.MultipartForm.Value["cart_uuid"][0]
-	}
+	outEvent.DurationFrom = durationFrom
+	outEvent.DurationTo = durationTo
 	outEvent.ItemAmount = int32(itemAmount)
 	outEvent.ItemUuid = r.MultipartForm.Value["item_uuid"][0]
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")

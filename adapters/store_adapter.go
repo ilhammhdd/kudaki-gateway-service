@@ -467,7 +467,7 @@ func (rir *RetrieveItemReviews) ParseEventToResponse(in proto.Message) *Response
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
 		resBody.Errs = &inEvent.EventStatus.Errors
 	} else {
-		resBody.Data = inEvent.Result
+		resBody.Data = json.RawMessage(inEvent.Result)
 	}
 
 	return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
@@ -526,8 +526,8 @@ func (cir *CommentItemReview) initUsecaseHandler(outKey string) usecases.EventDr
 	return &usecases.EventDrivenUsecase{
 		Consumer:       cir.Consumer,
 		InEventChecker: cir,
-		InTopic:        events.ItemReviewServiceCommandTopic_COMMENT_ITEM_REVIEW.String(),
-		OutTopic:       events.ItemReviewServiceEventTopic_ITEM_REVIEW_COMMENTED.String(),
+		InTopic:        events.ItemReviewServiceEventTopic_ITEM_REVIEW_COMMENTED.String(),
+		OutTopic:       events.ItemReviewServiceCommandTopic_COMMENT_ITEM_REVIEW.String(),
 		Producer:       cir.Producer}
 }
 
@@ -572,6 +572,8 @@ func (rirc *RetrieveItemReviewComments) ParseEventToResponse(in proto.Message) *
 	var resBody ResponseBody
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
 		resBody.Errs = &inEvent.EventStatus.Errors
+	} else {
+		resBody.Data = json.RawMessage(inEvent.Result)
 	}
 
 	return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
