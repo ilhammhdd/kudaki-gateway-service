@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -101,7 +102,7 @@ func (rci *RetrieveCartItems) ParseEventToResponse(in proto.Message) *Response {
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
 		resBody.Errs = &inEvent.EventStatus.Errors
 	} else {
-		resBody.Data = inEvent.Result
+		resBody.Data = json.RawMessage(inEvent.Result)
 	}
 
 	return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)

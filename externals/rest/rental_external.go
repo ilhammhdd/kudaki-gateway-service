@@ -53,9 +53,8 @@ func (rci *RetrieveCartItems) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 func (rci *RetrieveCartItems) validate(r *http.Request) (errs *[]string, ok bool) {
 	urlValidation := URLParamValidation{
 		Rules: map[string]string{
-			"cart_uuid": RegexUUIDV4,
-			"offset":    RegexNumber,
-			"limit":     RegexNumber},
+			"offset": RegexNumber,
+			"limit":  RegexNumber},
 		Values: r.URL.Query()}
 
 	return urlValidation.Validate()
