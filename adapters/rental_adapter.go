@@ -24,12 +24,12 @@ func (aci *AddCartItem) ParseRequestToKafkaMessage(r *http.Request) (key string,
 	errorkit.ErrorHandled(err)
 	durationFrom, err := strconv.ParseInt(r.MultipartForm.Value["duration_from"][0], 10, 64)
 	errorkit.ErrorHandled(err)
-	durationTo, err := strconv.ParseInt(r.MultipartForm.Value["duration_to"][0], 10, 64)
+	duration, err := strconv.ParseInt(r.MultipartForm.Value["duration"][0], 10, 32)
 	errorkit.ErrorHandled(err)
 
 	outEvent := new(events.AddCartItem)
 	outEvent.DurationFrom = durationFrom
-	outEvent.DurationTo = durationTo
+	outEvent.Duration = int32(duration)
 	outEvent.ItemAmount = int32(itemAmount)
 	outEvent.ItemUuid = r.MultipartForm.Value["item_uuid"][0]
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")

@@ -26,16 +26,13 @@ func (aci *AddCartItem) validate(r *http.Request) (errs *[]string, ok bool) {
 
 	restValidation := RestValidation{
 		Rules: map[string]string{
-			"cart_uuid":     RegexUUIDV4,
 			"item_uuid":     RegexUUIDV4,
 			"item_amount":   RegexNumber,
 			"duration_from": RegexNumber,
-			"duration_to":   RegexNumber},
+			"duration":      RegexNumber},
 		request: r}
 
-	_, errs, valid := restValidation.ValidateIfExists()
-
-	return errs, valid
+	return restValidation.Validate()
 }
 
 type RetrieveCartItems struct{}
