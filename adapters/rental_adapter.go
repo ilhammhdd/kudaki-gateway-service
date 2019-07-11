@@ -181,11 +181,11 @@ type UpdateCartItem struct {
 }
 
 func (uci *UpdateCartItem) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
-	totalItem, err := strconv.ParseInt(r.URL.Query().Get("total_item"), 10, 32)
+	totalItem, err := strconv.ParseInt(r.MultipartForm.Value["total_item"][0], 10, 32)
 	errorkit.ErrorHandled(err)
 
 	outEvent := &events.UpdateCartItem{
-		CartItemUuid: r.URL.Query().Get("cart_item_uuid"),
+		CartItemUuid: r.MultipartForm.Value["cart_item_uuid"][0],
 		KudakiToken:  r.Header.Get("Kudaki-Token"),
 		TotalItem:    int32(totalItem),
 		Uid:          uuid.New().String()}
