@@ -380,3 +380,52 @@ func (co *CheckOut) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Mess
 	}
 	return nil, false
 }
+
+type OwnerConfirmReturnment struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
+
+func (ocr *OwnerConfirmReturnment) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.OwnerConfirmReturnment)
+
+	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
+	outEvent.OwnerOrderUuid = r.MultipartForm.Value["owner_order_uuid"][0]
+	outEvent.Uid = uuid.New().String()
+
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, out
+}
+
+func (ocr *OwnerConfirmReturnment) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.OwnerConfirmedReturnment)
+
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
+		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
+	}
+
+	return NewResponse(http.StatusOK, &resBody)
+}
+
+func (ocr *OwnerConfirmReturnment) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	return &usecases.EventDrivenUsecase{
+		Consumer:       ocr.Consumer,
+		InEventChecker: ocr,
+		InTopic:        events.OrderServiceEventTopic_OWNER_CONFIRMED_RETURNMENT.String(),
+		OutTopic:       events.OrderServiceCommandTopic_OWNER_CONFIRM_RETURNMENT.String(),
+		Producer:       ocr.Producer}
+}
+
+func (ocr *OwnerConfirmReturnment) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
+	var inEvent events.OwnerConfirmedReturnment
+	if proto.Unmarshal(inVal, &inEvent) == nil {
+		if outKey == string(inKey) {
+			return &inEvent, true
+		}
+	}
+	return nil, false
+}

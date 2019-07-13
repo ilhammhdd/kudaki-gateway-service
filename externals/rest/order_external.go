@@ -191,3 +191,29 @@ func (co *CheckOut) validate(r *http.Request) (errs *[]string, ok bool) {
 
 	return restValidation.Validate()
 }
+
+type OwnerConfirmReturnment struct{}
+
+func (ocr *OwnerConfirmReturnment) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, valid := ocr.validate(r); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	edha := &adapters.OwnerConfirmReturnment{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction()}
+	adapters.HandleEventDriven(r, edha).WriteResponse(&w)
+}
+
+func (ocr *OwnerConfirmReturnment) validate(r *http.Request) (errs *[]string, ok bool) {
+	r.ParseMultipartForm(32 << 20)
+
+	restValidation := RestValidation{
+		Rules: map[string]string{
+			"owner_order_uuid": RegexUUIDV4},
+		request: r}
+
+	return restValidation.Validate()
+}

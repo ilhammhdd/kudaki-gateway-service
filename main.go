@@ -59,6 +59,7 @@ func restListener() {
 	http.Handle("/order/owner/approve", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.ApproveOwnerOrder))))
 	http.Handle("/order/checkout", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.CheckOut))))
 	http.Handle("/order/owner/disapprove", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.DisapproveOwnerOrder))))
+	http.Handle("/order/confirm-returnment/owner", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.OwnerConfirmReturnment))))
 	/*
 		rental aggregate
 	*/
@@ -68,8 +69,6 @@ func restListener() {
 		PatchHandler:  rest.Authenticate(new(rest.UpdateCartItem)),
 	})
 	http.Handle("/rental/cart/items", rest.MethodValidator(http.MethodGet, rest.Authenticate(new(rest.RetrieveCartItems))))
-	http.Handle("/rental/confirm-returnment/tenant", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.TenantConfirmReturnment))))
-	http.Handle("/rental/confirm-returnment/owner", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.OwnerConfirmReturnment))))
 	/*
 		store aggregate
 	*/
