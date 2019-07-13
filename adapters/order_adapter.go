@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -46,6 +47,7 @@ func (rooh *RetrieveOwnerOrderHistories) ParseEventToResponse(in proto.Message) 
 		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
 		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
 	}
+	resBody = ResponseBody{Data: json.RawMessage(inEvent.Result)}
 
 	return NewResponse(http.StatusOK, &resBody)
 }
@@ -100,9 +102,8 @@ func (rtoh *RetrieveTenantOrderHistories) ParseEventToResponse(in proto.Message)
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
 		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
 		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
-	} else {
-		resBody.Data = inEvent.Result
 	}
+	resBody.Data = json.RawMessage(inEvent.Result)
 
 	return NewResponse(http.StatusOK, &resBody)
 }
@@ -232,16 +233,16 @@ func (tri *TenantReviewItems) CheckInEvent(outKey string, inKey, inVal []byte) (
 	return nil, false
 }
 
-type ApproveOrder struct {
+type ApproveOwnerOrder struct {
 	Consumer usecases.EventDrivenConsumer
 	Producer usecases.EventDrivenProducer
 }
 
-func (ao *ApproveOrder) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
-	outEvent := new(events.ApproveOrder)
+func (ao *ApproveOwnerOrder) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.ApproveOwnerOrder)
 
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
-	outEvent.OrderUuid = r.MultipartForm.Value["order_uuid"][0]
+	outEvent.OwnerOrderUuid = r.MultipartForm.Value["owner_order_uuid"][0]
 	outEvent.Uid = uuid.New().String()
 
 	out, err := proto.Marshal(outEvent)
@@ -250,8 +251,8 @@ func (ao *ApproveOrder) ParseRequestToKafkaMessage(r *http.Request) (key string,
 	return outEvent.Uid, out
 }
 
-func (ao *ApproveOrder) ParseEventToResponse(in proto.Message) *Response {
-	inEvent := in.(*events.OrderApproved)
+func (ao *ApproveOwnerOrder) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.OwnerOrderApproved)
 
 	var resBody ResponseBody
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
@@ -262,17 +263,17 @@ func (ao *ApproveOrder) ParseEventToResponse(in proto.Message) *Response {
 	return NewResponse(http.StatusOK, &resBody)
 }
 
-func (ao *ApproveOrder) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+func (ao *ApproveOwnerOrder) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
 	return &usecases.EventDrivenUsecase{
 		Consumer:       ao.Consumer,
 		InEventChecker: ao,
-		InTopic:        events.OrderServiceEventTopic_ORDER_APPROVED.String(),
-		OutTopic:       events.OrderServiceCommandTopic_APPROVE_ORDER.String(),
+		InTopic:        events.OrderServiceEventTopic_OWNER_ORDER_APPROVED.String(),
+		OutTopic:       events.OrderServiceCommandTopic_APPROVE_OWNER_ORDER.String(),
 		Producer:       ao.Producer}
 }
 
-func (ao *ApproveOrder) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
-	var inEvent events.OrderApproved
+func (ao *ApproveOwnerOrder) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
+	var inEvent events.OwnerOrderApproved
 	if proto.Unmarshal(inVal, &inEvent) == nil {
 		if outKey == string(inKey) {
 			return &inEvent, true
@@ -281,16 +282,16 @@ func (ao *ApproveOrder) CheckInEvent(outKey string, inKey, inVal []byte) (proto.
 	return nil, false
 }
 
-type DisapproveOrder struct {
+type DisapproveOwnerOrder struct {
 	Consumer usecases.EventDrivenConsumer
 	Producer usecases.EventDrivenProducer
 }
 
-func (do *DisapproveOrder) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
-	outEvent := new(events.DisapproveOrder)
+func (do *DisapproveOwnerOrder) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.DisapproveOwnerOrder)
 
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
-	outEvent.OrderUuid = r.MultipartForm.Value["order_uuid"][0]
+	outEvent.OwnerOrderUuid = r.MultipartForm.Value["owner_order_uuid"][0]
 	outEvent.Uid = uuid.New().String()
 
 	out, err := proto.Marshal(outEvent)
@@ -299,7 +300,7 @@ func (do *DisapproveOrder) ParseRequestToKafkaMessage(r *http.Request) (key stri
 	return outEvent.Uid, out
 }
 
-func (do *DisapproveOrder) ParseEventToResponse(in proto.Message) *Response {
+func (do *DisapproveOwnerOrder) ParseEventToResponse(in proto.Message) *Response {
 	inEvent := in.(*events.OrderDisapproved)
 
 	var resBody ResponseBody
@@ -311,17 +312,67 @@ func (do *DisapproveOrder) ParseEventToResponse(in proto.Message) *Response {
 	return NewResponse(http.StatusOK, &resBody)
 }
 
-func (do *DisapproveOrder) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+func (do *DisapproveOwnerOrder) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
 	return &usecases.EventDrivenUsecase{
 		Consumer:       do.Consumer,
 		InEventChecker: do,
-		InTopic:        events.OrderServiceEventTopic_ORDER_DISAPPROVED.String(),
-		OutTopic:       events.OrderServiceCommandTopic_DISAPPROVE_ORDER.String(),
+		InTopic:        events.OrderServiceEventTopic_OWNER_ORDER_DISAPPROVED.String(),
+		OutTopic:       events.OrderServiceCommandTopic_DISAPPROVE_OWNER_ORDER.String(),
 		Producer:       do.Producer}
 }
 
-func (do *DisapproveOrder) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
+func (do *DisapproveOwnerOrder) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
 	var inEvent events.OrderDisapproved
+	if proto.Unmarshal(inVal, &inEvent) == nil {
+		if outKey == string(inKey) {
+			return &inEvent, true
+		}
+	}
+	return nil, false
+}
+
+type CheckOut struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
+
+func (co *CheckOut) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.CheckOut)
+
+	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
+	outEvent.CartUuid = r.MultipartForm.Value["cart_uuid"][0]
+	// outEvent.AddressUuid = r.MultipartForm.Value["address_uuid"][0]
+	outEvent.Uid = uuid.New().String()
+
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, out
+}
+
+func (co *CheckOut) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.CheckedOut)
+
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
+		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
+	}
+
+	return NewResponse(http.StatusOK, &resBody)
+}
+
+func (co *CheckOut) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	return &usecases.EventDrivenUsecase{
+		Consumer:       co.Consumer,
+		InEventChecker: co,
+		InTopic:        events.OrderServiceEventTopic_CHECKED_OUT.String(),
+		OutTopic:       events.OrderServiceCommandTopic_CHECK_OUT.String(),
+		Producer:       co.Producer}
+}
+
+func (co *CheckOut) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
+	var inEvent events.CheckedOut
 	if proto.Unmarshal(inVal, &inEvent) == nil {
 		if outKey == string(inKey) {
 			return &inEvent, true

@@ -448,6 +448,7 @@ func (up *UpdateProfile) ParseRequestToKafkaMessage(r *http.Request) (key string
 
 	outEvent.FullName = r.MultipartForm.Value["full_name"][0]
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
+	outEvent.PhoneNumber = r.MultipartForm.Value["phone_number"][0]
 	outEvent.Photo = r.MultipartForm.Value["photo"][0]
 	outEvent.Uid = uuid.New().String()
 
@@ -542,5 +543,55 @@ func (ra *RetrieveAddresses) initUsecaseHandler(outKey string) usecases.EventDri
 		InEventChecker: ra,
 		InTopic:        events.UserInfoServiceEventTopic_ADDRESSES_RETRIEVED.String(),
 		OutTopic:       events.UserInfoServiceCommandTopic_RETRIEVE_ADDRESSES.String(),
+		Producer:       ra.Producer}
+}
+
+type RetrieveProfile struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
+
+func (ra *RetrieveProfile) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.RetrieveProfile)
+
+	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
+	outEvent.Uid = uuid.New().String()
+
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, out
+}
+
+func (ra *RetrieveProfile) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.ProfileRetrieved)
+
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody.Errs = &inEvent.EventStatus.Errors
+	} else {
+		resBody.Data = json.RawMessage(inEvent.Result)
+	}
+
+	return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
+}
+
+func (ra *RetrieveProfile) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
+	var inEvent events.ProfileRetrieved
+
+	if proto.Unmarshal(inVal, &inEvent) == nil {
+		if outKey == string(inKey) {
+			return &inEvent, true
+		}
+	}
+	return nil, false
+}
+
+func (ra *RetrieveProfile) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	return &usecases.EventDrivenUsecase{
+		Consumer:       ra.Consumer,
+		InEventChecker: ra,
+		InTopic:        events.UserInfoServiceEventTopic_PROFILE_RETRIEVED.String(),
+		OutTopic:       events.UserInfoServiceCommandTopic_RETRIEVE_PROFILE.String(),
 		Producer:       ra.Producer}
 }

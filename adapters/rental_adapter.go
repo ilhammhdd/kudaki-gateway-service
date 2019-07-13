@@ -197,7 +197,7 @@ func (uci *UpdateCartItem) ParseRequestToKafkaMessage(r *http.Request) (key stri
 }
 
 func (uci *UpdateCartItem) ParseEventToResponse(in proto.Message) *Response {
-	inEvent := in.(*events.CartItemUpdated)
+	inEvent := in.(*events.CartItemsUpdated)
 
 	var resBody ResponseBody
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
@@ -209,7 +209,7 @@ func (uci *UpdateCartItem) ParseEventToResponse(in proto.Message) *Response {
 }
 
 func (uci *UpdateCartItem) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
-	var inEvent events.CartItemUpdated
+	var inEvent events.CartItemsUpdated
 	if proto.Unmarshal(inVal, &inEvent) == nil {
 		if outKey == string(inKey) {
 			return &inEvent, true
@@ -221,7 +221,7 @@ func (uci *UpdateCartItem) CheckInEvent(outKey string, inKey, inVal []byte) (pro
 func (uci *UpdateCartItem) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
 	return &usecases.EventDrivenUsecase{
 		Consumer: uci.Consumer,
-		InTopic:/* events.RentalTopic_CART_ITEM_UPDATED.String() */ events.RentalServiceEventTopic_CART_ITEM_UPDATED.String(),
+		InTopic:/* events.RentalTopic_CART_ITEM_UPDATED.String() */ events.RentalServiceEventTopic_CART_ITEMS_UPDATED.String(),
 		InEventChecker: uci,
 		OutTopic:/* events.RentalTopic_UPDATE_CART_ITEM_REQUESTED.String() */ events.RentalServiceCommandTopic_UPDATE_CART_ITEM.String(),
 		Producer: uci.Producer}

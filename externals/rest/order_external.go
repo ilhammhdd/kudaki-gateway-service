@@ -114,53 +114,79 @@ func (tri *TenantReviewItems) validate(r *http.Request) (errs *[]string, ok bool
 	return restValidation.Validate()
 }
 
-type ApproveOrder struct{}
+type ApproveOwnerOrder struct{}
 
-func (ao *ApproveOrder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (ao *ApproveOwnerOrder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if errs, valid := ao.validate(r); !valid {
 		resBody := adapters.ResponseBody{Errs: errs}
 		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 		return
 	}
 
-	edha := &adapters.ApproveOrder{
+	edha := &adapters.ApproveOwnerOrder{
 		Consumer: kafka.NewConsumption(),
 		Producer: kafka.NewProduction()}
 	adapters.HandleEventDriven(r, edha).WriteResponse(&w)
 }
 
-func (ao *ApproveOrder) validate(r *http.Request) (errs *[]string, ok bool) {
+func (ao *ApproveOwnerOrder) validate(r *http.Request) (errs *[]string, ok bool) {
 	r.ParseMultipartForm(32 << 20)
 
 	restValidation := RestValidation{
 		Rules: map[string]string{
-			"order_uuid": RegexUUIDV4},
+			"owner_order_uuid": RegexUUIDV4},
 		request: r}
 
 	return restValidation.Validate()
 }
 
-type DisapproveOrder struct{}
+type DisapproveOwnerOrder struct{}
 
-func (do *DisapproveOrder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (do *DisapproveOwnerOrder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if errs, valid := do.validate(r); !valid {
 		resBody := adapters.ResponseBody{Errs: errs}
 		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 		return
 	}
 
-	edha := &adapters.DisapproveOrder{
+	edha := &adapters.DisapproveOwnerOrder{
 		Consumer: kafka.NewConsumption(),
 		Producer: kafka.NewProduction()}
 	adapters.HandleEventDriven(r, edha).WriteResponse(&w)
 }
 
-func (do *DisapproveOrder) validate(r *http.Request) (errs *[]string, ok bool) {
+func (do *DisapproveOwnerOrder) validate(r *http.Request) (errs *[]string, ok bool) {
 	r.ParseMultipartForm(32 << 20)
 
 	restValidation := RestValidation{
 		Rules: map[string]string{
-			"order_uuid": RegexUUIDV4},
+			"owner_order_uuid": RegexUUIDV4},
+		request: r}
+
+	return restValidation.Validate()
+}
+
+type CheckOut struct{}
+
+func (co *CheckOut) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, valid := co.validate(r); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	edha := &adapters.CheckOut{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction()}
+	adapters.HandleEventDriven(r, edha).WriteResponse(&w)
+}
+
+func (co *CheckOut) validate(r *http.Request) (errs *[]string, ok bool) {
+	r.ParseMultipartForm(32 << 20)
+
+	restValidation := RestValidation{
+		Rules: map[string]string{
+			"cart_uuid": RegexUUIDV4},
 		request: r}
 
 	return restValidation.Validate()

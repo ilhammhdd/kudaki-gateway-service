@@ -227,8 +227,9 @@ func (up *UpdateProfile) validate(r *http.Request) (*[]string, bool) {
 
 	v := RestValidation{
 		Rules: map[string]string{
-			"photo":     RegexNotEmpty,
-			"full_name": RegexNotEmpty},
+			"photo":        RegexNotEmpty,
+			"full_name":    RegexNotEmpty,
+			"phone_number": RegexNotEmpty},
 		request: r,
 	}
 
@@ -275,6 +276,15 @@ type RetrieveAddresses struct{}
 
 func (ra *RetrieveAddresses) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	adapter := &adapters.RetrieveAddresses{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction()}
+	adapters.HandleEventDriven(r, adapter).WriteResponse(&w)
+}
+
+type RetrieveProfile struct{}
+
+func (rp *RetrieveProfile) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	adapter := &adapters.RetrieveProfile{
 		Consumer: kafka.NewConsumption(),
 		Producer: kafka.NewProduction()}
 	adapters.HandleEventDriven(r, adapter).WriteResponse(&w)

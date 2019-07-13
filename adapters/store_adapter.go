@@ -181,7 +181,7 @@ func (usi *UpdateStorefrontItem) ParseRequestToKafkaMessage(r *http.Request) (ke
 }
 
 func (usi *UpdateStorefrontItem) ParseEventToResponse(in proto.Message) *Response {
-	inEvent := in.(*events.StorefrontItemUpdated)
+	inEvent := in.(*events.StorefrontItemsUpdated)
 
 	var resBody ResponseBody
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
@@ -192,7 +192,7 @@ func (usi *UpdateStorefrontItem) ParseEventToResponse(in proto.Message) *Respons
 }
 
 func (usi *UpdateStorefrontItem) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
-	var inEvent events.StorefrontItemUpdated
+	var inEvent events.StorefrontItemsUpdated
 
 	if err := proto.Unmarshal(inVal, &inEvent); err == nil {
 		if outKey == string(inKey) {
@@ -205,7 +205,7 @@ func (usi *UpdateStorefrontItem) CheckInEvent(outKey string, inKey, inVal []byte
 func (usi *UpdateStorefrontItem) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
 	return &usecases.EventDrivenUsecase{
 		Consumer:       usi.Consumer,
-		InTopic:        events.StorefrontServiceEventTopic_STOREFRONT_ITEM_UPDATED.String(),
+		InTopic:        events.StorefrontServiceEventTopic_STOREFRONT_ITEMS_UPDATED.String(),
 		OutTopic:       events.StorefrontServiceCommandTopic_UPDATE_STOREFRONT_ITEM.String(),
 		Producer:       usi.Producer,
 		InEventChecker: usi}

@@ -56,8 +56,9 @@ func restListener() {
 	http.Handle("/order/tenant", rest.MethodValidator(http.MethodGet, rest.Authenticate(new(rest.RetrieveTenantOrderHistories))))
 	http.Handle("/order/tenant/review/owner", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.TenantReviewOwner))))
 	http.Handle("/order/tenant/review/items", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.TenantReviewItems))))
-	http.Handle("/order/approve", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.ApproveOrder))))
-	http.Handle("/order/disapprove", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.DisapproveOrder))))
+	http.Handle("/order/owner/approve", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.ApproveOwnerOrder))))
+	http.Handle("/order/checkout", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.CheckOut))))
+	http.Handle("/order/owner/disapprove", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.DisapproveOwnerOrder))))
 	/*
 		rental aggregate
 	*/
@@ -98,7 +99,10 @@ func restListener() {
 		PostHandler: rest.Authenticate(new(rest.AddAddress)),
 		PutHandler:  rest.Authenticate(new(rest.UpdateAddress)),
 	})
-	http.Handle("/user-info/profile", rest.MethodValidator(http.MethodPatch, rest.Authenticate(new(rest.UpdateProfile))))
+	http.Handle("/user-info/profile", rest.MethodRouting{
+		PatchHandler: rest.Authenticate(new(rest.UpdateProfile)),
+		GetHandler:   rest.Authenticate(new(rest.RetrieveProfile)),
+	})
 	http.Handle("/user-info/addresses", rest.MethodValidator(http.MethodGet, rest.Authenticate(new(rest.RetrieveAddresses))))
 	http.Handle("/user/password/change", rest.MethodValidator(http.MethodPatch, rest.Authenticate(new(rest.ChangePassword))))
 	http.Handle("/user/verify", rest.MethodValidator(http.MethodGet, new(rest.VerifyUser)))
