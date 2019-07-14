@@ -7,9 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ilhammhdd/kudaki-gateway-service/externals/kafka"
-	"gopkg.in/Shopify/sarama.v1"
-
 	"github.com/ilhammhdd/kudaki-gateway-service/entities/aggregates/user"
 
 	_ "github.com/go-sql-driver/mysql"
