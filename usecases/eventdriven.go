@@ -49,7 +49,7 @@ func (edu *EventDrivenUsecase) consume(outKey string) proto.Message {
 	edu.Consumer.Set(edu.InTopic, 0, sarama.OffsetNewest)
 	partCons, sig := edu.Consumer.Consume()
 
-	defer partCons.AsyncClose()
+	// defer partCons.AsyncClose()
 
 	for {
 		select {

@@ -1,11 +1,8 @@
 package usecases
 
 import (
-	"log"
 	"os"
 
-	"github.com/golang/protobuf/proto"
-	"github.com/ilhammhdd/go-toolkit/errorkit"
 	sarama "gopkg.in/Shopify/sarama.v1"
 )
 
@@ -28,24 +25,25 @@ type EventDrivenConsumerGroup interface {
 	Close()
 }
 
-func Consume(unmarshalProto proto.Message, topic string, key string, consumer EventDrivenConsumer) proto.Message {
-	consumer.Set(topic, 0, sarama.OffsetNewest)
-	partCons, sig := consumer.Consume()
-	defer partCons.Close()
+// func Consume(unmarshalProto proto.Message, topic string, key string, consumer EventDrivenConsumer) proto.Message {
+// 	consumer.Set(topic, 0, sarama.OffsetNewest)
+// 	partCons, sig := consumer.Consume()
 
-	for {
-		select {
-		case msg := <-partCons.Messages():
-			log.Printf("consumed : topic = %s, partition = %d, offset = %d, key = %s", msg.Topic, msg.Partition, msg.Offset, string(msg.Key))
-			if unmarshallErr := proto.Unmarshal(msg.Value, unmarshalProto); unmarshallErr == nil {
-				if string(msg.Key) == (key) {
-					return unmarshalProto
-				}
-			}
-		case errs := <-partCons.Errors():
-			errorkit.ErrorHandled(errs.Err)
-		case <-sig:
-			return nil
-		}
-	}
-}
+// 	defer partCons.Close()
+
+// 	for {
+// 		select {
+// 		case msg := <-partCons.Messages():
+// 			log.Printf("consumed : topic = %s, partition = %d, offset = %d, key = %s", msg.Topic, msg.Partition, msg.Offset, string(msg.Key))
+// 			if unmarshallErr := proto.Unmarshal(msg.Value, unmarshalProto); unmarshallErr == nil {
+// 				if string(msg.Key) == (key) {
+// 					return unmarshalProto
+// 				}
+// 			}
+// 		case errs := <-partCons.Errors():
+// 			errorkit.ErrorHandled(errs.Err)
+// 		case <-sig:
+// 			return nil
+// 		}
+// 	}
+// }
