@@ -15,7 +15,6 @@ schema:
     run:
       status: true
   args:
-  - -- ADDRESS 0.0.0.0
   - -- GRPC_PORT 9000
   - -- REST_PORT 9001
   - -- KAFKA_BROKERS 178.62.107.160:29092
