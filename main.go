@@ -28,9 +28,6 @@ func init() {
 	}
 
 	log.Println(os.Getenv("KAFKA_VERSION"))
-	var saramaErr error
-	kafka.SaramaConsumer, saramaErr = sarama.NewConsumer(strings.Split(os.Getenv("KAFKA_BROKERS"), ","), nil)
-	errorkit.ErrorHandled(saramaErr)
 }
 
 func main() {

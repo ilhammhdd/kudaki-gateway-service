@@ -3,6 +3,7 @@ package kafka
 import (
 	"os"
 	"os/signal"
+	"strings"
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
 	sarama "gopkg.in/Shopify/sarama.v1"
@@ -32,7 +33,10 @@ func (c *Consumption) Get() (string, int32, int64) {
 func (c *Consumption) Consume() (sarama.PartitionConsumer, chan os.Signal) {
 	topic, partition, offset := c.Get()
 
-	partCons, err := SaramaConsumer.ConsumePartition(topic, partition, offset)
+	cons, err := sarama.NewConsumer(strings.Split(os.Getenv("KAFKA_BROKERS"), ","), nil)
+	errorkit.ErrorHandled(err)
+
+	partCons, err := cons.ConsumePartition(topic, partition, offset)
 	errorkit.ErrorHandled(err)
 
 	signals := make(chan os.Signal, 1)
