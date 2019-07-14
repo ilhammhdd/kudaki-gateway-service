@@ -290,7 +290,7 @@ func Authenticate(h http.Handler) http.Handler {
 	})
 }
 
-func Authorize(role user.UserRole, h http.Handler) http.Handler {
+func Authorize(role []user.UserRole, h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		headerErr, ok := HeaderParamValidator(
@@ -304,15 +304,15 @@ func Authorize(role user.UserRole, h http.Handler) http.Handler {
 			return
 		}
 
-		conn, err := grpc.Dial(os.Getenv("USER_SERVICE_GRPC_ADDRESS"), grpc.WithInsecure())
+		conn, err := grpc.Dial(os.Getenv("USER_AUTH_SERVICE_GRPC_ADDRESS"), grpc.WithInsecure())
 		errorkit.ErrorHandled(err)
 
 		uc := grpc_exteral.NewUserClient(conn)
 
 		uar := &grpc_exteral.AuthorizeUser{
-			Jwt:      r.Header.Get("Kudaki-Token"),
-			UserRole: role,
-			Uid:      uuid.New().String()}
+			Jwt:       r.Header.Get("Kudaki-Token"),
+			UserRoles: role,
+			Uid:       uuid.New().String()}
 
 		uad, err := uc.UserAuthorization(r.Context(), uar)
 		errorkit.ErrorHandled(err)

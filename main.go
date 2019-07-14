@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ilhammhdd/kudaki-gateway-service/entities/aggregates/user"
+
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
@@ -34,6 +36,17 @@ func main() {
 }
 
 func restListener() {
+	/*
+		kudaki event aggregate
+	*/
+	http.Handle("/event", rest.MethodRouting{
+		PostHandler:   rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_ORGANIZER}, new(rest.AddKudakiEvent))),
+		DeleteHandler: rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_ORGANIZER}, new(rest.DeleteKudakiEvent))),
+	})
+	http.Handle("/event/price", rest.MethodRouting{
+		PostHandler: rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_KUDAKI_TEAM, user.UserRole_ADMIN}, new(rest.AddPrice))),
+		PutHandler:  rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_KUDAKI_TEAM, user.UserRole_ADMIN}, new(rest.DeleteKudakiEvent))),
+	})
 	/*
 		mountain aggregate
 	*/
