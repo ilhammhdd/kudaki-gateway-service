@@ -3,10 +3,8 @@ package kafka
 import (
 	"os"
 	"os/signal"
-	"strings"
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
-	"github.com/ilhammhdd/go-toolkit/safekit"
 	sarama "gopkg.in/Shopify/sarama.v1"
 )
 
@@ -15,6 +13,8 @@ type Consumption struct {
 	Partition int32
 	Offset    int64
 }
+
+var SaramaConsumer sarama.Consumer
 
 func NewConsumption() *Consumption { return &Consumption{} }
 
@@ -29,27 +29,14 @@ func (c *Consumption) Get() (string, int32, int64) {
 }
 
 // this function still tightly coupled to sarama by PartitionConsumer return value
-func (c *Consumption) Consume() (sarama.PartitionConsumer, chan os.Signal, chan bool) {
-	closeConsumer := make(chan bool)
-
-	cons, err := sarama.NewConsumer(strings.Split(os.Getenv("KAFKA_BROKERS"), ","), nil)
-	errorkit.ErrorHandled(err)
-
+func (c *Consumption) Consume() (sarama.PartitionConsumer, chan os.Signal) {
 	topic, partition, offset := c.Get()
 
-	partCons, err := cons.ConsumePartition(topic, partition, offset)
+	partCons, err := SaramaConsumer.ConsumePartition(topic, partition, offset)
 	errorkit.ErrorHandled(err)
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt)
 
-	safekit.Do(func() {
-		_, ok := <-closeConsumer
-		if !ok {
-			cons.Close()
-			partCons.Close()
-		}
-	})
-
-	return partCons, signals, closeConsumer
+	return partCons, signals
 }

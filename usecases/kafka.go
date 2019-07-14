@@ -18,7 +18,7 @@ type EventDrivenProducer interface {
 type EventDrivenConsumer interface {
 	Set(topic string, partition int32, offset int64)
 	Get() (topic string, partition int32, offset int64)
-	Consume() (partCons sarama.PartitionConsumer, signals chan os.Signal, close chan bool)
+	Consume() (partCons sarama.PartitionConsumer, signals chan os.Signal)
 }
 
 type EventDrivenConsumerGroup interface {
@@ -30,8 +30,8 @@ type EventDrivenConsumerGroup interface {
 
 func Consume(unmarshalProto proto.Message, topic string, key string, consumer EventDrivenConsumer) proto.Message {
 	consumer.Set(topic, 0, sarama.OffsetNewest)
-	partCons, sig, closeChan := consumer.Consume()
-	defer close(closeChan)
+	partCons, sig := consumer.Consume()
+	defer partCons.Close()
 
 	for {
 		select {

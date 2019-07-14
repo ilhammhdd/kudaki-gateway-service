@@ -7,6 +7,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ilhammhdd/kudaki-gateway-service/externals/kafka"
+	"gopkg.in/Shopify/sarama.v1"
+
 	"github.com/ilhammhdd/kudaki-gateway-service/entities/aggregates/user"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -25,6 +28,9 @@ func init() {
 	}
 
 	log.Println(os.Getenv("KAFKA_VERSION"))
+	var saramaErr error
+	kafka.SaramaConsumer, saramaErr = sarama.NewConsumer(strings.Split(os.Getenv("KAFKA_BROKERS"), ","), nil)
+	errorkit.ErrorHandled(saramaErr)
 }
 
 func main() {

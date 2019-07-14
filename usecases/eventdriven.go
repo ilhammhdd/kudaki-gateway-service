@@ -47,8 +47,8 @@ func (edu *EventDrivenUsecase) produce(outKey string, outMsg []byte) {
 
 func (edu *EventDrivenUsecase) consume(outKey string) proto.Message {
 	edu.Consumer.Set(edu.InTopic, 0, sarama.OffsetNewest)
-	partCons, sig, closeChan := edu.Consumer.Consume()
-	defer close(closeChan)
+	partCons, sig := edu.Consumer.Consume()
+	defer partCons.Close()
 
 	for {
 		select {
