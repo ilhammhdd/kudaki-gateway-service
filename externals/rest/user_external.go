@@ -133,7 +133,7 @@ func (s *Signup) validate(r *http.Request) (errs *[]string, ok bool) {
 		Rules: map[string]string{
 			"email":        RegexEmail,
 			"password":     RegexPassword,
-			"role":         RegexNotEmpty,
+			"role":         RegexRole,
 			"full_name":    RegexNotEmpty,
 			"phone_number": RegexNotEmpty},
 		request: r,
