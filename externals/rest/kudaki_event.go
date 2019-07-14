@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/ilhammhdd/kudaki-gateway-service/adapters"
@@ -88,4 +89,61 @@ func (ap *AddPrice) validate(r *http.Request) (errs *[]string, ok bool) {
 			"duration_unit": RegexNotEmpty},
 		request: r}
 	return restValidation.Validate()
+}
+
+// -------------------------------------------------------------------------------------------
+
+type RedirectDoku struct{}
+
+func (ap *RedirectDoku) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, valid := ap.validate(r); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	log.Println("request header : ", r.Header)
+	log.Println("request body : ", r.Body)
+}
+
+func (ap *RedirectDoku) validate(r *http.Request) (errs *[]string, ok bool) {
+	return nil, true
+}
+
+// -------------------------------------------------------------------------------------------
+
+type NotifyDoku struct{}
+
+func (ap *NotifyDoku) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, valid := ap.validate(r); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	log.Println("request header : ", r.Header)
+	log.Println("request body : ", r.Body)
+}
+
+func (ap *NotifyDoku) validate(r *http.Request) (errs *[]string, ok bool) {
+	return nil, true
+}
+
+// -------------------------------------------------------------------------------------------
+
+type IdentifyDoku struct{}
+
+func (ap *IdentifyDoku) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, valid := ap.validate(r); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	log.Println("request header : ", r.Header)
+	log.Println("request body : ", r.Body)
+}
+
+func (ap *IdentifyDoku) validate(r *http.Request) (errs *[]string, ok bool) {
+	return nil, true
 }

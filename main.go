@@ -43,10 +43,9 @@ func restListener() {
 		PostHandler:   rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_ORGANIZER}, new(rest.AddKudakiEvent))),
 		DeleteHandler: rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_ORGANIZER}, new(rest.DeleteKudakiEvent))),
 	})
-	http.Handle("/event/price", rest.MethodRouting{
-		PostHandler: rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_KUDAKI_TEAM, user.UserRole_ADMIN}, new(rest.AddPrice))),
-		PutHandler:  rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_KUDAKI_TEAM, user.UserRole_ADMIN}, new(rest.DeleteKudakiEvent))),
-	})
+	http.Handle("/event-payment/doku/redirect", new(rest.RedirectDoku))
+	http.Handle("/event-payment/doku/notify", new(rest.NotifyDoku))
+	http.Handle("/event-payment/doku/identify", new(rest.IdentifyDoku))
 	/*
 		mountain aggregate
 	*/
