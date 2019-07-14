@@ -45,21 +45,18 @@ func (edu *EventDrivenUsecase) produce(outKey string, outMsg []byte) {
 	log.Printf("produced %s : partition = %d, offset = %d, key = %s, duration = %f seconds", edu.OutTopic, part, offset, outKey, duration.Seconds())
 }
 
-func (edu *EventDrivenUsecase) consume(outKey string) (inEvent proto.Message) {
+func (edu *EventDrivenUsecase) consume(outKey string) proto.Message {
 	edu.Consumer.Set(edu.InTopic, 0, sarama.OffsetNewest)
 	partCons, sig, closeChan := edu.Consumer.Consume()
 	defer close(closeChan)
 
-	ok := false
 	for {
 		select {
 		case msg := <-partCons.Messages():
-			if inEvent, ok = edu.InEventChecker.CheckInEvent(outKey, msg.Key, msg.Value); ok {
-				return
+			if inEvent, ok := edu.InEventChecker.CheckInEvent(outKey, msg.Key, msg.Value); ok {
+				log.Printf("consumed %s : partition = %d, offset = %d, key = %s", edu.InTopic, msg.Partition, msg.Offset, string(msg.Key))
+				return inEvent
 			}
-			/* if inEvent, ok = (*edu.InUnmarshal)(msg.Key, msg.Value); ok {
-				return
-			} */
 		case errs := <-partCons.Errors():
 			log.Printf("error while consuming %s : %s", edu.InTopic, errs.Err.Error())
 		case <-sig:
