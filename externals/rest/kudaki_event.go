@@ -28,10 +28,13 @@ func (ake *AddKudakiEvent) validate(r *http.Request) (errs *[]string, ok bool) {
 
 	restValidation := RestValidation{
 		Rules: map[string]string{
-			"venue":         RegexNotEmpty,
-			"description":   RegexNotEmpty,
-			"duration_from": RegexNumber,
-			"duration_to":   RegexNumber},
+			"venue":            RegexNotEmpty,
+			"description":      RegexNotEmpty,
+			"duration_from":    RegexNumber,
+			"duration_to":      RegexNumber,
+			"name":             RegexNotEmpty,
+			"ad_duration_from": RegexNotEmpty,
+			"ad_duration_to":   RegexNotEmpty},
 		request: r}
 	return restValidation.Validate()
 }
@@ -59,34 +62,6 @@ func (dke *DeleteKudakiEvent) validate(r *http.Request) (errs *[]string, ok bool
 	restValidation := RestValidation{
 		Rules: map[string]string{
 			"event_uuid": RegexUUIDV4},
-		request: r}
-	return restValidation.Validate()
-}
-
-// -------------------------------------------------------------------------------------------
-
-type AddPrice struct{}
-
-func (ap *AddPrice) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if errs, valid := ap.validate(r); !valid {
-		resBody := adapters.ResponseBody{Errs: errs}
-		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
-		return
-	}
-
-	edha := &adapters.AddPrice{
-		Consumer: kafka.NewConsumption(),
-		Producer: kafka.NewProduction()}
-	adapters.HandleEventDriven(r, edha).WriteResponse(&w)
-}
-
-func (ap *AddPrice) validate(r *http.Request) (errs *[]string, ok bool) {
-	r.ParseMultipartForm(32 << 20)
-
-	restValidation := RestValidation{
-		Rules: map[string]string{
-			"duration":      RegexNumber,
-			"duration_unit": RegexNotEmpty},
 		request: r}
 	return restValidation.Validate()
 }

@@ -23,7 +23,13 @@ func (ake *AddKudakiEvent) ParseRequestToKafkaMessage(r *http.Request) (key stri
 	errorkit.ErrorHandled(err)
 	durationTo, err := strconv.ParseInt(r.MultipartForm.Value["duration_to"][0], 10, 64)
 	errorkit.ErrorHandled(err)
+	adDurationFrom, err := strconv.ParseInt(r.MultipartForm.Value["ad_duration_from"][0], 10, 64)
+	errorkit.ErrorHandled(err)
+	adDurationTo, err := strconv.ParseInt(r.MultipartForm.Value["ad_duration_to"][0], 10, 64)
+	errorkit.ErrorHandled(err)
 
+	outEvent.AdDurationFrom = adDurationFrom
+	outEvent.AdDurationTo = adDurationTo
 	outEvent.Description = r.MultipartForm.Value["description"][0]
 	outEvent.DurationFrom = durationFrom
 	outEvent.DurationTo = durationTo
@@ -112,61 +118,6 @@ func (ake *DeleteKudakiEvent) initUsecaseHandler(outKey string) usecases.EventDr
 
 func (ake *DeleteKudakiEvent) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
 	var inEvent events.KudakiEventDeleted
-	if proto.Unmarshal(inVal, &inEvent) == nil {
-		if outKey == string(inKey) {
-			return &inEvent, true
-		}
-	}
-	return nil, false
-}
-
-// -------------------------------------------------------------------------------------------
-
-type AddPrice struct {
-	Consumer usecases.EventDrivenConsumer
-	Producer usecases.EventDrivenProducer
-}
-
-func (ap *AddPrice) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
-	outEvent := new(events.AddPrice)
-
-	duration, err := strconv.ParseInt(r.MultipartForm.Value["duration"][0], 10, 64)
-	errorkit.ErrorHandled(err)
-
-	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
-	outEvent.Duration = duration
-	outEvent.DurationUnit = r.MultipartForm.Value["durataion_unit"][0]
-	outEvent.Uid = uuid.New().String()
-
-	out, err := proto.Marshal(outEvent)
-	errorkit.ErrorHandled(err)
-
-	return outEvent.Uid, out
-}
-
-func (ap *AddPrice) ParseEventToResponse(in proto.Message) *Response {
-	inEvent := in.(*events.PriceAdded)
-
-	var resBody ResponseBody
-	if inEvent.EventStatus.HttpCode != http.StatusOK {
-		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
-		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
-	}
-
-	return NewResponse(http.StatusOK, &resBody)
-}
-
-func (ap *AddPrice) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
-	return &usecases.EventDrivenUsecase{
-		Consumer:       ap.Consumer,
-		InEventChecker: ap,
-		InTopic:        events.EventServiceEventTopic_PRICE_ADDED.String(),
-		OutTopic:       events.EventServiceCommandTopic_ADD_PRICE.String(),
-		Producer:       ap.Producer}
-}
-
-func (ap *AddPrice) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
-	var inEvent events.PriceAdded
 	if proto.Unmarshal(inVal, &inEvent) == nil {
 		if outKey == string(inKey) {
 			return &inEvent, true
