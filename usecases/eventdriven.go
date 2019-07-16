@@ -7,8 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ilhammhdd/go-toolkit/safekit"
-
 	"gopkg.in/Shopify/sarama.v1"
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
@@ -34,17 +32,21 @@ type EventDrivenUsecase struct {
 	Consumer EventDrivenConsumer
 	// InUnmarshal *KafkaMessageUnmarshal
 	InEventChecker InEventChecker
+	producedOffset int64
 }
 
 func (edu *EventDrivenUsecase) Handle(outKey string, outMsg []byte) (inEvent proto.Message) {
-	inEventChan := make(chan proto.Message)
+	// inEventChan := make(chan proto.Message)
 
-	safekit.Do(func() {
-		inEventChan <- edu.consume(outKey)
-	})
+	// safekit.Do(func() {
+	// 	inEventChan <- edu.consume(outKey)
+	// })
+
+	// edu.produce(outKey, outMsg)
+	// return <-inEventChan
 
 	edu.produce(outKey, outMsg)
-	return <-inEventChan
+	return edu.consume(outKey)
 }
 
 func (edu *EventDrivenUsecase) produce(outKey string, outMsg []byte) {
@@ -60,7 +62,7 @@ func (edu *EventDrivenUsecase) consume(outKey string) proto.Message {
 	cons, err := sarama.NewConsumer(strings.Split(os.Getenv("KAFKA_BROKERS"), ","), nil)
 	errorkit.ErrorHandled(err)
 
-	partCons, err := cons.ConsumePartition(edu.InTopic, 0, sarama.OffsetNewest)
+	partCons, err := cons.ConsumePartition(edu.InTopic, 0, edu.producedOffset)
 	errorkit.ErrorHandled(err)
 
 	defer func() {
