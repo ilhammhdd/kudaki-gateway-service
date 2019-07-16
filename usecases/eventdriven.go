@@ -2,6 +2,9 @@ package usecases
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"strings"
 	"time"
 
 	"gopkg.in/Shopify/sarama.v1"
@@ -46,10 +49,19 @@ func (edu *EventDrivenUsecase) produce(outKey string, outMsg []byte) {
 }
 
 func (edu *EventDrivenUsecase) consume(outKey string) proto.Message {
-	edu.Consumer.Set(edu.InTopic, 0, sarama.OffsetNewest)
-	partCons, sig := edu.Consumer.Consume()
+	cons, err := sarama.NewConsumer(strings.Split(os.Getenv("KAFKA_BROKERS"), ","), nil)
+	errorkit.ErrorHandled(err)
 
-	// defer partCons.AsyncClose()
+	partCons, err := cons.ConsumePartition(edu.InTopic, 0, sarama.OffsetNewest)
+	errorkit.ErrorHandled(err)
+
+	defer func() {
+		partCons.Close()
+		cons.Close()
+	}()
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
 
 	for {
 		select {
@@ -64,4 +76,23 @@ func (edu *EventDrivenUsecase) consume(outKey string) proto.Message {
 			return nil
 		}
 	}
+
+	// edu.Consumer.Set(edu.InTopic, 0, sarama.OffsetNewest)
+	// partCons, sig := edu.Consumer.Consume()
+
+	// // defer partCons.AsyncClose()
+
+	// for {
+	// 	select {
+	// 	case msg := <-partCons.Messages():
+	// 		if inEvent, ok := edu.InEventChecker.CheckInEvent(outKey, msg.Key, msg.Value); ok {
+	// 			log.Printf("consumed %s : partition = %d, offset = %d, key = %s", edu.InTopic, msg.Partition, msg.Offset, string(msg.Key))
+	// 			return inEvent
+	// 		}
+	// 	case errs := <-partCons.Errors():
+	// 		log.Printf("error while consuming %s : %s", edu.InTopic, errs.Err.Error())
+	// 	case <-sig:
+	// 		return nil
+	// 	}
+	// }
 }
