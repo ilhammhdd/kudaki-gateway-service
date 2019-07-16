@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ilhammhdd/go-toolkit/safekit"
+
 	"gopkg.in/Shopify/sarama.v1"
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
@@ -35,8 +37,14 @@ type EventDrivenUsecase struct {
 }
 
 func (edu *EventDrivenUsecase) Handle(outKey string, outMsg []byte) (inEvent proto.Message) {
+	inEventChan := make(chan proto.Message)
+
+	safekit.Do(func() {
+		inEventChan <- edu.consume(outKey)
+	})
+
 	edu.produce(outKey, outMsg)
-	return edu.consume(outKey)
+	return <-inEventChan
 }
 
 func (edu *EventDrivenUsecase) produce(outKey string, outMsg []byte) {
