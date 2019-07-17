@@ -55,17 +55,17 @@ func (ake *AddKudakiEvent) ParseEventToResponse(in proto.Message) *Response {
 	}
 
 	var responseData struct {
-		Amount           int64  `json:"AMOUNT"`
-		PurchaseAmount   int64  `json:"PURCHASEAMOUNT"`
-		TransIDMerchant  string `json:"TRANSIDMERCHANT"`
-		Words            string `json:"WORDS"`
-		RequestDateTime  int64  `json:"REQUESTDATETIME"`
-		Currency         int32  `json:"CURRENCY"`
-		PurchaseCurrency int32  `json:"PURCHASECURRENCY"`
-		SessionID        string `json:"SESSIONID"`
-		Name             string `json:"NAME"`
-		Email            string `json:"EMAIL"`
-		Basket           string `json:"BASKET"`
+		Amount           float32 `json:"AMOUNT"`
+		PurchaseAmount   float32 `json:"PURCHASEAMOUNT"`
+		TransIDMerchant  string  `json:"TRANSIDMERCHANT"`
+		Words            string  `json:"WORDS"`
+		RequestDateTime  int64   `json:"REQUESTDATETIME"`
+		Currency         int32   `json:"CURRENCY"`
+		PurchaseCurrency int32   `json:"PURCHASECURRENCY"`
+		SessionID        string  `json:"SESSIONID"`
+		Name             string  `json:"NAME"`
+		Email            string  `json:"EMAIL"`
+		Basket           string  `json:"BASKET"`
 	}
 
 	responseData.Amount = inEvent.DokuInvoice.Amount
