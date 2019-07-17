@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -45,13 +46,43 @@ func (ake *AddKudakiEvent) ParseRequestToKafkaMessage(r *http.Request) (key stri
 }
 
 func (ake *AddKudakiEvent) ParseEventToResponse(in proto.Message) *Response {
-	inEvent := in.(*events.KudakiEventAdded)
+	inEvent := in.(*events.KudakiEventDokuInvoiceIssued)
 
 	var resBody ResponseBody
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
 		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
 		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
 	}
+
+	var responseData struct {
+		Amount           int64  `json:"AMOUNT"`
+		PurchaseAmount   int64  `json:"PURCHASEAMOUNT"`
+		TransIDMerchant  string `json:"TRANSIDMERCHANT"`
+		Words            string `json:"WORDS"`
+		RequestDateTime  int64  `json:"REQUESTDATETIME"`
+		Currency         int32  `json:"CURRENCY"`
+		PurchaseCurrency int32  `json:"PURCHASECURRENCY"`
+		SessionID        string `json:"SESSIONID"`
+		Name             string `json:"NAME"`
+		Email            string `json:"EMAIL"`
+		Basket           string `json:"BASKET"`
+	}
+
+	responseData.Amount = inEvent.DokuInvoice.Amount
+	responseData.Basket = inEvent.DokuInvoice.Basket
+	responseData.Currency = inEvent.DokuInvoice.Currency
+	responseData.Email = inEvent.DokuInvoice.Email
+	responseData.Name = inEvent.DokuInvoice.Name
+	responseData.PurchaseAmount = inEvent.DokuInvoice.PurchaseAmount
+	responseData.PurchaseCurrency = inEvent.DokuInvoice.PurchaseCurrency
+	responseData.RequestDateTime = inEvent.DokuInvoice.RequestDateTime
+	responseData.SessionID = inEvent.DokuInvoice.SessionId
+	responseData.TransIDMerchant = inEvent.DokuInvoice.TransactionIdMerchant
+	responseData.Words = inEvent.DokuInvoice.Words
+
+	resBody.Data = responseData
+
+	log.Println("response body data : ", resBody.Data)
 
 	return NewResponse(http.StatusOK, &resBody)
 }
@@ -60,7 +91,7 @@ func (ake *AddKudakiEvent) initUsecaseHandler(outKey string) usecases.EventDrive
 	return &usecases.EventDrivenUsecase{
 		Consumer:       ake.Consumer,
 		InEventChecker: ake,
-		InTopic:        events.EventServiceEventTopic_KUDAKI_EVENT_ADDED.String(),
+		InTopic:        events.EventPaymentServiceEventTopic_EVENT_DOKU_INVOICE_ISSUED.String(),
 		OutTopic:       events.EventServiceCommandTopic_ADD_KUDAKI_EVENT.String(),
 		Producer:       ake.Producer}
 }
