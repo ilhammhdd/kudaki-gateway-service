@@ -97,7 +97,7 @@ func (ake *AddKudakiEvent) initUsecaseHandler(outKey string) usecases.EventDrive
 }
 
 func (ake *AddKudakiEvent) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
-	var inEvent events.KudakiEventAdded
+	var inEvent events.KudakiEventDokuInvoiceIssued
 	if proto.Unmarshal(inVal, &inEvent) == nil {
 		if outKey == string(inKey) {
 			return &inEvent, true
