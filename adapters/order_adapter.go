@@ -127,72 +127,20 @@ func (rtoh *RetrieveTenantOrderHistories) CheckInEvent(outKey string, inKey, inV
 	return nil, false
 }
 
-type TenantReviewOwner struct {
+type TenantReviewOwnerOrder struct {
 	Consumer usecases.EventDrivenConsumer
 	Producer usecases.EventDrivenProducer
 }
 
-func (tro *TenantReviewOwner) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
-	outEvent := new(events.TenantReviewOwner)
+func (tro *TenantReviewOwnerOrder) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.TenantReviewOwnerOrder)
 
 	rating, err := strconv.ParseFloat(r.MultipartForm.Value["rating"][0], 32)
 	errorkit.ErrorHandled(err)
 
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
-	outEvent.OrderUuid = r.MultipartForm.Value["order_uuid"][0]
-	outEvent.Rating = float32(rating)
-	outEvent.Uid = uuid.New().String()
-
-	out, err := proto.Marshal(outEvent)
-	errorkit.ErrorHandled(err)
-
-	return outEvent.Uid, out
-}
-
-func (tro *TenantReviewOwner) ParseEventToResponse(in proto.Message) *Response {
-	inEvent := in.(*events.TenantReviewedOwner)
-
-	var resBody ResponseBody
-	if inEvent.EventStatus.HttpCode != http.StatusOK {
-		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
-		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
-	}
-
-	return NewResponse(http.StatusOK, &resBody)
-}
-
-func (tro *TenantReviewOwner) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
-	return &usecases.EventDrivenUsecase{
-		Consumer:       tro.Consumer,
-		InEventChecker: tro,
-		InTopic:        events.OrderServiceEventTopic_TENANT_REVIEWED_OWNER.String(),
-		OutTopic:       events.OrderServiceCommandTopic_TENANT_REVIEW_OWNER.String(),
-		Producer:       tro.Producer}
-}
-
-func (tro *TenantReviewOwner) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
-	var inEvent events.TenantReviewedOwner
-	if proto.Unmarshal(inVal, &inEvent) == nil {
-		if outKey == string(inKey) {
-			return &inEvent, true
-		}
-	}
-	return nil, false
-}
-
-type TenantReviewItems struct {
-	Consumer usecases.EventDrivenConsumer
-	Producer usecases.EventDrivenProducer
-}
-
-func (tri *TenantReviewItems) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
-	outEvent := new(events.TenantReviewItems)
-
-	rating, err := strconv.ParseFloat(r.MultipartForm.Value["rating"][0], 32)
-	errorkit.ErrorHandled(err)
-
-	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
-	outEvent.Rating = float32(rating)
+	outEvent.OwnerOrderUuid = r.MultipartForm.Value["owner_order_uuid"][0]
+	outEvent.Rating = rating
 	outEvent.Review = r.MultipartForm.Value["review"][0]
 	outEvent.Uid = uuid.New().String()
 
@@ -202,8 +150,8 @@ func (tri *TenantReviewItems) ParseRequestToKafkaMessage(r *http.Request) (key s
 	return outEvent.Uid, out
 }
 
-func (tri *TenantReviewItems) ParseEventToResponse(in proto.Message) *Response {
-	inEvent := in.(*events.TenantReviewedItems)
+func (tro *TenantReviewOwnerOrder) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.TenantReviewedOwnerOrder)
 
 	var resBody ResponseBody
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
@@ -214,17 +162,17 @@ func (tri *TenantReviewItems) ParseEventToResponse(in proto.Message) *Response {
 	return NewResponse(http.StatusOK, &resBody)
 }
 
-func (tri *TenantReviewItems) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+func (tro *TenantReviewOwnerOrder) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
 	return &usecases.EventDrivenUsecase{
-		Consumer:       tri.Consumer,
-		InEventChecker: tri,
-		InTopic:        events.OrderServiceEventTopic_TENANT_REVIEWED_ITEMS.String(),
-		OutTopic:       events.OrderServiceCommandTopic_TENANT_REVIEW_ITEMS.String(),
-		Producer:       tri.Producer}
+		Consumer:       tro.Consumer,
+		InEventChecker: tro,
+		InTopic:        events.OrderServiceEventTopic_TENANT_REVIEWED_OWNER_ORDER.String(),
+		OutTopic:       events.OrderServiceCommandTopic_TENANT_REVIEW_OWNER_ORDER.String(),
+		Producer:       tro.Producer}
 }
 
-func (tri *TenantReviewItems) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
-	var inEvent events.TenantReviewedItems
+func (tro *TenantReviewOwnerOrder) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
+	var inEvent events.TenantReviewedOwnerOrder
 	if proto.Unmarshal(inVal, &inEvent) == nil {
 		if outKey == string(inKey) {
 			return &inEvent, true

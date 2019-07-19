@@ -66,8 +66,7 @@ func restListener() {
 	*/
 	http.Handle("/order/owner", rest.MethodValidator(http.MethodGet, rest.Authenticate(new(rest.RetrieveOwnerOrderHistories))))
 	http.Handle("/order/tenant", rest.MethodValidator(http.MethodGet, rest.Authenticate(new(rest.RetrieveTenantOrderHistories))))
-	http.Handle("/order/tenant/review/owner", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.TenantReviewOwner))))
-	http.Handle("/order/tenant/review/items", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.TenantReviewItems))))
+	http.Handle("/order/owner-order-review", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.TenantReviewOwnerOrder))))
 	http.Handle("/order/owner/approve", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.ApproveOwnerOrder))))
 	http.Handle("/order/checkout", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.CheckOut))))
 	http.Handle("/order/owner/disapprove", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.DisapproveOwnerOrder))))

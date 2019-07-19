@@ -59,56 +59,29 @@ func (rtoh *RetrieveTenantOrderHistories) validate(r *http.Request) (errs *[]str
 	return paramValidation.Validate()
 }
 
-type TenantReviewOwner struct{}
+type TenantReviewOwnerOrder struct{}
 
-func (tro *TenantReviewOwner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (tro *TenantReviewOwnerOrder) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if errs, valid := tro.validate(r); !valid {
 		resBody := adapters.ResponseBody{Errs: errs}
 		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
 		return
 	}
 
-	edha := &adapters.TenantReviewOwner{
+	edha := &adapters.TenantReviewOwnerOrder{
 		Consumer: kafka.NewConsumption(),
 		Producer: kafka.NewProduction()}
 	adapters.HandleEventDriven(r, edha).WriteResponse(&w)
 }
 
-func (tro *TenantReviewOwner) validate(r *http.Request) (errs *[]string, ok bool) {
+func (tro *TenantReviewOwnerOrder) validate(r *http.Request) (errs *[]string, ok bool) {
 	r.ParseMultipartForm(32 << 20)
 
 	restValidation := RestValidation{
 		Rules: map[string]string{
-			"rating":     RegexNotEmpty,
-			"order_uuid": RegexUUIDV4},
-		request: r}
-
-	return restValidation.Validate()
-}
-
-type TenantReviewItems struct{}
-
-func (tri *TenantReviewItems) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if errs, valid := tri.validate(r); !valid {
-		resBody := adapters.ResponseBody{Errs: errs}
-		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
-		return
-	}
-
-	edha := &adapters.TenantReviewOwner{
-		Consumer: kafka.NewConsumption(),
-		Producer: kafka.NewProduction()}
-	adapters.HandleEventDriven(r, edha).WriteResponse(&w)
-}
-
-func (tri *TenantReviewItems) validate(r *http.Request) (errs *[]string, ok bool) {
-	r.ParseMultipartForm(32 << 20)
-
-	restValidation := RestValidation{
-		Rules: map[string]string{
-			"rating":     RegexNotEmpty,
-			"review":     RegexNotEmpty,
-			"order_uuid": RegexUUIDV4},
+			"rating":           RegexNotEmpty,
+			"owner_order_uuid": RegexUUIDV4,
+			"review":           RegexNotEmpty},
 		request: r}
 
 	return restValidation.Validate()
