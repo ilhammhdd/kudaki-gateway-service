@@ -381,60 +381,6 @@ func (si *SearchItems) initUsecaseHandler(outKey string) usecases.EventDrivenHan
 		Producer: si.Producer}
 }
 
-type ReviewItem struct {
-	Consumer usecases.EventDrivenConsumer
-	Producer usecases.EventDrivenProducer
-}
-
-func (ri *ReviewItem) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
-	outEvent := new(events.ReviewItem)
-
-	rating, err := strconv.ParseFloat(r.MultipartForm.Value["rating"][0], 32)
-	errorkit.ErrorHandled(err)
-
-	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
-	outEvent.ItemUuid = r.MultipartForm.Value["item_uuid"][0]
-	outEvent.Rating = float32(rating)
-	outEvent.Review = r.MultipartForm.Value["review"][0]
-	outEvent.Uid = uuid.New().String()
-
-	out, err := proto.Marshal(outEvent)
-	errorkit.ErrorHandled(err)
-
-	return outEvent.Uid, out
-}
-
-func (ri *ReviewItem) ParseEventToResponse(in proto.Message) *Response {
-	inEvent := in.(*events.ItemReviewed)
-
-	var resBody ResponseBody
-	if inEvent.EventStatus.HttpCode != http.StatusOK {
-		resBody.Errs = &inEvent.EventStatus.Errors
-	}
-
-	return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
-}
-
-func (ri *ReviewItem) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
-	return &usecases.EventDrivenUsecase{
-		Consumer:       ri.Consumer,
-		InEventChecker: ri,
-		InTopic:        events.ItemReviewServiceEventTopic_ITEM_REVIEWED.String(),
-		OutTopic:       events.ItemReviewServiceCommandTopic_REVIEW_ITEM.String(),
-		Producer:       ri.Producer}
-}
-
-func (ri *ReviewItem) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
-	var inEvent events.ItemReviewed
-
-	if proto.Unmarshal(inVal, &inEvent) == nil {
-		if outKey == string(inKey) {
-			return &inEvent, true
-		}
-	}
-	return nil, false
-}
-
 type RetrieveItemReviews struct {
 	Consumer usecases.EventDrivenConsumer
 	Producer usecases.EventDrivenProducer
