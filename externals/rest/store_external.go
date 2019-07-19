@@ -186,36 +186,6 @@ func (si *SearchItems) validate(r *http.Request) (errs *[]string, ok bool) {
 	return urlParamValidation.Validate()
 }
 
-// --------------------------------------------------
-
-type ReviewItem struct{}
-
-func (ri *ReviewItem) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if errs, valid := ri.validate(r); !valid {
-		resBody := adapters.ResponseBody{Errs: errs}
-		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
-		return
-	}
-
-	edha := adapters.ReviewItem{
-		Consumer: kafka.NewConsumption(),
-		Producer: kafka.NewProduction()}
-	adapters.HandleEventDriven(r, &edha).WriteResponse(&w)
-}
-
-func (ri *ReviewItem) validate(r *http.Request) (errs *[]string, ok bool) {
-	r.ParseMultipartForm(32 << 20)
-
-	restValidation := RestValidation{
-		Rules: map[string]string{
-			"rating":    RegexNumber,
-			"item_uuid": RegexUUIDV4,
-			"review":    RegexNotEmpty},
-		request: r}
-
-	return restValidation.Validate()
-}
-
 type RetrieveItemReviews struct{}
 
 func (rir *RetrieveItemReviews) ServeHTTP(w http.ResponseWriter, r *http.Request) {

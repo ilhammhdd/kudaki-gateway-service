@@ -91,7 +91,7 @@ func restListener() {
 	http.Handle("/storefront/items", rest.MethodValidator(http.MethodGet, rest.Authenticate(new(rest.RetrieveStorefrontItems))))
 	http.Handle("/items", rest.MethodValidator(http.MethodGet, rest.Authenticate(new(rest.RetrieveItems))))
 	http.Handle("/items/search", rest.MethodValidator(http.MethodGet, rest.Authenticate(new(rest.SearchItems))))
-	http.Handle("/item-review/review", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.ReviewItem))))
+	// http.Handle("/item-review/review", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.ReviewItem))))
 	http.Handle("/item-review/reviews", rest.MethodValidator(http.MethodGet, rest.Authenticate(new(rest.RetrieveItemReviews))))
 	http.Handle("/item-review/review/comment", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.CommentItemReview))))
 	http.Handle("/item-review/review/comments", rest.MethodValidator(http.MethodGet, rest.Authenticate(new(rest.RetrieveItemReviewComments))))
