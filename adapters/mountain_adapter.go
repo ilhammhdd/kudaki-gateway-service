@@ -93,7 +93,7 @@ func (arg *AddRecommendedGear) ParseRequestToKafkaMessage(r *http.Request) (key 
 }
 
 func (arg *AddRecommendedGear) ParseEventToResponse(in proto.Message) *Response {
-	inEvent := in.(*events.RecommendedGearUpdated)
+	inEvent := in.(*events.RecommendedGearAdded)
 
 	var resBody ResponseBody
 	if inEvent.EventStatus.HttpCode != http.StatusOK {
@@ -108,13 +108,13 @@ func (arg *AddRecommendedGear) initUsecaseHandler(outKey string) usecases.EventD
 	return &usecases.EventDrivenUsecase{
 		Consumer:       arg.Consumer,
 		InEventChecker: arg,
-		InTopic:        events.RecommendationServiceEventTopic_RECOMMENDED_GEAR_UPDATED.String(),
+		InTopic:        events.RecommendationServiceEventTopic_RECOMMENDED_GEAR_ADDED.String(),
 		OutTopic:       events.RecommendationServiceCommandTopic_ADD_RECOMMENDED_GEAR.String(),
 		Producer:       arg.Producer}
 }
 
 func (arg *AddRecommendedGear) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
-	var inEvent events.RecommendedGearUpdated
+	var inEvent events.RecommendedGearAdded
 	if proto.Unmarshal(inVal, &inEvent) == nil {
 		if outKey == string(inKey) {
 			return &inEvent, true
