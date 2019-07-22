@@ -220,7 +220,8 @@ func (rm *RetrieveMountains) validate(r *http.Request) (errs *[]string, ok bool)
 	urlParamValidation := URLParamValidation{
 		Rules: map[string]string{
 			"offset": RegexNumber,
-			"limit":  RegexNumber}}
+			"limit":  RegexNumber},
+		Values: r.URL.Query()}
 
 	return urlParamValidation.Validate()
 }
