@@ -435,7 +435,7 @@ func (dvrg *DownVoteRecommendedGear) CheckInEvent(outKey string, inKey, inVal []
 	return nil, false
 }
 
-// here
+// ----------------------------------------------------------------------------------------------
 
 type RetrieveMountains struct {
 	Consumer usecases.EventDrivenConsumer
@@ -485,6 +485,65 @@ func (dvrg *RetrieveMountains) initUsecaseHandler(outKey string) usecases.EventD
 }
 
 func (dvrg *RetrieveMountains) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
+	var inEvent events.MountainsRetrieved
+	if proto.Unmarshal(inVal, &inEvent) == nil {
+		if outKey == string(inKey) {
+			return &inEvent, true
+		}
+	}
+	return nil, false
+}
+
+// ----------------------------------------------------------------------------------------------
+
+type SearchMountains struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
+
+func (dvrg *SearchMountains) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.SearchMountains)
+
+	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 32)
+	errorkit.ErrorHandled(err)
+	offset, err := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 32)
+	errorkit.ErrorHandled(err)
+
+	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
+	outEvent.Limit = int32(limit)
+	outEvent.Offset = int32(offset)
+	outEvent.Uid = uuid.New().String()
+
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, out
+}
+
+func (dvrg *SearchMountains) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.MountainsRetrieved)
+
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
+		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
+	} else {
+		resBody.Data = json.RawMessage(inEvent.Result)
+	}
+
+	return NewResponse(http.StatusOK, &resBody)
+}
+
+func (dvrg *SearchMountains) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	return &usecases.EventDrivenUsecase{
+		Consumer:       dvrg.Consumer,
+		InEventChecker: dvrg,
+		InTopic:        events.MountainServiceEventTopic_MOUNTAINS_RETRIEVED.String(),
+		OutTopic:       events.MountainServiceCommandTopic_RETRIEVE_MOUNTAINS.String(),
+		Producer:       dvrg.Producer}
+}
+
+func (dvrg *SearchMountains) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
 	var inEvent events.MountainsRetrieved
 	if proto.Unmarshal(inVal, &inEvent) == nil {
 		if outKey == string(inKey) {

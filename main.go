@@ -46,6 +46,7 @@ func restListener() {
 	http.Handle("/event-payment/doku/redirect", new(rest.RedirectDoku))
 	http.Handle("/event-payment/doku/notify", new(rest.NotifyDoku))
 	http.Handle("/event-payment/doku/identify", new(rest.IdentifyDoku))
+	http.Handle("/event-payment/", rest.MethodValidator(http.MethodGet, rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_ORGANIZER}, new(rest.RetrieveOrganizerInvoices)))))
 	/*
 		mountain aggregate
 	*/

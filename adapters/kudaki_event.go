@@ -1,6 +1,7 @@
 package adapters
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -149,6 +150,58 @@ func (ake *DeleteKudakiEvent) initUsecaseHandler(outKey string) usecases.EventDr
 
 func (ake *DeleteKudakiEvent) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
 	var inEvent events.KudakiEventDeleted
+	if proto.Unmarshal(inVal, &inEvent) == nil {
+		if outKey == string(inKey) {
+			return &inEvent, true
+		}
+	}
+	return nil, false
+}
+
+// -------------------------------------------------------------------------------------------
+
+type RetrieveOrganizerInvoices struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
+
+func (ake *RetrieveOrganizerInvoices) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.RetrieveOrganizerInvoices)
+
+	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
+	outEvent.Uid = uuid.New().String()
+
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, out
+}
+
+func (ake *RetrieveOrganizerInvoices) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.OrganizerInvoicesRetrieved)
+
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
+		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
+	} else {
+		resBody.Data = json.RawMessage(inEvent.Result)
+	}
+
+	return NewResponse(http.StatusOK, &resBody)
+}
+
+func (ake *RetrieveOrganizerInvoices) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	return &usecases.EventDrivenUsecase{
+		Consumer:       ake.Consumer,
+		InEventChecker: ake,
+		InTopic:        events.EventServiceEventTopic_ORGANIZER_INVOICES_RETRIEVED.String(),
+		OutTopic:       events.EventServiceCommandTopic_RETRIEVE_ORGANIZER_INVOICES.String(),
+		Producer:       ake.Producer}
+}
+
+func (ake *RetrieveOrganizerInvoices) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
+	var inEvent events.OrganizerInvoicesRetrieved
 	if proto.Unmarshal(inVal, &inEvent) == nil {
 		if outKey == string(inKey) {
 			return &inEvent, true

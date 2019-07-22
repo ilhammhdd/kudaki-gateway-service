@@ -122,3 +122,24 @@ func (ap *IdentifyDoku) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (ap *IdentifyDoku) validate(r *http.Request) (errs *[]string, ok bool) {
 	return nil, true
 }
+
+// -------------------------------------------------------------------------------------------
+
+type RetrieveOrganizerInvoices struct{}
+
+func (ap *RetrieveOrganizerInvoices) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, valid := ap.validate(r); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	adapter := &adapters.RetrieveOrganizerInvoices{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction()}
+	adapters.HandleEventDriven(r, adapter).WriteResponse(&w)
+}
+
+func (ap *RetrieveOrganizerInvoices) validate(r *http.Request) (errs *[]string, ok bool) {
+	return nil, true
+}
