@@ -198,3 +198,29 @@ func (dvrg *DownVoteRecommendedGear) validate(r *http.Request) (errs *[]string, 
 
 	return restValidation.Validate()
 }
+
+// here
+
+type RetrieveMountains struct{}
+
+func (rm *RetrieveMountains) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, valid := rm.validate(r); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	edha := &adapters.RetrieveMountains{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction()}
+	adapters.HandleEventDriven(r, edha).WriteResponse(&w)
+}
+
+func (rm *RetrieveMountains) validate(r *http.Request) (errs *[]string, ok bool) {
+	urlParamValidation := URLParamValidation{
+		Rules: map[string]string{
+			"offset": RegexNumber,
+			"limit":  RegexNumber}}
+
+	return urlParamValidation.Validate()
+}
