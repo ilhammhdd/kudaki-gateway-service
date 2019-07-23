@@ -96,8 +96,6 @@ func (ap *NotifyDoku) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println("request header : ", r.Header)
-	log.Println("request body : ", r.Body)
 }
 
 func (ap *NotifyDoku) validate(r *http.Request) (errs *[]string, ok bool) {
@@ -120,6 +118,25 @@ func (ap *IdentifyDoku) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ap *IdentifyDoku) validate(r *http.Request) (errs *[]string, ok bool) {
+	return nil, true
+}
+
+// -------------------------------------------------------------------------------------------
+
+type ReviewDoku struct{}
+
+func (ap *ReviewDoku) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, valid := ap.validate(r); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	log.Println("request header : ", r.Header)
+	log.Println("request body : ", r.Body)
+}
+
+func (ap *ReviewDoku) validate(r *http.Request) (errs *[]string, ok bool) {
 	return nil, true
 }
 

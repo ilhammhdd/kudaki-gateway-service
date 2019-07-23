@@ -2,7 +2,6 @@ package adapters
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -82,8 +81,6 @@ func (ake *AddKudakiEvent) ParseEventToResponse(in proto.Message) *Response {
 	responseData.Words = inEvent.DokuInvoice.Words
 
 	resBody.Data = responseData
-
-	log.Println("response body data : ", resBody.Data)
 
 	return NewResponse(http.StatusOK, &resBody)
 }
