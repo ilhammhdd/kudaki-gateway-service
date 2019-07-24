@@ -184,5 +184,12 @@ func (ap *PaymentRequest) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ap *PaymentRequest) validate(r *http.Request) (errs *[]string, ok bool) {
-	return nil, true
+	restValidation := RestValidation{
+		Rules: map[string]string{
+			"transaction_id_merchant": RegexNotEmpty,
+			"session_id":              RegexUUIDV4,
+			"hashed_words":            RegexNotEmpty},
+		request: r}
+
+	return restValidation.Validate()
 }
