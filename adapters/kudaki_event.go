@@ -217,7 +217,10 @@ type PaymentRequest struct {
 func (ake *PaymentRequest) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
 	outEvent := new(events.PaymentRequestDoku)
 
+	outEvent.HashedWords = r.MultipartForm.Value["hashed_words"][0]
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
+	outEvent.SessionId = r.MultipartForm.Value["session_id"][0]
+	outEvent.TransactionIdMerchant = r.MultipartForm.Value["transaction_id_merchant"][0]
 	outEvent.Uid = uuid.New().String()
 
 	out, err := proto.Marshal(outEvent)
