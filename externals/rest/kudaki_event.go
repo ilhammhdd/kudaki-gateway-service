@@ -96,6 +96,11 @@ func (ap *NotifyDoku) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println("request header : ", r.Header)
+	log.Println("request body : ", r.Body)
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("CONTINUE"))
 }
 
 func (ap *NotifyDoku) validate(r *http.Request) (errs *[]string, ok bool) {
