@@ -206,3 +206,53 @@ func (ake *RetrieveOrganizerInvoices) CheckInEvent(outKey string, inKey, inVal [
 	}
 	return nil, false
 }
+
+// -------------------------------------------------------------------------------------------
+
+type PaymentRequest struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
+
+func (ake *PaymentRequest) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.PaymentRequestDoku)
+
+	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
+	outEvent.Uid = uuid.New().String()
+
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, out
+}
+
+func (ake *PaymentRequest) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.PaymentRequestedDoku)
+
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
+		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
+	}
+
+	return NewResponse(http.StatusOK, &resBody)
+}
+
+func (ake *PaymentRequest) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	return &usecases.EventDrivenUsecase{
+		Consumer:       ake.Consumer,
+		InEventChecker: ake,
+		InTopic:        events.EventPaymentServiceEventTopic_PAYMENT_REQUESTED_DOKU.String(),
+		OutTopic:       events.EventPaymentServiceCommandTopic_PAYMENT_REQUEST_DOKU.String(),
+		Producer:       ake.Producer}
+}
+
+func (ake *PaymentRequest) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
+	var inEvent events.PaymentRequestedDoku
+	if proto.Unmarshal(inVal, &inEvent) == nil {
+		if outKey == string(inKey) {
+			return &inEvent, true
+		}
+	}
+	return nil, false
+}
