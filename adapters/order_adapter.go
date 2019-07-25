@@ -377,3 +377,54 @@ func (ocr *OwnerConfirmReturnment) CheckInEvent(outKey string, inKey, inVal []by
 	}
 	return nil, false
 }
+
+// -------------------------------------------------------------------------
+
+type OwnerOrderRented struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
+
+func (oor *OwnerOrderRented) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.OwnerOrderRented)
+
+	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
+	outEvent.OwnerOrderUuid = r.MultipartForm.Value["owner_order_uuid"][0]
+	outEvent.Uid = uuid.New().String()
+
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, out
+}
+
+func (oor *OwnerOrderRented) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.OwnerOrderRentedOut)
+
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
+		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
+	}
+
+	return NewResponse(http.StatusOK, &resBody)
+}
+
+func (oor *OwnerOrderRented) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	return &usecases.EventDrivenUsecase{
+		Consumer:       oor.Consumer,
+		InEventChecker: oor,
+		InTopic:        events.OrderServiceEventTopic_OWNER_ORDER_RENTED_OUT.String(),
+		OutTopic:       events.OrderServiceCommandTopic_OWNER_ORDER_RENTED.String(),
+		Producer:       oor.Producer}
+}
+
+func (oor *OwnerOrderRented) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
+	var inEvent events.OwnerOrderRentedOut
+	if proto.Unmarshal(inVal, &inEvent) == nil {
+		if outKey == string(inKey) {
+			return &inEvent, true
+		}
+	}
+	return nil, false
+}

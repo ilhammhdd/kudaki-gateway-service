@@ -190,3 +190,31 @@ func (ocr *OwnerConfirmReturnment) validate(r *http.Request) (errs *[]string, ok
 
 	return restValidation.Validate()
 }
+
+// ----------------------------------------------------------------
+
+type OwnerOrderRented struct{}
+
+func (oor *OwnerOrderRented) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if errs, valid := oor.validate(r); !valid {
+		resBody := adapters.ResponseBody{Errs: errs}
+		adapters.NewResponse(http.StatusBadRequest, &resBody).WriteResponse(&w)
+		return
+	}
+
+	edha := &adapters.OwnerOrderRented{
+		Consumer: kafka.NewConsumption(),
+		Producer: kafka.NewProduction()}
+	adapters.HandleEventDriven(r, edha).WriteResponse(&w)
+}
+
+func (oor *OwnerOrderRented) validate(r *http.Request) (errs *[]string, ok bool) {
+	r.ParseMultipartForm(32 << 20)
+
+	restValidation := RestValidation{
+		Rules: map[string]string{
+			"owner_order_uuid": RegexUUIDV4},
+		request: r}
+
+	return restValidation.Validate()
+}

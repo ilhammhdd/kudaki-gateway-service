@@ -75,6 +75,7 @@ func restListener() {
 	http.Handle("/order/checkout", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.CheckOut))))
 	http.Handle("/order/owner/disapprove", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.DisapproveOwnerOrder))))
 	http.Handle("/order/confirm-returnment/owner", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.OwnerConfirmReturnment))))
+	http.Handle("/order/owner/rented", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.OwnerOrderRented))))
 	/*
 		rental aggregate
 	*/
