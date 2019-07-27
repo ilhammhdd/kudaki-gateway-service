@@ -260,6 +260,7 @@ func (rrg *RetrieveRecommendedGears) ParseEventToResponse(in proto.Message) *Res
 		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
 	}
 
+	resBody = ResponseBody{Data: json.RawMessage(inEvent.Result)}
 	return NewResponse(http.StatusOK, &resBody)
 }
 

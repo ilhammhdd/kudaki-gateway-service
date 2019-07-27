@@ -65,6 +65,7 @@ func restListener() {
 	http.Handle("/recommendation/upvote", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.UpVoteRecommendedGear))))
 	http.Handle("/recommendation/downvote", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.DownVoteRecommendedGear))))
 	http.Handle("/mountain", rest.MethodValidator(http.MethodGet, new(rest.RetrieveMountains)))
+	http.Handle("/recommendations", rest.MethodValidator(http.MethodGet, rest.Authenticate(new(rest.RetrieveRecommendedGears))))
 	/*
 		order aggregate
 	*/
