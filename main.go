@@ -47,7 +47,16 @@ func restListener() {
 	http.Handle("/event-payment/doku/notify", new(rest.NotifyDoku))
 	http.Handle("/event-payment/doku/identify", new(rest.IdentifyDoku))
 	http.Handle("/event-payment/doku/review", new(rest.ReviewDoku))
-	http.Handle("/event-payment/transactions", rest.MethodValidator(http.MethodGet, rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_ORGANIZER}, new(rest.RetrieveOrganizerInvoices)))))
+	http.Handle("/event-payment/transactions",
+		rest.MethodValidator(
+			http.MethodGet,
+			rest.Authenticate(
+				rest.Authorize(
+					[]user.UserRole{
+						user.UserRole_ORGANIZER,
+						user.UserRole_KUDAKI_TEAM,
+						user.UserRole_ADMIN},
+					new(rest.RetrieveOrganizerInvoices)))))
 	http.Handle("/event-payment/doku/payment-request", rest.MethodValidator(http.MethodPost, rest.Authenticate(new(rest.PaymentRequest))))
 	/*
 		mountain aggregate
