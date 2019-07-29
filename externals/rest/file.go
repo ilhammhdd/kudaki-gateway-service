@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/ilhammhdd/go-toolkit/errorkit"
@@ -82,4 +83,28 @@ func (sf *StoreFile) validate(r *http.Request) ([]string, bool) {
 	}
 
 	return errs, ok
+}
+
+// --------------------------------------------------------------------------------------
+
+type RetrieveFile struct{}
+
+func (rf *RetrieveFile) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	client := http.Client{}
+
+	fullPath := r.URL.Query().Get("full_path")
+	reqURLRaw := os.Getenv("FILE_SERVICE_REST_ADDRESS") + "/file?full_path=" + fullPath
+	reqURL, err := url.Parse(reqURLRaw)
+	errorkit.ErrorHandled(err)
+
+	// --------------------------------------------------------------------------------------
+
+	req, err := http.NewRequest(http.MethodGet, reqURL.String(), r.Body)
+	errorkit.ErrorHandled(err)
+
+	res, err := client.Do(req)
+	errorkit.ErrorHandled(err)
+
+	_, err = io.Copy(w, res.Body)
+	errorkit.ErrorHandled(err)
 }
