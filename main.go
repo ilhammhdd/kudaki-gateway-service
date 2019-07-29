@@ -37,6 +37,13 @@ func main() {
 
 func restListener() {
 	/*
+		kudaki file service
+	*/
+	http.Handle("/file", rest.MethodRouting{
+		PostHandler: new(rest.StoreFile),
+		GetHandler:  nil,
+	})
+	/*
 		kudaki event aggregate
 	*/
 	http.Handle("/event", rest.MethodRouting{
