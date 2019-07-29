@@ -299,7 +299,8 @@ func (ake *RetrieveKudakiEvent) ParseEventToResponse(in proto.Message) *Response
 			"ad_duration_from": inEvent.KudakiEvent.AdDurationFrom,
 			"ad_duration_to":   inEvent.KudakiEvent.AdDurationTo,
 			"status":           inEvent.KudakiEvent.Status.String(),
-			"poster":           inEvent.KudakiEvent.FilePath}}
+			"poster":           inEvent.KudakiEvent.FilePath,
+			"payment_status":   inEvent.PaymentStatus}}
 
 	return NewResponse(http.StatusOK, &resBody)
 }
