@@ -260,3 +260,64 @@ func (ake *PaymentRequest) CheckInEvent(outKey string, inKey, inVal []byte) (pro
 	}
 	return nil, false
 }
+
+// -------------------------------------------------------------------------------------------
+
+type RetrieveKudakiEvent struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
+
+func (ake *RetrieveKudakiEvent) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.RetrieveKudakiEvent)
+
+	outEvent.Uid = uuid.New().String()
+
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, out
+}
+
+func (ake *RetrieveKudakiEvent) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.KudakiEventRetrieved)
+
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
+		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
+	}
+
+	resBody = ResponseBody{
+		Data: map[string]interface{}{
+			"name":             inEvent.KudakiEvent.Name,
+			"venue":            inEvent.KudakiEvent.Venue,
+			"description":      inEvent.KudakiEvent.Description,
+			"duration_from":    inEvent.KudakiEvent.DurationFrom,
+			"duration_to":      inEvent.KudakiEvent.DurationTo,
+			"ad_duration_from": inEvent.KudakiEvent.AdDurationFrom,
+			"ad_duration_to":   inEvent.KudakiEvent.AdDurationTo,
+			"status":           inEvent.KudakiEvent.Status.String(),
+			"poster":           inEvent.KudakiEvent.FilePath}}
+
+	return NewResponse(http.StatusOK, &resBody)
+}
+
+func (ake *RetrieveKudakiEvent) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	return &usecases.EventDrivenUsecase{
+		Consumer:       ake.Consumer,
+		InEventChecker: ake,
+		InTopic:        events.EventServiceEventTopic_KUDAKI_EVENT_RETRIEVED.String(),
+		OutTopic:       events.EventServiceCommandTopic_RETRIEVE_KUDAKI_EVENT.String(),
+		Producer:       ake.Producer}
+}
+
+func (ake *RetrieveKudakiEvent) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
+	var inEvent events.KudakiEventRetrieved
+	if proto.Unmarshal(inVal, &inEvent) == nil {
+		if outKey == string(inKey) {
+			return &inEvent, true
+		}
+	}
+	return nil, false
+}

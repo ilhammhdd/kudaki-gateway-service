@@ -49,6 +49,7 @@ func restListener() {
 	http.Handle("/event", rest.MethodRouting{
 		PostHandler:   rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_ORGANIZER}, new(rest.AddKudakiEvent))),
 		DeleteHandler: rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_ORGANIZER}, new(rest.DeleteKudakiEvent))),
+		GetHandler:    new(rest.RetrieveKudakiEvent),
 	})
 	http.Handle("/event-payment/doku/redirect", new(rest.RedirectDoku))
 	http.Handle("/event-payment/doku/notify", new(rest.NotifyDoku))
