@@ -213,11 +213,11 @@ func (dke *RetrieveKudakiEvent) ServeHTTP(w http.ResponseWriter, r *http.Request
 }
 
 func (dke *RetrieveKudakiEvent) validate(r *http.Request) (errs *[]string, ok bool) {
-	r.ParseMultipartForm(32 << 20)
-
-	restValidation := RestValidation{
+	urlParamValidation := URLParamValidation{
 		Rules: map[string]string{
 			"kudaki_event_uuid": RegexUUIDV4},
-		request: r}
-	return restValidation.Validate()
+		Values: r.URL.Query(),
+	}
+
+	return urlParamValidation.Validate()
 }
