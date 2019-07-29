@@ -34,7 +34,8 @@ func (ake *AddKudakiEvent) validate(r *http.Request) (errs *[]string, ok bool) {
 			"duration_to":      RegexNumber,
 			"name":             RegexNotEmpty,
 			"ad_duration_from": RegexNotEmpty,
-			"ad_duration_to":   RegexNotEmpty},
+			"ad_duration_to":   RegexNotEmpty,
+			"file_path":        RegexNotEmpty},
 		request: r}
 	return restValidation.Validate()
 }

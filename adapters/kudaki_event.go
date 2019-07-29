@@ -34,6 +34,7 @@ func (ake *AddKudakiEvent) ParseRequestToKafkaMessage(r *http.Request) (key stri
 	outEvent.Description = r.MultipartForm.Value["description"][0]
 	outEvent.DurationFrom = durationFrom
 	outEvent.DurationTo = durationTo
+	outEvent.FilePath = r.MultipartForm.Value["file_path"][0]
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
 	outEvent.Name = r.MultipartForm.Value["name"][0]
 	outEvent.Uid = uuid.New().String()
