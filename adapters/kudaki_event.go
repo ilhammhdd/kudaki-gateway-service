@@ -271,6 +271,7 @@ type RetrieveKudakiEvent struct {
 func (ake *RetrieveKudakiEvent) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
 	outEvent := new(events.RetrieveKudakiEvent)
 
+	outEvent.KudakiEventUuid = r.URL.Query().Get("kudaki_event_uuid")
 	outEvent.Uid = uuid.New().String()
 
 	out, err := proto.Marshal(outEvent)
