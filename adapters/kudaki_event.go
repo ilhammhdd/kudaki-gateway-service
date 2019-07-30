@@ -324,3 +324,53 @@ func (ake *RetrieveKudakiEvent) CheckInEvent(outKey string, inKey, inVal []byte)
 	}
 	return nil, false
 }
+
+// -------------------------------------------------------------------------------------------
+
+type PublishKudakiEvent struct {
+	Consumer usecases.EventDrivenConsumer
+	Producer usecases.EventDrivenProducer
+}
+
+func (pke *PublishKudakiEvent) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
+	outEvent := new(events.PublishKudakiEvent)
+
+	outEvent.KudakiEventUuid = r.URL.Query().Get("kudaki_event_uuid")
+	outEvent.Uid = uuid.New().String()
+
+	out, err := proto.Marshal(outEvent)
+	errorkit.ErrorHandled(err)
+
+	return outEvent.Uid, out
+}
+
+func (pke *PublishKudakiEvent) ParseEventToResponse(in proto.Message) *Response {
+	inEvent := in.(*events.KudakiEventPublished)
+
+	var resBody ResponseBody
+	if inEvent.EventStatus.HttpCode != http.StatusOK {
+		resBody = ResponseBody{Errs: &inEvent.EventStatus.Errors}
+		return NewResponse(int(inEvent.EventStatus.HttpCode), &resBody)
+	}
+
+	return NewResponse(http.StatusOK, &resBody)
+}
+
+func (pke *PublishKudakiEvent) initUsecaseHandler(outKey string) usecases.EventDrivenHandler {
+	return &usecases.EventDrivenUsecase{
+		Consumer:       pke.Consumer,
+		InEventChecker: pke,
+		InTopic:        events.EventServiceEventTopic_KUDAKI_EVENT_PUBLISHED.String(),
+		OutTopic:       events.EventServiceCommandTopic_PUBLISH_KUDAKI_EVENT.String(),
+		Producer:       pke.Producer}
+}
+
+func (pke *PublishKudakiEvent) CheckInEvent(outKey string, inKey, inVal []byte) (proto.Message, bool) {
+	var inEvent events.KudakiEventPublished
+	if proto.Unmarshal(inVal, &inEvent) == nil {
+		if outKey == string(inKey) {
+			return &inEvent, true
+		}
+	}
+	return nil, false
+}

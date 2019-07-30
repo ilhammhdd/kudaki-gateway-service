@@ -46,6 +46,7 @@ func restListener() {
 	/*
 		kudaki event aggregate
 	*/
+	http.Handle("/event/publish", rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_ADMIN}, new(rest.PublishKudakiEvent))))
 	http.Handle("/event", rest.MethodRouting{
 		PostHandler:   rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_ORGANIZER}, new(rest.AddKudakiEvent))),
 		DeleteHandler: rest.Authenticate(rest.Authorize([]user.UserRole{user.UserRole_ORGANIZER}, new(rest.DeleteKudakiEvent))),
