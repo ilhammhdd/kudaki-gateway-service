@@ -291,6 +291,7 @@ func (ake *RetrieveKudakiEvent) ParseEventToResponse(in proto.Message) *Response
 
 	resBody = ResponseBody{
 		Data: map[string]interface{}{
+			"uuid":             inEvent.KudakiEvent.Uuid,
 			"name":             inEvent.KudakiEvent.Name,
 			"venue":            inEvent.KudakiEvent.Venue,
 			"description":      inEvent.KudakiEvent.Description,
