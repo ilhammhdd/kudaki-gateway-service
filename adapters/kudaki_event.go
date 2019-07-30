@@ -335,6 +335,7 @@ type PublishKudakiEvent struct {
 func (pke *PublishKudakiEvent) ParseRequestToKafkaMessage(r *http.Request) (key string, message []byte) {
 	outEvent := new(events.PublishKudakiEvent)
 
+	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
 	outEvent.KudakiEventUuid = r.URL.Query().Get("kudaki_event_uuid")
 	outEvent.Uid = uuid.New().String()
 
