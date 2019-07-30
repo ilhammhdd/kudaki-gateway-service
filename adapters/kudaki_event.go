@@ -336,7 +336,7 @@ func (pke *PublishKudakiEvent) ParseRequestToKafkaMessage(r *http.Request) (key 
 	outEvent := new(events.PublishKudakiEvent)
 
 	outEvent.KudakiToken = r.Header.Get("Kudaki-Token")
-	outEvent.KudakiEventUuid = r.URL.Query().Get("kudaki_event_uuid")
+	outEvent.KudakiEventUuid = r.MultipartForm.Value["kudaki_event_uuid"][0]
 	outEvent.Uid = uuid.New().String()
 
 	out, err := proto.Marshal(outEvent)
