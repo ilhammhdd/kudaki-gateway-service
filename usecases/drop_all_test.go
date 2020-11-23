@@ -7,38 +7,8 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/ilhammhdd/go-toolkit/errorkit"
-	kudakiredisearch "github.com/ilhammhdd/kudaki-gateway-service/externals/redisearch"
 )
-
-func TestDropAllIndices(t *testing.T) {
-	t.Log("dropping all indices...")
-
-	servers := []string{ /* "178.62.107.160:6379", */ "178.62.107.160:6380"}
-
-	for _, server := range servers {
-		t.Log("server : ", server)
-		client := redisearch.NewClient(server, kudakiredisearch.Cart.Name())
-		client.Drop()
-		client = redisearch.NewClient(server, kudakiredisearch.CartItem.Name())
-		client.Drop()
-		client = redisearch.NewClient(server, kudakiredisearch.Checkout.Name())
-		client.Drop()
-		client = redisearch.NewClient(server, kudakiredisearch.Item.Name())
-		client.Drop()
-		client = redisearch.NewClient(server, kudakiredisearch.Mountain.Name())
-		client.Drop()
-		// client = redisearch.NewClient(server, kudakiredisearch.Profile.Name())
-		// client.Drop()
-		client = redisearch.NewClient(server, kudakiredisearch.RecomendedGear.Name())
-		client.Drop()
-		client = redisearch.NewClient(server, kudakiredisearch.Storefront.Name())
-		client.Drop()
-		// client = redisearch.NewClient(server, kudakiredisearch.User.Name())
-		// client.Drop()
-	}
-}
 
 func TestTruncateAllTable(t *testing.T) {
 	type truncateDB struct {
