@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -19,12 +18,11 @@ import (
 func init() {
 	if len(os.Args) > 1 {
 		for _, val := range os.Args[1:] {
-			flag := strings.Split(val, " ")
-			os.Setenv(flag[1], flag[2])
+			env := strings.Split(val, "=")
+			env[1] = strings.ReplaceAll(env[1], ".exe", "")
+			os.Setenv(env[0], env[1])
 		}
 	}
-
-	log.Println(os.Getenv("KAFKA_VERSION"))
 }
 
 func main() {
