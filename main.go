@@ -17,7 +17,6 @@ import (
 )
 
 func init() {
-	log.Printf("len(os.Args) > 1 is %t", len(os.Args) > 1)
 	if len(os.Args) > 1 {
 		for _, val := range os.Args[1:] {
 			env := strings.Split(val, "=")
