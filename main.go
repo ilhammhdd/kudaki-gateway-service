@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -16,10 +17,12 @@ import (
 )
 
 func init() {
+	log.Printf("len(os.Args) > 1 is %t", len(os.Args) > 1)
 	if len(os.Args) > 1 {
 		for _, val := range os.Args[1:] {
 			env := strings.Split(val, "=")
 			env[1] = strings.ReplaceAll(env[1], ".exe", "")
+			log.Printf("env[0], env[1] is %s, %s", env[0], env[1])
 			os.Setenv(env[0], env[1])
 		}
 	}

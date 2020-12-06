@@ -7,9 +7,9 @@ tmp_dir = "tmp"
 
 [build]
 # Just plain old shell command. You could use `make` as well.
-cmd = "go build -o ./tmp/kudaki_gateway_service_app.exe"
+cmd = "go build -o ./tmp/main.exe"
 # Binary file yields from `cmd`.
-bin = "./tmp/kudaki_gateway_service_app GRPC_PORT=9000 REST_PORT=9001 KAFKA_BROKERS=178.62.107.160:29092 USER_AUTH_SERVICE_GRPC_ADDRESS=localhost:9099 KAFKA_VERSION=2.1.1 REDISEARCH_SERVER=178.62.107.160:6379 FILE_SERVICE_REST_ADDRESS=http://localhost:9003"
+bin = "tmp/main GRPC_PORT=9000 REST_PORT=9001 KAFKA_BROKERS=178.62.107.160:29092 USER_AUTH_SERVICE_GRPC_ADDRESS=localhost:9099 KAFKA_VERSION=2.1.1 REDISEARCH_SERVER=178.62.107.160:6379 FILE_SERVICE_REST_ADDRESS=http://localhost:9003"
 # Watch these filename extensions.
 include_ext = ["go", "tpl", "tmpl", "html"]
 # Ignore these filename extensions or directories.

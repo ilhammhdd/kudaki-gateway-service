@@ -1,4 +1,6 @@
-FROM golang:1.15-alpine AS build-env
+ARG ARCH=
+
+FROM ${ARCH}golang:1.15-alpine AS build-env
 
 RUN apk update
 RUN apk upgrade
@@ -8,7 +10,7 @@ COPY . /go/src/github.com/ilhammhdd/kudaki-gateway-service/
 RUN go mod tidy
 RUN go build -o kudaki_gateway_service_app
 
-FROM alpine
+FROM ${ARCH}alpine
 
 ARG KAFKA_VERSION
 ARG KAFKA_BROKERS
